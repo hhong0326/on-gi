@@ -1,0 +1,1 @@
+[   77979ms] [WARNING] Image with src "http://localhost:3000/vercel.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ http://localhost:3000/_next/static/chunks/d27f3_next_dist_a8d4b7e4._.js:2297

@@ -1,0 +1,3 @@
+[    1017ms] [ERROR] Failed to load resource: the server responded with a status of 406 (Not Acceptable) @ http://127.0.0.1:54321/rest/v1/users?select=nickname&id=eq.4fcbb302-81af-4904-9496-c8e26edc7dca:0
+[   74528ms] [ERROR] Failed to load resource: the server responded with a status of 406 (Not Acceptable) @ http://127.0.0.1:54321/rest/v1/users?select=nickname&id=eq.4fcbb302-81af-4904-9496-c8e26edc7dca:0
+[   74537ms] [ERROR] Failed to load resource: the server responded with a status of 406 (Not Acceptable) @ http://127.0.0.1:54321/rest/v1/users?select=nickname&id=eq.4fcbb302-81af-4904-9496-c8e26edc7dca:0

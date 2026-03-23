@@ -1,0 +1,4 @@
+[     856ms] [ERROR] Failed to load resource: the server responded with a status of 406 (Not Acceptable) @ http://127.0.0.1:54321/rest/v1/users?select=nickname&id=eq.4fcbb302-81af-4904-9496-c8e26edc7dca:0
+[   14854ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:54321/auth/v1/user:0
+[   14859ms] [ERROR] Failed to update nickname: Error: No user session
+    at OnboardingPage.useCallback[handleSubmit] (http://localhost:3000/_next/static/chunks/Desktop_etc_sunil_on-gi_src_3f5c447b._.js:169:34) @ http://localhost:3000/_next/static/chunks/d27f3_next_dist_a8d4b7e4._.js:3127

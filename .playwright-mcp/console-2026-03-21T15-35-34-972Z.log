@@ -1,0 +1,7 @@
+[    1258ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://127.0.0.1:54321/auth/v1/signup:0
+[    1260ms] [ERROR] AuthApiError: Anonymous sign-ins are disabled
+    at handleError (http://localhost:3000/_next/static/chunks/d27f3_c82b5999._.js:11737:11)
+    at async _handleRequest (http://localhost:3000/_next/static/chunks/d27f3_c82b5999._.js:11787:9)
+    at async _request (http://localhost:3000/_next/static/chunks/d27f3_c82b5999._.js:11767:18)
+    at async SupabaseAuthClient.signInAnonymously (http://localhost:3000/_next/static/chunks/d27f3_c82b5999._.js:14149:25)
+    at async ensureAnonymousSession (http://localhost:3000/_next/static/chunks/Desktop_etc_sunil_on-gi_src_3f5c447b._.js:35:29) @ http://localhost:3000/_next/static/chunks/d27f3_next_dist_a8d4b7e4._.js:3127

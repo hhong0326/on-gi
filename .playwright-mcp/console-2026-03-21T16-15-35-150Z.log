@@ -1,0 +1,5 @@
+[     322ms] [WARNING] iso_swr: SSR fetch failed for "/api/v1/integrations/search-repo" {error: iso_swr_fetch_error, message: The request is missing an authentication token} @ https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app:99
+[     806ms] [WARNING] iso_swr[warn] [client] fallback error for key: "/api/v1/integrations/search-repo" {error: iso_swr_fetch_error, message: The request is missing an authentication token} @ https://vercel.com/_next/static/chunks/07bhxzm_n~5-z.js?dpl=dpl_546gB749sQnrB9s9upGoE1m2uvwE:2
+[     960ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[    1010ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/v1/integrations/search-repo:0
+[    1320ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/chunks/15asx0z-wbae6.js?dpl=dpl_546gB749sQnrB9s9upGoE1m2uvwE:18
