@@ -12,7 +12,7 @@ export type { PrayerPoint };
 
 interface GlobeViewProps {
   points: PrayerPoint[];
-  onZoomChange?: (zoomLevel: number, center: { lat: number; lng: number }) => void;
+  onZoomChange?: (zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => void;
 }
 
 interface ClusteredPoint {
@@ -20,6 +20,7 @@ interface ClusteredPoint {
   lng: number;
   weight: number;
   isUser: boolean;
+  isActive: boolean;
 }
 
 function clusterPoints(points: PrayerPoint[], radius: number): ClusteredPoint[] {
@@ -34,6 +35,7 @@ function clusterPoints(points: PrayerPoint[], radius: number): ClusteredPoint[] 
     let lngSum = points[i].lng * points[i].intensity;
     let weightSum = points[i].intensity;
     let isUser = points[i].isUser;
+    let hasActive = points[i].isActive;
 
     for (let j = i + 1; j < points.length; j++) {
       if (used.has(j)) continue;
@@ -45,6 +47,7 @@ function clusterPoints(points: PrayerPoint[], radius: number): ClusteredPoint[] 
         lngSum += points[j].lng * points[j].intensity;
         weightSum += points[j].intensity;
         if (points[j].isUser) isUser = true;
+        if (points[j].isActive) hasActive = true;
       }
     }
 
@@ -53,6 +56,7 @@ function clusterPoints(points: PrayerPoint[], radius: number): ClusteredPoint[] 
       lng: lngSum / weightSum,
       weight: weightSum,
       isUser,
+      isActive: hasActive,
     });
   }
 
@@ -146,7 +150,11 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
             };
           }
         }
-        onZoomChangeRef.current(zoomLevel, center);
+        // Calculate visible latitude degrees based on camera FOV and distance
+        const globeRadius = 100; // react-globe.gl default
+        const fov = camera.fov * (Math.PI / 180);
+        const visibleDegrees = 2 * Math.atan(globeRadius / dist) * (180 / Math.PI) * (fov / 0.7);
+        onZoomChangeRef.current(zoomLevel, center, visibleDegrees);
       }
     };
 

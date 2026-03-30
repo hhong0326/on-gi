@@ -28,11 +28,12 @@ export default function HybridPage() {
   const [mapZoom, setMapZoom] = useState(8);
   const [showMap, setShowMap] = useState(false);
 
-  const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }) => {
+  const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => {
     if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewMode === 'globe') {
       setMapCenter(center);
-      const mapZ = Math.round(3 + zoomLevel * 7);
-      setMapZoom(mapZ);
+      // Match visible area: zoom = log2(360 / visibleDegrees)
+      const mapZ = Math.round(Math.log2(360 / Math.max(visibleDegrees, 1)));
+      setMapZoom(Math.max(3, Math.min(mapZ, 18)));
       setShowMap(true);
       setViewMode('map');
     }

@@ -44,6 +44,7 @@ function createSeedPoints(): PrayerPoint[] {
     lng: loc.lng + (Math.random() - 0.5) * 2,
     intensity: 0.3 + Math.random() * 0.7,
     isUser: false,
+    isActive: Math.random() > 0.4, // 60% active, 40% residual
   }));
 }
 
@@ -92,6 +93,7 @@ export function usePrayerState(defaultTab: ViewTab = 'globe') {
           lng: loc.lng + (Math.random() - 0.5) * 10,
           intensity: 0.4 + Math.random() * 0.6,
           isUser: false,
+          isActive: Math.random() > 0.3,
         };
         return [...prev, newPoint];
       });
@@ -133,6 +135,7 @@ export function usePrayerState(defaultTab: ViewTab = 'globe') {
         lng: pos.lng,
         intensity: 1,
         isUser: true,
+        isActive: true,
       };
       userPointIdRef.current = userPoint.id;
       setPoints((prev) => [...prev, userPoint]);

@@ -49,6 +49,7 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
         const el = createPrayerLightElement({
           weight: p.intensity,
           isUser: p.isUser,
+          isActive: p.isActive,
           lat: p.lat,
           lng: p.lng,
         });
