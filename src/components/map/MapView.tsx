@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
-import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
-import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
+import { useEffect, useRef } from 'react';
+import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps';
 
 import '@/components/shared/prayer-light.css';
 import { createPrayerLightElement } from '@/components/shared/prayer-light';
@@ -12,79 +11,76 @@ const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '';
 
 const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: 'geometry', stylers: [{ color: '#0a0a12' }] },
-  { elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#3a3a5e' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#08080F' }] },
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#080810' }] },
   { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#0e0e18' }] },
+  { featureType: 'road', stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
   { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#1a1a2e' }, { weight: 0.5 }] },
-  { featureType: 'administrative.country', elementType: 'labels.text.fill', stylers: [{ color: '#3a3a5e' }, { visibility: 'simplified' }] },
+  { featureType: 'administrative.province', stylers: [{ visibility: 'off' }] },
+  { featureType: 'administrative.locality', stylers: [{ visibility: 'off' }] },
 ];
 
 interface MapViewProps {
   points: PrayerPoint[];
 }
 
-function PrayerMarkers({ points }: { points: PrayerPoint[] }) {
+function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
   const map = useMap();
-  const clustererRef = useRef<MarkerClusterer | null>(null);
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const overlaysRef = useRef<google.maps.OverlayView[]>([]);
 
-  // Initialize clusterer
   useEffect(() => {
     if (!map) return;
 
-    clustererRef.current = new MarkerClusterer({
-      map,
-      algorithm: new SuperClusterAlgorithm({ radius: 80 }),
-      renderer: {
-        render: ({ count, position }) => {
-          const weight = Math.min(count, 10);
-          const el = createPrayerLightElement({
-            weight,
-            isUser: false,
-            lat: position.lat(),
-            lng: position.lng(),
-          });
-          return new google.maps.marker.AdvancedMarkerElement({
-            position,
-            content: el,
-          });
-        },
-      },
+    // Clear old overlays
+    overlaysRef.current.forEach((o) => o.setMap(null));
+    overlaysRef.current = [];
+
+    // Create custom overlays for each point
+    points.forEach((p) => {
+      const overlay = new google.maps.OverlayView();
+
+      overlay.onAdd = function () {
+        const el = createPrayerLightElement({
+          weight: p.intensity,
+          isUser: p.isUser,
+          lat: p.lat,
+          lng: p.lng,
+        });
+        el.style.position = 'absolute';
+        this.getPanes()?.overlayMouseTarget.appendChild(el);
+        (this as unknown as { _el: HTMLElement })._el = el;
+      };
+
+      overlay.draw = function () {
+        const projection = this.getProjection();
+        if (!projection) return;
+        const pos = projection.fromLatLngToDivPixel(
+          new google.maps.LatLng(p.lat, p.lng)
+        );
+        if (!pos) return;
+        const el = (this as unknown as { _el: HTMLElement })._el;
+        if (el) {
+          el.style.left = `${pos.x}px`;
+          el.style.top = `${pos.y}px`;
+        }
+      };
+
+      overlay.onRemove = function () {
+        const el = (this as unknown as { _el: HTMLElement })._el;
+        if (el?.parentNode) el.parentNode.removeChild(el);
+      };
+
+      overlay.setMap(map);
+      overlaysRef.current.push(overlay);
     });
 
     return () => {
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
-      }
+      overlaysRef.current.forEach((o) => o.setMap(null));
+      overlaysRef.current = [];
     };
-  }, [map]);
-
-  // Update markers when points change
-  useEffect(() => {
-    if (!map || !clustererRef.current) return;
-
-    // Clear old markers
-    clustererRef.current.clearMarkers();
-    markersRef.current = [];
-
-    // Create new markers
-    const newMarkers = points.map((p) => {
-      const el = createPrayerLightElement({
-        weight: p.intensity,
-        isUser: p.isUser,
-        lat: p.lat,
-        lng: p.lng,
-      });
-
-      return new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: p.lat, lng: p.lng },
-        content: el,
-        map: undefined, // clusterer manages the map
-      });
-    });
-
-    markersRef.current = newMarkers;
-    clustererRef.current.addMarkers(newMarkers);
   }, [map, points]);
 
   return null;
@@ -106,12 +102,11 @@ export function MapView({ points }: MapViewProps) {
         defaultZoom={3}
         gestureHandling="greedy"
         disableDefaultUI={true}
-        mapId="ongi-dark-map"
         styles={DARK_MAP_STYLES}
         backgroundColor="#08080F"
         style={{ width: '100%', height: '100%' }}
       >
-        <PrayerMarkers points={points} />
+        <PrayerOverlays points={points} />
       </Map>
     </APIProvider>
   );
