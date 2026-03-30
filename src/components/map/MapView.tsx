@@ -9,16 +9,18 @@ import type { PrayerPoint } from '@/types/prayer';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '';
 
-const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: 'geometry', stylers: [{ color: '#0a0a12' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#3a3a5e' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#08080F' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#080810' }] },
-  { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#0e0e18' }] },
+const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: 'geometry', stylers: [{ color: '#1a2138' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#6b7fa3' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1624' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0c1a3a' }] },
+  { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#1e3050' }] },
+  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#1a3348' }] },
   { featureType: 'road', stylers: [{ visibility: 'off' }] },
   { featureType: 'poi', stylers: [{ visibility: 'off' }] },
   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#1a1a2e' }, { weight: 0.5 }] },
+  { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#2a4060' }, { weight: 0.5 }] },
+  { featureType: 'administrative.country', elementType: 'labels.text.fill', stylers: [{ color: '#5a7a9a' }] },
   { featureType: 'administrative.province', stylers: [{ visibility: 'off' }] },
   { featureType: 'administrative.locality', stylers: [{ visibility: 'off' }] },
 ];
@@ -117,7 +119,7 @@ export function MapView({ points, center, zoom, onZoomChange }: MapViewProps) {
         defaultZoom={zoom ?? 3}
         gestureHandling="greedy"
         disableDefaultUI={true}
-        styles={DARK_MAP_STYLES}
+        styles={MAP_STYLES}
         backgroundColor="#08080F"
         style={{ width: '100%', height: '100%' }}
       >
