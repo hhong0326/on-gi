@@ -52,6 +52,7 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
           isActive: p.isActive,
           lat: p.lat,
           lng: p.lng,
+          context: 'map',
         });
         el.style.position = 'absolute';
         this.getPanes()?.overlayMouseTarget.appendChild(el);

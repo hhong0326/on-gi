@@ -4,53 +4,82 @@ interface PrayerLightOptions {
   isActive: boolean;
   lat: number;
   lng: number;
+  context?: 'globe' | 'map';
 }
 
-// Active prayer SVGs
-const ACTIVE_LAYERS = [
-  { src: '/기도의빛_바깥블룸.svg', size: 63 },
-  { src: '/기도의빛_안쪽글로우.svg', size: 32 },
-  { src: '/기도의빛_중심.svg', size: 10 },
-];
-
-// Residual light SVGs (잔상)
-const RESIDUAL_LAYERS = [
-  { src: '/잔상_바깥.svg', size: 63 },
-  { src: '/잔상_글로우.svg', size: 32 },
-  { src: '/잔상_중심.svg', size: 10 },
-];
-
-export function createPrayerLightElement({ weight, isUser, isActive, lat, lng }: PrayerLightOptions): HTMLElement {
+export function createPrayerLightElement({ weight, isUser, isActive, context = 'globe' }: PrayerLightOptions): HTMLElement {
   const el = document.createElement('div');
   el.style.cssText = 'position:relative; transform:translate(-50%,-50%); pointer-events:none;';
 
   const clamped = Math.min(weight, 8);
-  const scale = isUser ? 2 : 0.6 + (clamped / 8) * 1.4;
-  const layers = isActive || isUser ? ACTIVE_LAYERS : RESIDUAL_LAYERS;
 
-  // Twinkle for active prayers only
+  // Globe needs bigger elements (viewed from far), Map needs smaller
+  let coreSize: number;
+  let glowSize: number;
+  let bloomSize: number;
+
+  if (context === 'globe') {
+    coreSize = isUser ? 16 : 10 + (clamped / 8) * 8;
+    glowSize = coreSize * 5;
+    bloomSize = coreSize * 10;
+  } else {
+    coreSize = isUser ? 6 : 3 + (clamped / 8) * 3;
+    glowSize = coreSize * 3;
+    bloomSize = coreSize * 6;
+  }
+
+  // Use SVG as center image, CSS for glow layers
+  const isActiveLight = isActive || isUser;
+  const svgCore = isActiveLight ? '/기도의빛_중심.svg' : '/잔상_중심.svg';
+
   const twinkleDuration = 2 + Math.random() * 4;
   const twinkleDelay = Math.random() * -6;
+  const anim = isActiveLight
+    ? `animation: twinkle ${twinkleDuration}s ease-in-out ${twinkleDelay}s infinite;`
+    : '';
+  const dimOpacity = isActiveLight ? '' : `opacity: ${0.4 + (clamped / 8) * 0.3};`;
 
-  layers.forEach((layer) => {
-    const img = document.createElement('img');
-    img.src = layer.src;
-    img.style.cssText = `
-      position:absolute; left:50%; top:50%;
-      width:${layer.size * scale}px; height:${layer.size * scale}px;
-      transform:translate(-50%,-50%);
-      pointer-events:none;
-    `;
+  // Outer bloom (CSS radial gradient)
+  const bloomColor = isActiveLight ? '#FFE164' : '#AA8833';
+  const bloom = document.createElement('div');
+  bloom.style.cssText = `
+    position:absolute; left:50%; top:50%;
+    width:${bloomSize}px; height:${bloomSize}px;
+    border-radius:50%;
+    background: radial-gradient(circle, ${bloomColor}30 0%, ${bloomColor}15 40%, transparent 70%);
+    transform:translate(-50%,-50%);
+    ${anim} ${dimOpacity}
+  `;
+  el.appendChild(bloom);
 
-    if (isActive || isUser) {
-      img.style.animation = `twinkle ${twinkleDuration}s ease-in-out ${twinkleDelay}s infinite`;
-    } else {
-      // Residual: dimmer, no animation
-      img.style.opacity = `${0.3 + (clamped / 8) * 0.3}`;
-    }
+  // Inner glow (CSS radial gradient)
+  const glowColor = isActiveLight ? '#FFFAB4' : '#BB9944';
+  const glow = document.createElement('div');
+  glow.style.cssText = `
+    position:absolute; left:50%; top:50%;
+    width:${glowSize}px; height:${glowSize}px;
+    border-radius:50%;
+    background: radial-gradient(circle, ${glowColor}55 0%, ${glowColor}25 50%, transparent 70%);
+    transform:translate(-50%,-50%);
+    ${anim} ${dimOpacity}
+  `;
+  el.appendChild(glow);
 
-    el.appendChild(img);
-  });
+  // Core (SVG image + CSS box-shadow for extra glow)
+  const core = document.createElement('img');
+  core.src = svgCore;
+  const shadowColor = isActiveLight ? '#FFD700' : '#AA8833';
+  core.style.cssText = `
+    position:absolute; left:50%; top:50%;
+    width:${coreSize}px; height:${coreSize}px;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    filter: brightness(2);
+    box-shadow: 0 0 ${coreSize}px ${shadowColor}, 0 0 ${coreSize * 2}px ${shadowColor}80;
+    border-radius: 50%;
+    ${anim} ${dimOpacity}
+  `;
+  el.appendChild(core);
 
   return el;
 }

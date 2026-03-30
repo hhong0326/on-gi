@@ -109,7 +109,7 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
 
   const globeMaterial = useMemo(() => {
     return new THREE.MeshPhongMaterial({
-      color: new THREE.Color(0.15, 0.15, 0.18),
+      color: new THREE.Color(0.08, 0.08, 0.1),
       specular: new THREE.Color(0.05, 0.05, 0.05),
       shininess: 5,
     });
@@ -167,7 +167,7 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
 
   const htmlElementFn = useCallback((d: object) => {
     const p = d as ClusteredPoint;
-    return createPrayerLightElement(p);
+    return createPrayerLightElement({ ...p, context: 'globe' });
   }, []);
 
   return (
@@ -182,7 +182,7 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
       htmlLat="lat"
       htmlLng="lng"
       htmlElement={htmlElementFn}
-      htmlAltitude={0.01}
+      htmlAltitude={0.02}
       arcsData={wires}
       arcStartLat="startLat"
       arcStartLng="startLng"
