@@ -12,6 +12,7 @@ export type { PrayerPoint };
 
 interface GlobeViewProps {
   points: PrayerPoint[];
+  onZoomChange?: (zoomLevel: number, center: { lat: number; lng: number }) => void;
 }
 
 interface ClusteredPoint {
@@ -95,7 +96,7 @@ function buildWireConnections(clusters: ClusteredPoint[], maxConns = 15): ArcDat
   return conns;
 }
 
-export function GlobeView({ points }: GlobeViewProps) {
+export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const [clusterRadius, setClusterRadius] = useState(5);
@@ -122,6 +123,13 @@ export function GlobeView({ points }: GlobeViewProps) {
       const dist = camera.position.length();
       const normalized = (dist - 130) / (600 - 130);
       setClusterRadius(1 + normalized * 7);
+
+      // Emit zoom level (0 = far, 1 = close) + approximate center
+      if (onZoomChange) {
+        const zoomLevel = 1 - normalized;
+        const pov = globeRef.current.pointOfView();
+        onZoomChange(zoomLevel, { lat: pov.lat ?? 0, lng: pov.lng ?? 0 });
+      }
     };
 
     controls.addEventListener('change', handleChange);

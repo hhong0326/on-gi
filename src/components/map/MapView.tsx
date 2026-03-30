@@ -25,6 +25,9 @@ const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
 
 interface MapViewProps {
   points: PrayerPoint[];
+  center?: { lat: number; lng: number };
+  zoom?: number;
+  onZoomChange?: (zoom: number) => void;
 }
 
 function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
@@ -34,11 +37,9 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
   useEffect(() => {
     if (!map) return;
 
-    // Clear old overlays
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
 
-    // Create custom overlays for each point
     points.forEach((p) => {
       const overlay = new google.maps.OverlayView();
 
@@ -86,7 +87,21 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
   return null;
 }
 
-export function MapView({ points }: MapViewProps) {
+function ZoomListener({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    const listener = map.addListener('zoom_changed', () => {
+      onZoomChange(map.getZoom() ?? 3);
+    });
+    return () => google.maps.event.removeListener(listener);
+  }, [map, onZoomChange]);
+
+  return null;
+}
+
+export function MapView({ points, center, zoom, onZoomChange }: MapViewProps) {
   if (!GOOGLE_MAPS_KEY) {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: '#08080F' }}>
@@ -98,8 +113,8 @@ export function MapView({ points }: MapViewProps) {
   return (
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>
       <Map
-        defaultCenter={{ lat: 37.5665, lng: 126.978 }}
-        defaultZoom={3}
+        defaultCenter={center ?? { lat: 37.5665, lng: 126.978 }}
+        defaultZoom={zoom ?? 3}
         gestureHandling="greedy"
         disableDefaultUI={true}
         styles={DARK_MAP_STYLES}
@@ -107,6 +122,7 @@ export function MapView({ points }: MapViewProps) {
         style={{ width: '100%', height: '100%' }}
       >
         <PrayerOverlays points={points} />
+        {onZoomChange && <ZoomListener onZoomChange={onZoomChange} />}
       </Map>
     </APIProvider>
   );

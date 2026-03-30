@@ -15,9 +15,11 @@ export default function MapPage() {
   const router = useRouter();
   const state = usePrayerState('map');
 
-  const handleTabChange = (tab: 'globe' | 'map' | 'history' | 'settings') => {
+  const handleTabChange = (tab: 'globe' | 'map' | 'hybrid' | 'history' | 'settings') => {
     if (tab === 'globe') {
       router.push('/');
+    } else if (tab === 'hybrid') {
+      router.push('/hybrid');
     } else {
       state.setActiveTab(tab);
     }

@@ -20,6 +20,7 @@ function formatTime(seconds: number): string {
 const TABS: { key: ViewTab; icon: string; label: string }[] = [
   { key: 'globe', icon: '🌍', label: '3D 지구본' },
   { key: 'map', icon: '🗺️', label: '위성 지도' },
+  { key: 'hybrid', icon: '✨', label: '하이브리드' },
   { key: 'history', icon: '📖', label: '기도 기록' },
   { key: 'settings', icon: '⚙️', label: '설정' },
 ];
