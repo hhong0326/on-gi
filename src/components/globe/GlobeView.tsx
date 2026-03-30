@@ -99,6 +99,8 @@ function buildWireConnections(clusters: ClusteredPoint[], maxConns = 15): ArcDat
 export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
+  const onZoomChangeRef = useRef(onZoomChange);
+  onZoomChangeRef.current = onZoomChange;
   const [clusterRadius, setClusterRadius] = useState(5);
 
   const globeMaterial = useMemo(() => {
@@ -124,7 +126,7 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
       const normalized = (dist - 130) / (600 - 130);
       setClusterRadius(1 + normalized * 7);
 
-      if (onZoomChange) {
+      if (onZoomChangeRef.current) {
         const zoomLevel = 1 - normalized;
         // Raycast from screen center to globe surface for accurate lat/lng
         const raycaster = new THREE.Raycaster();
@@ -144,7 +146,7 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
             };
           }
         }
-        onZoomChange(zoomLevel, center);
+        onZoomChangeRef.current(zoomLevel, center);
       }
     };
 
