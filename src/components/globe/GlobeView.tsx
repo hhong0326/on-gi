@@ -124,11 +124,27 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
       const normalized = (dist - 130) / (600 - 130);
       setClusterRadius(1 + normalized * 7);
 
-      // Emit zoom level (0 = far, 1 = close) + approximate center
       if (onZoomChange) {
         const zoomLevel = 1 - normalized;
-        const pov = globeRef.current.pointOfView();
-        onZoomChange(zoomLevel, { lat: pov.lat ?? 0, lng: pov.lng ?? 0 });
+        // Raycast from screen center to globe surface for accurate lat/lng
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+        const scene = globeRef.current.scene();
+        const globeMesh = scene.children.find(
+          (c: THREE.Object3D) => c.type === 'Mesh' || c.type === 'Group'
+        );
+        let center = { lat: 0, lng: 0 };
+        if (globeMesh) {
+          const hits = raycaster.intersectObject(globeMesh, true);
+          if (hits.length > 0) {
+            const p = hits[0].point.clone().normalize();
+            center = {
+              lat: Math.asin(p.y) * (180 / Math.PI),
+              lng: Math.atan2(p.x, -p.z) * (180 / Math.PI),
+            };
+          }
+        }
+        onZoomChange(zoomLevel, center);
       }
     };
 

@@ -17,8 +17,8 @@ const MapView = dynamic(
   { ssr: false }
 );
 
-const TRANSITION_TO_MAP_THRESHOLD = 0.85; // globe zoom 85%+ → switch to map
-const TRANSITION_TO_GLOBE_THRESHOLD = 4;  // google maps zoom ≤4 → switch to globe
+const TRANSITION_TO_MAP_THRESHOLD = 0.85;
+const TRANSITION_TO_GLOBE_THRESHOLD = 4;
 
 export default function HybridPage() {
   const router = useRouter();
@@ -26,11 +26,14 @@ export default function HybridPage() {
   const [viewMode, setViewMode] = useState<'globe' | 'map'>('globe');
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 });
   const [mapZoom, setMapZoom] = useState(8);
+  const [showMap, setShowMap] = useState(false);
 
   const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }) => {
     if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewMode === 'globe') {
       setMapCenter(center);
-      setMapZoom(8);
+      const mapZ = Math.round(3 + zoomLevel * 7);
+      setMapZoom(mapZ);
+      setShowMap(true);
       setViewMode('map');
     }
   }, [viewMode]);
@@ -63,11 +66,12 @@ export default function HybridPage() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
-      {/* Globe / Map swap */}
-      <div className="absolute inset-0">
-        {viewMode === 'globe' ? (
-          <GlobeView points={state.points} onZoomChange={handleGlobeZoom} />
-        ) : (
+      {/* Both mounted, toggle visibility — no remount = no re-animation */}
+      <div className="absolute inset-0" style={{ display: viewMode === 'globe' ? 'block' : 'none' }}>
+        <GlobeView points={state.points} onZoomChange={handleGlobeZoom} />
+      </div>
+      <div className="absolute inset-0" style={{ display: viewMode === 'map' ? 'block' : 'none' }}>
+        {showMap && (
           <MapView
             points={state.points}
             center={mapCenter}
