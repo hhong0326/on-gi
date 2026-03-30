@@ -14,7 +14,7 @@ const GlobeView = dynamic(
 );
 
 const SEED_LOCATIONS = [
-  { lat: 37.5665, lng: 126.978 },   // Seoul
+  // Global
   { lat: 31.7683, lng: 35.2137 },   // Jerusalem
   { lat: 40.7128, lng: -74.006 },   // NYC
   { lat: 51.5074, lng: -0.1278 },   // London
@@ -29,6 +29,19 @@ const SEED_LOCATIONS = [
   { lat: 30.0444, lng: 31.2357 },   // Cairo
   { lat: -1.2921, lng: 36.8219 },   // Nairobi
   { lat: 19.4326, lng: -99.1332 },  // Mexico City
+  // Seoul / Gyeonggi cluster test
+  { lat: 37.5665, lng: 126.978 },   // Seoul City Hall
+  { lat: 37.5512, lng: 126.988 },   // Myeongdong
+  { lat: 37.5172, lng: 127.0473 },  // Gangnam
+  { lat: 37.4979, lng: 127.0276 },  // Seocho
+  { lat: 37.6584, lng: 127.0497 },  // Nowon
+  { lat: 37.4563, lng: 126.7052 },  // Incheon
+  { lat: 37.3897, lng: 127.0997 },  // Bundang
+  { lat: 37.2911, lng: 127.0089 },  // Suwon
+  { lat: 37.7413, lng: 127.0477 },  // Uijeongbu
+  { lat: 37.6519, lng: 127.0480 },  // Dobong
+  { lat: 37.5407, lng: 127.0700 },  // Seongdong
+  { lat: 37.5800, lng: 126.9770 },  // Jongno
 ];
 
 function createSeedPoints(): PrayerPoint[] {

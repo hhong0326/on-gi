@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
+import * as THREE from 'three';
 
 export interface PrayerPoint {
   id: string;
@@ -22,14 +23,13 @@ interface ClusteredPoint {
   isUser: boolean;
 }
 
-// Warm bulb colors from reference
 const BULB_COLORS = ['#FFD700', '#FFA500', '#FF8C42', '#FFE4B5', '#FFFACD'];
 
 function pickColor(lat: number, lng: number): string {
   return BULB_COLORS[Math.abs(Math.floor((lat + lng) * 100)) % BULB_COLORS.length];
 }
 
-function clusterPoints(points: PrayerPoint[], radius = 5): ClusteredPoint[] {
+function clusterPoints(points: PrayerPoint[], radius: number): ClusteredPoint[] {
   const clusters: ClusteredPoint[] = [];
   const used = new Set<number>();
 
@@ -66,7 +66,6 @@ function clusterPoints(points: PrayerPoint[], radius = 5): ClusteredPoint[] {
   return clusters;
 }
 
-// Build wire connections between nearby points (like string lights)
 interface ArcData {
   startLat: number;
   startLng: number;
@@ -74,7 +73,7 @@ interface ArcData {
   endLng: number;
 }
 
-function buildWireConnections(clusters: ClusteredPoint[], maxConns = 12): ArcData[] {
+function buildWireConnections(clusters: ClusteredPoint[], maxConns = 15): ArcData[] {
   const conns: ArcData[] = [];
 
   for (let i = 0; i < clusters.length && conns.length < maxConns; i++) {
@@ -107,6 +106,16 @@ function buildWireConnections(clusters: ClusteredPoint[], maxConns = 12): ArcDat
 export function GlobeView({ points }: GlobeViewProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
+  const [clusterRadius, setClusterRadius] = useState(5);
+
+  // Dark globe material — bright texture dimmed down, glow "illuminates"
+  const globeMaterial = useMemo(() => {
+    return new THREE.MeshPhongMaterial({
+      color: new THREE.Color(0.15, 0.15, 0.18),
+      specular: new THREE.Color(0.05, 0.05, 0.05),
+      shininess: 5,
+    });
+  }, []);
 
   useEffect(() => {
     if (!globeRef.current) return;
@@ -115,12 +124,26 @@ export function GlobeView({ points }: GlobeViewProps) {
     controls.autoRotateSpeed = 0.5;
     controls.minDistance = 130;
     controls.maxDistance = 600;
+
+    // Update cluster radius based on zoom level
+    const handleChange = () => {
+      if (!globeRef.current) return;
+      const camera = globeRef.current.camera();
+      const dist = camera.position.length();
+      // Far away (600) → big clusters (8°), close (130) → small clusters (1°)
+      const normalized = (dist - 130) / (600 - 130);
+      const newRadius = 1 + normalized * 7;
+      setClusterRadius(newRadius);
+    };
+
+    controls.addEventListener('change', handleChange);
+    return () => controls.removeEventListener('change', handleChange);
   }, []);
 
-  const clustered = useMemo(() => clusterPoints(points), [points]);
+  const clustered = useMemo(() => clusterPoints(points, clusterRadius), [points, clusterRadius]);
   const wires = useMemo(() => buildWireConnections(clustered), [clustered]);
 
-  // Inject flicker keyframes once (from reference: twinkling like string lights)
+  // Inject flicker keyframes
   useEffect(() => {
     if (document.getElementById('globe-flicker-style')) return;
     const style = document.createElement('style');
@@ -139,46 +162,57 @@ export function GlobeView({ points }: GlobeViewProps) {
     document.head.appendChild(style);
   }, []);
 
-  // Multi-layered glow HTML element (core + inner glow + outer bloom from reference)
+  // Multi-layered glow: core + inner + outer + wide gleam
   const htmlElementFn = useCallback((d: object) => {
     const p = d as ClusteredPoint;
     const el = document.createElement('div');
     el.style.cssText = 'position:relative; transform:translate(-50%,-50%); pointer-events:none;';
 
-    const clamped = Math.min(p.weight, 5);
-    const t = clamped / 5;
+    const clamped = Math.min(p.weight, 8);
+    const t = clamped / 8;
 
     const color = p.isUser ? '#FFD700' : pickColor(p.lat, p.lng);
     const coreColor = p.isUser ? '#FFFFFF' : color;
 
-    // Sizes from reference: core, inner glow (3x), outer bloom (6x)
-    const coreSize = p.isUser ? 8 : 4 + t * 3;
+    const coreSize = p.isUser ? 8 : 3 + t * 5;
     const innerSize = coreSize * 3;
-    const outerSize = coreSize * 6;
+    const outerSize = coreSize * 7;
+    const gleamSize = coreSize * 14; // Wide gleam to "illuminate" surrounding darkness
 
-    // Twinkling: each light gets different speed (from reference)
     const twinkleDuration = 2 + Math.random() * 4;
     const twinkleDelay = Math.random() * -6;
 
-    // Outer bloom layer
+    // Wide gleam layer — illuminates surrounding darkness
+    const gleam = document.createElement('div');
+    gleam.style.cssText = `
+      position:absolute; left:50%; top:50%;
+      width:${gleamSize}px; height:${gleamSize}px;
+      border-radius:50%;
+      background: radial-gradient(circle, ${color}12 0%, ${color}06 40%, transparent 70%);
+      transform:translate(-50%,-50%);
+      animation: twinkle ${twinkleDuration * 1.5}s ease-in-out ${twinkleDelay}s infinite;
+    `;
+    el.appendChild(gleam);
+
+    // Outer bloom
     const outer = document.createElement('div');
     outer.style.cssText = `
       position:absolute; left:50%; top:50%;
       width:${outerSize}px; height:${outerSize}px;
       border-radius:50%;
-      background: radial-gradient(circle, ${color}15 0%, transparent 70%);
+      background: radial-gradient(circle, ${color}20 0%, ${color}08 50%, transparent 70%);
       transform:translate(-50%,-50%);
       animation: twinkle ${twinkleDuration * 1.2}s ease-in-out ${twinkleDelay}s infinite;
     `;
     el.appendChild(outer);
 
-    // Inner glow layer
+    // Inner glow
     const inner = document.createElement('div');
     inner.style.cssText = `
       position:absolute; left:50%; top:50%;
       width:${innerSize}px; height:${innerSize}px;
       border-radius:50%;
-      background: radial-gradient(circle, ${color}30 0%, transparent 70%);
+      background: radial-gradient(circle, ${color}40 0%, ${color}15 50%, transparent 70%);
       transform:translate(-50%,-50%);
       animation: twinkle ${twinkleDuration}s ease-in-out ${twinkleDelay}s infinite;
     `;
@@ -191,7 +225,7 @@ export function GlobeView({ points }: GlobeViewProps) {
       width:${coreSize}px; height:${coreSize}px;
       border-radius:50%;
       background:${coreColor};
-      box-shadow: 0 0 ${coreSize}px ${color}, 0 0 ${coreSize * 2}px ${color}80;
+      box-shadow: 0 0 ${coreSize * 1.5}px ${color}, 0 0 ${coreSize * 3}px ${color}80;
       transform:translate(-50%,-50%);
       animation: twinkle ${twinkleDuration}s ease-in-out ${twinkleDelay}s infinite;
     `;
@@ -203,7 +237,8 @@ export function GlobeView({ points }: GlobeViewProps) {
   return (
     <Globe
       ref={globeRef}
-      globeImageUrl="https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
+      globeImageUrl="https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
+      globeMaterial={globeMaterial}
       backgroundColor="rgba(0,0,0,0)"
       showAtmosphere={false}
       animateIn={true}
@@ -217,7 +252,7 @@ export function GlobeView({ points }: GlobeViewProps) {
       arcStartLng="startLng"
       arcEndLat="endLat"
       arcEndLng="endLng"
-      arcColor={() => 'rgba(245, 166, 35, 0.15)'}
+      arcColor={() => 'rgba(245, 166, 35, 0.12)'}
       arcAltitudeAutoScale={0.3}
       arcStroke={0.3}
       arcDashLength={0.4}
