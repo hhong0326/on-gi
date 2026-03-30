@@ -4,13 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 
-export interface PrayerPoint {
-  id: string;
-  lat: number;
-  lng: number;
-  intensity: number;
-  isUser: boolean;
-}
+import '@/components/shared/prayer-light.css';
+import { createPrayerLightElement } from '@/components/shared/prayer-light';
+import type { PrayerPoint } from '@/types/prayer';
+
+export type { PrayerPoint };
 
 interface GlobeViewProps {
   points: PrayerPoint[];
@@ -21,12 +19,6 @@ interface ClusteredPoint {
   lng: number;
   weight: number;
   isUser: boolean;
-}
-
-const BULB_COLORS = ['#FFD700', '#FFA500', '#FF8C42', '#FFE4B5', '#FFFACD'];
-
-function pickColor(lat: number, lng: number): string {
-  return BULB_COLORS[Math.abs(Math.floor((lat + lng) * 100)) % BULB_COLORS.length];
 }
 
 function clusterPoints(points: PrayerPoint[], radius: number): ClusteredPoint[] {
@@ -108,7 +100,6 @@ export function GlobeView({ points }: GlobeViewProps) {
   const globeRef = useRef<any>(null);
   const [clusterRadius, setClusterRadius] = useState(5);
 
-  // Dark globe material — bright texture dimmed down, glow "illuminates"
   const globeMaterial = useMemo(() => {
     return new THREE.MeshPhongMaterial({
       color: new THREE.Color(0.15, 0.15, 0.18),
@@ -125,15 +116,12 @@ export function GlobeView({ points }: GlobeViewProps) {
     controls.minDistance = 130;
     controls.maxDistance = 600;
 
-    // Update cluster radius based on zoom level
     const handleChange = () => {
       if (!globeRef.current) return;
       const camera = globeRef.current.camera();
       const dist = camera.position.length();
-      // Far away (600) → big clusters (8°), close (130) → small clusters (1°)
       const normalized = (dist - 130) / (600 - 130);
-      const newRadius = 1 + normalized * 7;
-      setClusterRadius(newRadius);
+      setClusterRadius(1 + normalized * 7);
     };
 
     controls.addEventListener('change', handleChange);
@@ -143,95 +131,9 @@ export function GlobeView({ points }: GlobeViewProps) {
   const clustered = useMemo(() => clusterPoints(points, clusterRadius), [points, clusterRadius]);
   const wires = useMemo(() => buildWireConnections(clustered), [clustered]);
 
-  // Inject flicker keyframes
-  useEffect(() => {
-    if (document.getElementById('globe-flicker-style')) return;
-    const style = document.createElement('style');
-    style.id = 'globe-flicker-style';
-    style.textContent = `
-      @keyframes twinkle {
-        0%, 100% { opacity: 1; }
-        15% { opacity: 0.6; }
-        30% { opacity: 0.85; }
-        45% { opacity: 0.5; }
-        60% { opacity: 0.9; }
-        75% { opacity: 0.55; }
-        90% { opacity: 0.95; }
-      }
-    `;
-    document.head.appendChild(style);
-  }, []);
-
-  // Multi-layered glow: core + inner + outer + wide gleam
   const htmlElementFn = useCallback((d: object) => {
     const p = d as ClusteredPoint;
-    const el = document.createElement('div');
-    el.style.cssText = 'position:relative; transform:translate(-50%,-50%); pointer-events:none;';
-
-    const clamped = Math.min(p.weight, 8);
-    const t = clamped / 8;
-
-    const color = p.isUser ? '#FFD700' : pickColor(p.lat, p.lng);
-    const coreColor = p.isUser ? '#FFFFFF' : color;
-
-    const coreSize = p.isUser ? 8 : 3 + t * 5;
-    const innerSize = coreSize * 3;
-    const outerSize = coreSize * 7;
-    const gleamSize = coreSize * 14; // Wide gleam to "illuminate" surrounding darkness
-
-    const twinkleDuration = 2 + Math.random() * 4;
-    const twinkleDelay = Math.random() * -6;
-
-    // Wide gleam layer — illuminates surrounding darkness
-    const gleam = document.createElement('div');
-    gleam.style.cssText = `
-      position:absolute; left:50%; top:50%;
-      width:${gleamSize}px; height:${gleamSize}px;
-      border-radius:50%;
-      background: radial-gradient(circle, ${color}12 0%, ${color}06 40%, transparent 70%);
-      transform:translate(-50%,-50%);
-      animation: twinkle ${twinkleDuration * 1.5}s ease-in-out ${twinkleDelay}s infinite;
-    `;
-    el.appendChild(gleam);
-
-    // Outer bloom
-    const outer = document.createElement('div');
-    outer.style.cssText = `
-      position:absolute; left:50%; top:50%;
-      width:${outerSize}px; height:${outerSize}px;
-      border-radius:50%;
-      background: radial-gradient(circle, ${color}20 0%, ${color}08 50%, transparent 70%);
-      transform:translate(-50%,-50%);
-      animation: twinkle ${twinkleDuration * 1.2}s ease-in-out ${twinkleDelay}s infinite;
-    `;
-    el.appendChild(outer);
-
-    // Inner glow
-    const inner = document.createElement('div');
-    inner.style.cssText = `
-      position:absolute; left:50%; top:50%;
-      width:${innerSize}px; height:${innerSize}px;
-      border-radius:50%;
-      background: radial-gradient(circle, ${color}40 0%, ${color}15 50%, transparent 70%);
-      transform:translate(-50%,-50%);
-      animation: twinkle ${twinkleDuration}s ease-in-out ${twinkleDelay}s infinite;
-    `;
-    el.appendChild(inner);
-
-    // Core bright point
-    const core = document.createElement('div');
-    core.style.cssText = `
-      position:absolute; left:50%; top:50%;
-      width:${coreSize}px; height:${coreSize}px;
-      border-radius:50%;
-      background:${coreColor};
-      box-shadow: 0 0 ${coreSize * 1.5}px ${color}, 0 0 ${coreSize * 3}px ${color}80;
-      transform:translate(-50%,-50%);
-      animation: twinkle ${twinkleDuration}s ease-in-out ${twinkleDelay}s infinite;
-    `;
-    el.appendChild(core);
-
-    return el;
+    return createPrayerLightElement(p);
   }, []);
 
   return (

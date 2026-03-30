@@ -1,12 +1,14 @@
 'use client';
 
+import type { ViewTab } from '@/hooks/usePrayerState';
+
 interface PrayerOverlayProps {
   prayerCount: number;
   isPraying: boolean;
   elapsedSeconds: number;
   onTogglePrayer: () => void;
-  activeTab: 'globe' | 'history' | 'settings';
-  onTabChange: (tab: 'globe' | 'history' | 'settings') => void;
+  activeTab: ViewTab;
+  onTabChange: (tab: ViewTab) => void;
 }
 
 function formatTime(seconds: number): string {
@@ -14,6 +16,13 @@ function formatTime(seconds: number): string {
   const s = (seconds % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
+
+const TABS: { key: ViewTab; icon: string; label: string }[] = [
+  { key: 'globe', icon: '🌍', label: '3D 지구본' },
+  { key: 'map', icon: '🗺️', label: '위성 지도' },
+  { key: 'history', icon: '📖', label: '기도 기록' },
+  { key: 'settings', icon: '⚙️', label: '설정' },
+];
 
 export function PrayerOverlay({
   prayerCount,
@@ -54,11 +63,7 @@ export function PrayerOverlay({
 
       {/* Tab Bar */}
       <nav className="pointer-events-auto flex justify-around border-t border-white/10 bg-[#08080F]/90 px-2 pb-8 pt-3 backdrop-blur-sm">
-        {([
-          { key: 'globe' as const, icon: '🌍', label: '기도 지구본' },
-          { key: 'history' as const, icon: '📖', label: '기도 기록' },
-          { key: 'settings' as const, icon: '⚙️', label: '설정' },
-        ]).map((tab) => (
+        {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}

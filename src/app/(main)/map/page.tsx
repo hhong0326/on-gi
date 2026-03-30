@@ -6,18 +6,18 @@ import dynamic from 'next/dynamic';
 import { usePrayerState } from '@/hooks/usePrayerState';
 import { PrayerOverlay } from '@/components/globe/PrayerOverlay';
 
-const GlobeView = dynamic(
-  () => import('@/components/globe/GlobeView').then((m) => m.GlobeView),
+const MapView = dynamic(
+  () => import('@/components/map/MapView').then((m) => m.MapView),
   { ssr: false }
 );
 
-export default function GlobePage() {
+export default function MapPage() {
   const router = useRouter();
-  const state = usePrayerState('globe');
+  const state = usePrayerState('map');
 
   const handleTabChange = (tab: 'globe' | 'map' | 'history' | 'settings') => {
-    if (tab === 'map') {
-      router.push('/map');
+    if (tab === 'globe') {
+      router.push('/');
     } else {
       state.setActiveTab(tab);
     }
@@ -36,7 +36,7 @@ export default function GlobePage() {
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
       <div className="absolute inset-0">
-        <GlobeView points={state.points} />
+        <MapView points={state.points} />
       </div>
       <PrayerOverlay
         prayerCount={state.points.length}
