@@ -50,6 +50,7 @@ export default function HybridPage() {
   const [globeTheme, setGlobeTheme] = useState<GlobeTheme>('aubergine');
   const [mapTheme, setMapTheme] = useState<MapTheme>('retro');
   const [showThemePanel, setShowThemePanel] = useState(false);
+  const [hideLabels, setHideLabels] = useState(false);
 
   const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => {
     if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewModeRef.current === 'globe') {
@@ -114,6 +115,7 @@ export default function HybridPage() {
           <MapView
             points={state.points}
             theme={mapTheme}
+            hideLabels={hideLabels}
             center={mapCenter}
             zoom={mapZoom}
             onZoomChange={handleMapZoom}
@@ -158,6 +160,17 @@ export default function HybridPage() {
                 {t.label}
               </button>
             ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-xs text-white/70">🏷️ 지도 라벨 숨기기</span>
+            <button
+              onClick={() => setHideLabels((v) => !v)}
+              className={`rounded-full px-3 py-1 text-xs ${
+                hideLabels ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/60'
+              }`}
+            >
+              {hideLabels ? 'ON' : 'OFF'}
+            </button>
           </div>
           <button
             onClick={() => setShowThemePanel(false)}

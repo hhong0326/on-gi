@@ -66,6 +66,7 @@ const MAP_THEME_STYLES: Record<MapTheme, google.maps.MapTypeStyle[]> = {
 interface MapViewProps {
   points: PrayerPoint[];
   theme?: MapTheme;
+  hideLabels?: boolean;
   center?: { lat: number; lng: number };
   zoom?: number;
   onZoomChange?: (zoom: number) => void;
@@ -163,7 +164,7 @@ function ZoomListener({ onZoomChange }: { onZoomChange: (zoom: number) => void }
   return null;
 }
 
-export function MapView({ points, theme = 'retro', center, zoom, onZoomChange }: MapViewProps) {
+export function MapView({ points, theme = 'retro', hideLabels = false, center, zoom, onZoomChange }: MapViewProps) {
   if (!GOOGLE_MAPS_KEY) {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: '#08080F' }}>
@@ -179,7 +180,10 @@ export function MapView({ points, theme = 'retro', center, zoom, onZoomChange }:
         defaultZoom={zoom ?? 3}
         gestureHandling="greedy"
         disableDefaultUI={true}
-        styles={MAP_THEME_STYLES[theme]}
+        styles={[
+          ...MAP_THEME_STYLES[theme],
+          ...(hideLabels ? [{ elementType: 'labels' as const, stylers: [{ visibility: 'off' as const }] }] : []),
+        ]}
         backgroundColor="#08080F"
         style={{ width: '100%', height: '100%' }}
       >
