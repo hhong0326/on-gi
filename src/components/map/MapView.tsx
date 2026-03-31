@@ -73,23 +73,29 @@ interface MapViewProps {
 
 function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
   const map = useMap();
-  const overlaysRef = useRef<google.maps.OverlayView[]>([]);
-  const prevCountRef = useRef(0);
+  const overlayMapRef = useRef(new globalThis.Map<string, google.maps.OverlayView>());
 
   useEffect(() => {
     if (!map) return;
 
-    // Only rebuild if count changed significantly (avoid thrashing)
-    if (Math.abs(points.length - prevCountRef.current) < 3 && prevCountRef.current > 0) return;
-    prevCountRef.current = points.length;
+    const currentIds = new Set(points.map((p) => p.id));
+    const existingIds = overlayMapRef.current;
 
-    overlaysRef.current.forEach((o) => o.setMap(null));
-    overlaysRef.current = [];
+    // Remove overlays for deleted points
+    existingIds.forEach((overlay, id) => {
+      if (!currentIds.has(id)) {
+        overlay.setMap(null);
+        existingIds.delete(id);
+      }
+    });
 
-    // Limit overlays for performance
+    // Limit to last 60 points for performance
     const limitedPoints = points.length > 60 ? points.slice(-60) : points;
 
+    // Add overlays for new points only
     limitedPoints.forEach((p) => {
+      if (existingIds.has(p.id)) return;
+
       const overlay = new google.maps.OverlayView();
 
       overlay.onAdd = function () {
@@ -126,14 +132,17 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
       };
 
       overlay.setMap(map);
-      overlaysRef.current.push(overlay);
+      existingIds.set(p.id, overlay);
     });
-
-    return () => {
-      overlaysRef.current.forEach((o) => o.setMap(null));
-      overlaysRef.current = [];
-    };
   }, [map, points]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      overlayMapRef.current.forEach((o) => o.setMap(null));
+      overlayMapRef.current.clear();
+    };
+  }, []);
 
   return null;
 }
