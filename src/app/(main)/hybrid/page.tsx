@@ -130,7 +130,7 @@ export default function HybridPage() {
 
       {/* Theme selector panel */}
       {showThemePanel && (
-        <div className="absolute bottom-28 left-1/2 z-20 w-72 -translate-x-1/2 rounded-2xl bg-black/80 p-4 backdrop-blur-md">
+        <div className="absolute bottom-28 left-1/2 z-30 w-72 -translate-x-1/2 rounded-2xl bg-black/80 p-4 backdrop-blur-md">
           <p className="mb-3 text-xs font-medium text-white/70">🌍 지구본 테마</p>
           <div className="mb-4 flex flex-wrap gap-2">
             {GLOBE_THEMES.map((t) => (
@@ -168,15 +168,17 @@ export default function HybridPage() {
         </div>
       )}
 
-      <PrayerOverlay
-        prayerCount={state.points.length}
-        isPraying={state.isPraying}
-        elapsedSeconds={state.elapsedSeconds}
-        onTogglePrayer={state.handleTogglePrayer}
-        activeTab={state.activeTab}
-        onTabChange={handleTabChange}
-      />
-      <div className="absolute right-4 top-14 z-10">
+      <div className="absolute inset-0 z-10">
+        <PrayerOverlay
+          prayerCount={state.points.length}
+          isPraying={state.isPraying}
+          elapsedSeconds={state.elapsedSeconds}
+          onTogglePrayer={state.handleTogglePrayer}
+          activeTab={state.activeTab}
+          onTabChange={handleTabChange}
+        />
+      </div>
+      <div className="absolute right-4 top-14 z-20">
         <span className="text-xs text-white/50">{state.nickname}님</span>
       </div>
     </div>
