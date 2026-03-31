@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps';
 
 import '@/components/shared/prayer-light.css';
@@ -93,14 +93,16 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
 
 function ZoomListener({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
   const map = useMap();
+  const callbackRef = useRef(onZoomChange);
+  callbackRef.current = onZoomChange;
 
   useEffect(() => {
     if (!map) return;
     const listener = map.addListener('zoom_changed', () => {
-      onZoomChange(map.getZoom() ?? 3);
+      callbackRef.current(map.getZoom() ?? 3);
     });
     return () => google.maps.event.removeListener(listener);
-  }, [map, onZoomChange]);
+  }, [map]);
 
   return null;
 }

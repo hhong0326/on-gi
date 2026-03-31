@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
@@ -24,26 +24,27 @@ export default function HybridPage() {
   const router = useRouter();
   const state = usePrayerState('hybrid');
   const [viewMode, setViewMode] = useState<'globe' | 'map'>('globe');
+  const viewModeRef = useRef(viewMode);
+  viewModeRef.current = viewMode;
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 });
   const [mapZoom, setMapZoom] = useState(8);
   const [showMap, setShowMap] = useState(false);
 
   const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => {
-    if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewMode === 'globe') {
+    if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewModeRef.current === 'globe') {
       setMapCenter(center);
-      // Match visible area: zoom = log2(360 / visibleDegrees)
       const mapZ = Math.round(Math.log2(360 / Math.max(visibleDegrees, 1)));
       setMapZoom(Math.max(3, Math.min(mapZ, 18)));
       setShowMap(true);
       setViewMode('map');
     }
-  }, [viewMode]);
+  }, []);
 
   const handleMapZoom = useCallback((zoom: number) => {
-    if (zoom <= TRANSITION_TO_GLOBE_THRESHOLD && viewMode === 'map') {
+    if (zoom <= TRANSITION_TO_GLOBE_THRESHOLD && viewModeRef.current === 'map') {
       setViewMode('globe');
     }
-  }, [viewMode]);
+  }, []);
 
   const handleTabChange = (tab: ViewTab) => {
     if (tab === 'globe') {
