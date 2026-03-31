@@ -9,24 +9,63 @@ import type { PrayerPoint } from '@/types/prayer';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '';
 
-const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: 'geometry', stylers: [{ color: '#1a2138' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#6b7fa3' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1624' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0c1a3a' }] },
-  { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#1e3050' }] },
-  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#1a3348' }] },
-  { featureType: 'road', stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#2a4060' }, { weight: 0.5 }] },
-  { featureType: 'administrative.country', elementType: 'labels.text.fill', stylers: [{ color: '#5a7a9a' }] },
-  { featureType: 'administrative.province', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative.locality', stylers: [{ visibility: 'off' }] },
-];
+export type MapTheme = 'retro' | 'dark' | 'night' | 'aubergine' | 'silver';
+
+const MAP_THEME_STYLES: Record<MapTheme, google.maps.MapTypeStyle[]> = {
+  retro: [
+    { elementType: 'geometry', stylers: [{ color: '#ebe3cd' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#523735' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f1e6' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#b9d3c2' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#dfd2ae' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#a5977e' }, { weight: 0.5 }] },
+  ],
+  dark: [
+    { elementType: 'geometry', stylers: [{ color: '#1a2138' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#6b7fa3' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1624' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0c1a3a' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#1e3050' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#2a4060' }, { weight: 0.5 }] },
+  ],
+  night: [
+    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  ],
+  aubergine: [
+    { elementType: 'geometry', stylers: [{ color: '#1d2c4d' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#8ec3b9' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a3646' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0e1626' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#283d6a' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  ],
+  silver: [
+    { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9c9c9' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  ],
+};
 
 interface MapViewProps {
   points: PrayerPoint[];
+  theme?: MapTheme;
   center?: { lat: number; lng: number };
   zoom?: number;
   onZoomChange?: (zoom: number) => void;
@@ -107,7 +146,7 @@ function ZoomListener({ onZoomChange }: { onZoomChange: (zoom: number) => void }
   return null;
 }
 
-export function MapView({ points, center, zoom, onZoomChange }: MapViewProps) {
+export function MapView({ points, theme = 'retro', center, zoom, onZoomChange }: MapViewProps) {
   if (!GOOGLE_MAPS_KEY) {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: '#08080F' }}>
@@ -123,7 +162,7 @@ export function MapView({ points, center, zoom, onZoomChange }: MapViewProps) {
         defaultZoom={zoom ?? 3}
         gestureHandling="greedy"
         disableDefaultUI={true}
-        styles={MAP_STYLES}
+        styles={MAP_THEME_STYLES[theme]}
         backgroundColor="#08080F"
         style={{ width: '100%', height: '100%' }}
       >

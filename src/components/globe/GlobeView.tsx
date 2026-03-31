@@ -10,8 +10,19 @@ import type { PrayerPoint } from '@/types/prayer';
 
 export type { PrayerPoint };
 
+export type GlobeTheme = 'aubergine' | 'dark' | 'night' | 'blue-marble' | 'topology';
+
+const GLOBE_THEMES: Record<GlobeTheme, { url: string; color: [number, number, number] }> = {
+  aubergine: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg', color: [0.08, 0.04, 0.12] },
+  dark: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg', color: [0.08, 0.08, 0.1] },
+  night: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg', color: [0.06, 0.06, 0.08] },
+  'blue-marble': { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg', color: [0.08, 0.08, 0.1] },
+  topology: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png', color: [0.1, 0.08, 0.06] },
+};
+
 interface GlobeViewProps {
   points: PrayerPoint[];
+  theme?: GlobeTheme;
   onZoomChange?: (zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => void;
 }
 
@@ -100,20 +111,22 @@ function buildWireConnections(clusters: ClusteredPoint[], maxConns = 15): ArcDat
   return conns;
 }
 
-export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
+export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeViewProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const onZoomChangeRef = useRef(onZoomChange);
   onZoomChangeRef.current = onZoomChange;
   const [clusterRadius, setClusterRadius] = useState(5);
 
+  const themeConfig = GLOBE_THEMES[theme];
   const globeMaterial = useMemo(() => {
+    const [r, g, b] = themeConfig.color;
     return new THREE.MeshPhongMaterial({
-      color: new THREE.Color(0.08, 0.08, 0.1),
+      color: new THREE.Color(r, g, b),
       specular: new THREE.Color(0.05, 0.05, 0.05),
       shininess: 5,
     });
-  }, []);
+  }, [themeConfig]);
 
   useEffect(() => {
     if (!globeRef.current) return;
@@ -173,7 +186,7 @@ export function GlobeView({ points, onZoomChange }: GlobeViewProps) {
   return (
     <Globe
       ref={globeRef}
-      globeImageUrl="https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
+      globeImageUrl={themeConfig.url}
       globeMaterial={globeMaterial}
       backgroundColor="rgba(0,0,0,0)"
       showAtmosphere={false}
