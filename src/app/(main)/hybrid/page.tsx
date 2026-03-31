@@ -67,11 +67,23 @@ export default function HybridPage() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
-      {/* Both mounted, toggle visibility — no remount = no re-animation */}
-      <div className="absolute inset-0" style={{ display: viewMode === 'globe' ? 'block' : 'none' }}>
+      {/* Both mounted, visibility toggle — preserves WebGL context */}
+      <div
+        className="absolute inset-0"
+        style={{
+          visibility: viewMode === 'globe' ? 'visible' : 'hidden',
+          zIndex: viewMode === 'globe' ? 1 : 0,
+        }}
+      >
         <GlobeView points={state.points} onZoomChange={handleGlobeZoom} />
       </div>
-      <div className="absolute inset-0" style={{ display: viewMode === 'map' ? 'block' : 'none' }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          visibility: viewMode === 'map' ? 'visible' : 'hidden',
+          zIndex: viewMode === 'map' ? 1 : 0,
+        }}
+      >
         {showMap && (
           <MapView
             points={state.points}
