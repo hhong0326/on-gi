@@ -74,14 +74,22 @@ interface MapViewProps {
 function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
   const map = useMap();
   const overlaysRef = useRef<google.maps.OverlayView[]>([]);
+  const prevCountRef = useRef(0);
 
   useEffect(() => {
     if (!map) return;
 
+    // Only rebuild if count changed significantly (avoid thrashing)
+    if (Math.abs(points.length - prevCountRef.current) < 3 && prevCountRef.current > 0) return;
+    prevCountRef.current = points.length;
+
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
 
-    points.forEach((p) => {
+    // Limit overlays for performance
+    const limitedPoints = points.length > 60 ? points.slice(-60) : points;
+
+    limitedPoints.forEach((p) => {
       const overlay = new google.maps.OverlayView();
 
       overlay.onAdd = function () {

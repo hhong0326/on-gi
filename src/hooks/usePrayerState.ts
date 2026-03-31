@@ -95,7 +95,9 @@ export function usePrayerState(defaultTab: ViewTab = 'globe') {
           isUser: false,
           isActive: Math.random() > 0.3,
         };
-        return [...prev, newPoint];
+        // Cap at 80 points to prevent memory issues on mobile
+        const next = [...prev, newPoint];
+        return next.length > 80 ? next.slice(-80) : next;
       });
     }, 3000);
     return () => clearInterval(interval);
