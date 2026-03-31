@@ -168,7 +168,7 @@ export default function HybridPage() {
         </div>
       )}
 
-      <div className="absolute inset-0 z-10">
+      <div className="pointer-events-none absolute inset-0 z-10">
         <PrayerOverlay
           prayerCount={state.points.length}
           isPraying={state.isPraying}
