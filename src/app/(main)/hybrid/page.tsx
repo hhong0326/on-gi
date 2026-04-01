@@ -23,7 +23,8 @@ const TRANSITION_TO_MAP_THRESHOLD = 0.85;
 const TRANSITION_TO_GLOBE_THRESHOLD = 4;
 
 const GLOBE_THEMES: { key: GlobeTheme; label: string }[] = [
-  { key: 'wireframe', label: '와이어프레임' },
+  { key: 'wire-light', label: '와이어 라이트' },
+  { key: 'wire-dark', label: '와이어 다크' },
   { key: 'aubergine', label: '오버진' },
   { key: 'dark', label: '다크' },
   { key: 'night', label: '나이트' },

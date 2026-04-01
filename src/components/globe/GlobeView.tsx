@@ -10,16 +10,48 @@ import type { PrayerPoint } from '@/types/prayer';
 
 export type { PrayerPoint };
 
-export type GlobeTheme = 'wireframe' | 'aubergine' | 'dark' | 'night' | 'blue-marble' | 'topology';
+export type GlobeTheme = 'wire-light' | 'wire-dark' | 'aubergine' | 'dark' | 'night' | 'blue-marble' | 'topology';
+
+interface WireframeStyle {
+  globe: [number, number, number];      // 구체(바다) RGB
+  landFill: string;                      // 대륙 채움
+  landStroke: string;                    // 대륙 경계선
+  landSide: string;                      // 대륙 측면
+  arcColor: string;                      // 연결선
+}
 
 interface ThemeConfig {
   url: string | null;
   color: [number, number, number];
   wireframe?: boolean;
+  wireStyle?: WireframeStyle;
 }
 
 const GLOBE_THEMES: Record<GlobeTheme, ThemeConfig> = {
-  wireframe: { url: null, color: [0.02, 0.02, 0.04], wireframe: true },
+  'wire-light': {
+    url: null,
+    color: [0.06, 0.06, 0.08],
+    wireframe: true,
+    wireStyle: {
+      globe: [0.08, 0.08, 0.12],
+      landFill: 'rgba(180, 190, 210, 0.08)',
+      landStroke: 'rgba(160, 170, 200, 0.4)',
+      landSide: 'rgba(140, 150, 180, 0.05)',
+      arcColor: 'rgba(160, 180, 220, 0.2)',
+    },
+  },
+  'wire-dark': {
+    url: null,
+    color: [0.02, 0.02, 0.04],
+    wireframe: true,
+    wireStyle: {
+      globe: [0.02, 0.02, 0.04],
+      landFill: 'rgba(20, 30, 60, 0.5)',
+      landStroke: 'rgba(60, 100, 180, 0.35)',
+      landSide: 'rgba(30, 50, 100, 0.1)',
+      arcColor: 'rgba(80, 140, 255, 0.2)',
+    },
+  },
   aubergine: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg', color: [0.08, 0.04, 0.12] },
   dark: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg', color: [0.08, 0.08, 0.1] },
   night: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg', color: [0.06, 0.06, 0.08] },
@@ -147,11 +179,13 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
     })();
   }, [isWireframe]);
 
+  const wireStyle = themeConfig.wireStyle;
   const globeMaterial = useMemo(() => {
     const [r, g, b] = themeConfig.color;
-    if (isWireframe) {
+    if (isWireframe && wireStyle) {
+      const [wr, wg, wb] = wireStyle.globe;
       return new THREE.MeshBasicMaterial({
-        color: new THREE.Color(0.03, 0.03, 0.06),
+        color: new THREE.Color(wr, wg, wb),
       });
     }
     return new THREE.MeshPhongMaterial({
@@ -159,7 +193,7 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
       specular: new THREE.Color(0.05, 0.05, 0.05),
       shininess: 5,
     });
-  }, [themeConfig, isWireframe]);
+  }, [themeConfig, isWireframe, wireStyle]);
 
   useEffect(() => {
     if (!globeRef.current) return;
@@ -227,9 +261,9 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
       showAtmosphere={false}
       animateIn={true}
       polygonsData={isWireframe ? countries : []}
-      polygonCapColor={() => 'rgba(30, 40, 70, 0.4)'}
-      polygonSideColor={() => 'rgba(60, 80, 140, 0.1)'}
-      polygonStrokeColor={() => 'rgba(100, 140, 220, 0.3)'}
+      polygonCapColor={() => wireStyle?.landFill ?? 'rgba(30, 40, 70, 0.4)'}
+      polygonSideColor={() => wireStyle?.landSide ?? 'rgba(60, 80, 140, 0.1)'}
+      polygonStrokeColor={() => wireStyle?.landStroke ?? 'rgba(100, 140, 220, 0.3)'}
       polygonAltitude={0.005}
       htmlElementsData={clustered}
       htmlLat="lat"
@@ -241,7 +275,7 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
       arcStartLng="startLng"
       arcEndLat="endLat"
       arcEndLng="endLng"
-      arcColor={() => isWireframe ? 'rgba(120, 180, 255, 0.25)' : 'rgba(245, 166, 35, 0.12)'}
+      arcColor={() => isWireframe ? (wireStyle?.arcColor ?? 'rgba(120, 180, 255, 0.25)') : 'rgba(245, 166, 35, 0.12)'}
       arcAltitudeAutoScale={0.3}
       arcStroke={isWireframe ? 0.5 : 0.3}
       arcDashLength={0.4}
