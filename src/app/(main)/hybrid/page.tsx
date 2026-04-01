@@ -20,7 +20,8 @@ const MapView = dynamic(
 );
 
 const TRANSITION_TO_MAP_THRESHOLD = 0.85;
-const TRANSITION_TO_GLOBE_THRESHOLD = 4;
+const TRANSITION_TO_GLOBE_THRESHOLD = 3;  // z3 이하에서 역전환 (히스테리시스)
+const TRANSITION_COOLDOWN_MS = 1500;
 
 const GLOBE_THEMES: { key: GlobeTheme; label: string }[] = [
   { key: 'wire-light', label: '와이어 라이트' },
@@ -55,9 +56,14 @@ export default function HybridPage() {
   const [hideLabels, setHideLabels] = useState(false);
   const [globePOV, setGlobePOV] = useState<{ lat: number; lng: number } | undefined>(undefined);
   const lastMapCenterRef = useRef({ lat: 37.5665, lng: 126.978 });
+  const lastTransitionRef = useRef(0);
 
   const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => {
-    if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewModeRef.current === 'globe') {
+    const now = Date.now();
+    if (now - lastTransitionRef.current < TRANSITION_COOLDOWN_MS) return;
+    if (viewModeRef.current !== 'globe') return;
+    if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD) {
+      lastTransitionRef.current = now;
       setMapCenter(center);
       const mapZ = Math.round(Math.log2(360 / Math.max(visibleDegrees, 1)));
       setMapZoom(Math.max(3, Math.min(mapZ, 18)));
@@ -67,7 +73,11 @@ export default function HybridPage() {
   }, []);
 
   const handleMapZoom = useCallback((zoom: number) => {
-    if (zoom <= TRANSITION_TO_GLOBE_THRESHOLD && viewModeRef.current === 'map') {
+    const now = Date.now();
+    if (now - lastTransitionRef.current < TRANSITION_COOLDOWN_MS) return;
+    if (viewModeRef.current !== 'map') return;
+    if (zoom <= TRANSITION_TO_GLOBE_THRESHOLD) {
+      lastTransitionRef.current = now;
       setGlobePOV(lastMapCenterRef.current);
       setViewMode('globe');
     }
