@@ -10,9 +10,16 @@ import type { PrayerPoint } from '@/types/prayer';
 
 export type { PrayerPoint };
 
-export type GlobeTheme = 'aubergine' | 'dark' | 'night' | 'blue-marble' | 'topology';
+export type GlobeTheme = 'wireframe' | 'aubergine' | 'dark' | 'night' | 'blue-marble' | 'topology';
 
-const GLOBE_THEMES: Record<GlobeTheme, { url: string; color: [number, number, number] }> = {
+interface ThemeConfig {
+  url: string | null;
+  color: [number, number, number];
+  wireframe?: boolean;
+}
+
+const GLOBE_THEMES: Record<GlobeTheme, ThemeConfig> = {
+  wireframe: { url: null, color: [0.02, 0.02, 0.04], wireframe: true },
   aubergine: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg', color: [0.08, 0.04, 0.12] },
   dark: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg', color: [0.08, 0.08, 0.1] },
   night: { url: 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg', color: [0.06, 0.06, 0.08] },
@@ -111,22 +118,48 @@ function buildWireConnections(clusters: ClusteredPoint[], maxConns = 15): ArcDat
   return conns;
 }
 
+const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+
 export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeViewProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const onZoomChangeRef = useRef(onZoomChange);
   onZoomChangeRef.current = onZoomChange;
   const [clusterRadius, setClusterRadius] = useState(5);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [countries, setCountries] = useState<any[]>([]);
 
   const themeConfig = GLOBE_THEMES[theme];
+  const isWireframe = themeConfig.wireframe ?? false;
+
+  // Load country polygons for wireframe mode
+  useEffect(() => {
+    if (!isWireframe) {
+      setCountries([]);
+      return;
+    }
+    (async () => {
+      const { feature } = await import('topojson-client');
+      const res = await fetch(COUNTRIES_URL);
+      const world = await res.json();
+      const geo = feature(world, world.objects.countries) as unknown as { features: unknown[] };
+      setCountries(geo.features);
+    })();
+  }, [isWireframe]);
+
   const globeMaterial = useMemo(() => {
     const [r, g, b] = themeConfig.color;
+    if (isWireframe) {
+      return new THREE.MeshBasicMaterial({
+        color: new THREE.Color(0.03, 0.03, 0.06),
+      });
+    }
     return new THREE.MeshPhongMaterial({
       color: new THREE.Color(r, g, b),
       specular: new THREE.Color(0.05, 0.05, 0.05),
       shininess: 5,
     });
-  }, [themeConfig]);
+  }, [themeConfig, isWireframe]);
 
   useEffect(() => {
     if (!globeRef.current) return;
@@ -186,11 +219,18 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
   return (
     <Globe
       ref={globeRef}
-      globeImageUrl={themeConfig.url}
+      globeImageUrl={themeConfig.url ?? undefined}
+      showGlobe={true}
       globeMaterial={globeMaterial}
+      showGraticules={isWireframe}
       backgroundColor="rgba(0,0,0,0)"
       showAtmosphere={false}
       animateIn={true}
+      polygonsData={isWireframe ? countries : []}
+      polygonCapColor={() => 'rgba(30, 40, 70, 0.4)'}
+      polygonSideColor={() => 'rgba(60, 80, 140, 0.1)'}
+      polygonStrokeColor={() => 'rgba(100, 140, 220, 0.3)'}
+      polygonAltitude={0.005}
       htmlElementsData={clustered}
       htmlLat="lat"
       htmlLng="lng"
@@ -201,12 +241,12 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
       arcStartLng="startLng"
       arcEndLat="endLat"
       arcEndLng="endLng"
-      arcColor={() => 'rgba(245, 166, 35, 0.12)'}
+      arcColor={() => isWireframe ? 'rgba(120, 180, 255, 0.25)' : 'rgba(245, 166, 35, 0.12)'}
       arcAltitudeAutoScale={0.3}
-      arcStroke={0.3}
+      arcStroke={isWireframe ? 0.5 : 0.3}
       arcDashLength={0.4}
       arcDashGap={0.2}
-      arcDashAnimateTime={4000}
+      arcDashAnimateTime={isWireframe ? 3000 : 4000}
     />
   );
 }
