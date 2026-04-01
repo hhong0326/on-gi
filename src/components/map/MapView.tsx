@@ -73,6 +73,7 @@ interface MapViewProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   onZoomChange?: (zoom: number) => void;
+  onCenterChange?: (center: { lat: number; lng: number }) => void;
 }
 
 function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
@@ -151,23 +152,37 @@ function PrayerOverlays({ points }: { points: PrayerPoint[] }) {
   return null;
 }
 
-function ZoomListener({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+function MapEventListener({ onZoomChange, onCenterChange }: {
+  onZoomChange: (zoom: number) => void;
+  onCenterChange?: (center: { lat: number; lng: number }) => void;
+}) {
   const map = useMap();
-  const callbackRef = useRef(onZoomChange);
-  callbackRef.current = onZoomChange;
+  const zoomRef = useRef(onZoomChange);
+  zoomRef.current = onZoomChange;
+  const centerRef = useRef(onCenterChange);
+  centerRef.current = onCenterChange;
 
   useEffect(() => {
     if (!map) return;
-    const listener = map.addListener('zoom_changed', () => {
-      callbackRef.current(map.getZoom() ?? 3);
+    const zoomListener = map.addListener('zoom_changed', () => {
+      zoomRef.current(map.getZoom() ?? 3);
     });
-    return () => google.maps.event.removeListener(listener);
+    const centerListener = map.addListener('center_changed', () => {
+      const c = map.getCenter();
+      if (c && centerRef.current) {
+        centerRef.current({ lat: c.lat(), lng: c.lng() });
+      }
+    });
+    return () => {
+      google.maps.event.removeListener(zoomListener);
+      google.maps.event.removeListener(centerListener);
+    };
   }, [map]);
 
   return null;
 }
 
-export function MapView({ points, theme = 'retro', hideLabels = false, center, zoom, onZoomChange }: MapViewProps) {
+export function MapView({ points, theme = 'retro', hideLabels = false, center, zoom, onZoomChange, onCenterChange }: MapViewProps) {
   if (!GOOGLE_MAPS_KEY) {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: '#08080F' }}>
@@ -192,7 +207,7 @@ export function MapView({ points, theme = 'retro', hideLabels = false, center, z
         style={{ width: '100%', height: '100%' }}
       >
         <PrayerOverlays points={points} />
-        {onZoomChange && <ZoomListener onZoomChange={onZoomChange} />}
+        {onZoomChange && <MapEventListener onZoomChange={onZoomChange} onCenterChange={onCenterChange} />}
       </Map>
     </APIProvider>
   );

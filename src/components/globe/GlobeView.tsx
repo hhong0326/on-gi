@@ -62,6 +62,7 @@ const GLOBE_THEMES: Record<GlobeTheme, ThemeConfig> = {
 interface GlobeViewProps {
   points: PrayerPoint[];
   theme?: GlobeTheme;
+  initialPOV?: { lat: number; lng: number };
   onZoomChange?: (zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => void;
 }
 
@@ -152,11 +153,12 @@ function buildWireConnections(clusters: ClusteredPoint[], maxConns = 15): ArcDat
 
 const COUNTRIES_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
-export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeViewProps) {
+export function GlobeView({ points, theme = 'aubergine', initialPOV, onZoomChange }: GlobeViewProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const onZoomChangeRef = useRef(onZoomChange);
   onZoomChangeRef.current = onZoomChange;
+  const initialPOVRef = useRef(initialPOV);
   const [clusterRadius, setClusterRadius] = useState(5);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [countries, setCountries] = useState<any[]>([]);
@@ -194,6 +196,16 @@ export function GlobeView({ points, theme = 'aubergine', onZoomChange }: GlobeVi
       shininess: 5,
     });
   }, [themeConfig, isWireframe, wireStyle]);
+
+  // Apply initialPOV when returning from map view
+  useEffect(() => {
+    if (!globeRef.current || !initialPOVRef.current) return;
+    const pov = initialPOVRef.current;
+    if (pov.lat !== 0 || pov.lng !== 0) {
+      globeRef.current.pointOfView({ lat: pov.lat, lng: pov.lng, altitude: 2.5 }, 0);
+    }
+    initialPOVRef.current = undefined;
+  });
 
   useEffect(() => {
     if (!globeRef.current) return;

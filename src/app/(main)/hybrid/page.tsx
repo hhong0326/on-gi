@@ -53,6 +53,8 @@ export default function HybridPage() {
   const [mapTheme, setMapTheme] = useState<MapTheme>('retro');
   const [showThemePanel, setShowThemePanel] = useState(false);
   const [hideLabels, setHideLabels] = useState(false);
+  const [globePOV, setGlobePOV] = useState<{ lat: number; lng: number } | undefined>(undefined);
+  const lastMapCenterRef = useRef({ lat: 37.5665, lng: 126.978 });
 
   const handleGlobeZoom = useCallback((zoomLevel: number, center: { lat: number; lng: number }, visibleDegrees: number) => {
     if (zoomLevel >= TRANSITION_TO_MAP_THRESHOLD && viewModeRef.current === 'globe') {
@@ -66,8 +68,13 @@ export default function HybridPage() {
 
   const handleMapZoom = useCallback((zoom: number) => {
     if (zoom <= TRANSITION_TO_GLOBE_THRESHOLD && viewModeRef.current === 'map') {
+      setGlobePOV(lastMapCenterRef.current);
       setViewMode('globe');
     }
+  }, []);
+
+  const handleMapCenterChange = useCallback((center: { lat: number; lng: number }) => {
+    lastMapCenterRef.current = center;
   }, []);
 
   const handleTabChange = (tab: ViewTab) => {
@@ -103,7 +110,7 @@ export default function HybridPage() {
           zIndex: 1,
         }}
       >
-        <GlobeView points={state.points} theme={globeTheme} onZoomChange={handleGlobeZoom} />
+        <GlobeView points={state.points} theme={globeTheme} initialPOV={globePOV} onZoomChange={handleGlobeZoom} />
       </div>
       <div
         className="absolute inset-0 transition-opacity duration-700"
@@ -121,6 +128,7 @@ export default function HybridPage() {
             center={mapCenter}
             zoom={mapZoom}
             onZoomChange={handleMapZoom}
+            onCenterChange={handleMapCenterChange}
           />
         )}
       </div>
