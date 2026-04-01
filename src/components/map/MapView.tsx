@@ -42,6 +42,7 @@ const MAP_THEME_STYLES: Record<MapTheme, google.maps.MapTypeStyle[]> = {
     { featureType: 'road', stylers: [{ visibility: 'off' }] },
     { featureType: 'poi', stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#3a5070' }, { weight: 0.8 }] },
   ],
   aubergine: [
     { elementType: 'geometry', stylers: [{ color: '#1d2c4d' }] },
@@ -52,6 +53,7 @@ const MAP_THEME_STYLES: Record<MapTheme, google.maps.MapTypeStyle[]> = {
     { featureType: 'road', stylers: [{ visibility: 'off' }] },
     { featureType: 'poi', stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#3a5580' }, { weight: 0.8 }] },
   ],
   silver: [
     { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
@@ -60,6 +62,7 @@ const MAP_THEME_STYLES: Record<MapTheme, google.maps.MapTypeStyle[]> = {
     { featureType: 'road', stylers: [{ visibility: 'off' }] },
     { featureType: 'poi', stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#9a9a9a' }, { weight: 0.8 }] },
   ],
 };
 
@@ -177,7 +180,8 @@ export function MapView({ points, theme = 'retro', hideLabels = false, center, z
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>
       <Map
         defaultCenter={center ?? { lat: 37.5665, lng: 126.978 }}
-        defaultZoom={zoom ?? 3}
+        defaultZoom={zoom ?? 2}
+        minZoom={1}
         gestureHandling="greedy"
         disableDefaultUI={true}
         styles={[
