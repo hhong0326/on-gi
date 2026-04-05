@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-import { usePrayerState } from '@/hooks/usePrayerState';
+import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
 import { PrayerOverlay } from '@/components/globe/PrayerOverlay';
 
 const MapView = dynamic(
@@ -15,14 +15,11 @@ export default function MapPage() {
   const router = useRouter();
   const state = usePrayerState('map');
 
-  const handleTabChange = (tab: 'globe' | 'map' | 'hybrid' | 'history' | 'settings') => {
-    if (tab === 'globe') {
-      router.push('/');
-    } else if (tab === 'hybrid') {
-      router.push('/hybrid');
-    } else {
-      state.setActiveTab(tab);
-    }
+  const handleTabChange = (tab: ViewTab) => {
+    if (tab === 'globe') router.push('/');
+    else if (tab === 'hybrid') router.push('/hybrid');
+    else if (tab === 'mapbox') router.push('/mapbox');
+    else state.setActiveTab(tab);
   };
 
   if (!state.ready) return null;

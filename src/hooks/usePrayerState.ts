@@ -48,7 +48,7 @@ function createSeedPoints(): PrayerPoint[] {
   }));
 }
 
-export type ViewTab = 'globe' | 'map' | 'hybrid' | 'history' | 'settings';
+export type ViewTab = 'globe' | 'map' | 'hybrid' | 'mapbox' | 'history' | 'settings';
 
 export function usePrayerState(defaultTab: ViewTab = 'globe') {
   const [nickname, setNickname] = useState<string | null>(null);
