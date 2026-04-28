@@ -21,6 +21,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   const [activeTab, setActiveTab] = useState<ViewTab>(defaultTab);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activePrayerIdRef = useRef<string | null>(null);
+  const prevDurationRef = useRef(0);
   const userIdRef = useRef<string | null>(null);
   const lastFetchTimeRef = useRef<string>(SEVEN_DAYS_ISO);
 
@@ -117,12 +118,13 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
 
   const handleTogglePrayer = useCallback(async () => {
     if (isPraying) {
-      // Stop praying — update duration
+      // Stop praying — accumulate duration (previous + this session)
       setIsPraying(false);
       if (activePrayerIdRef.current) {
+        const totalDuration = prevDurationRef.current + elapsedSeconds;
         await supabase
           .from('prayers')
-          .update({ duration_seconds: elapsedSeconds })
+          .update({ duration_seconds: totalDuration })
           .eq('id', activePrayerIdRef.current);
 
         // Update local point to residual
@@ -135,29 +137,69 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
         activePrayerIdRef.current = null;
       }
     } else {
-      // Start praying — insert to DB
+      // Start praying — upsert today's row
       setIsPraying(true);
       const pos = await getCurrentPosition();
       const userId = userIdRef.current;
       if (!userId) return;
 
-      const { data, error } = await supabase
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      // Check if today's prayer already exists
+      const { data: existing } = await supabase
         .from('prayers')
-        .insert({ user_id: userId, lat: pos.lat, lng: pos.lng })
-        .select('id, prayed_at')
+        .select('id, duration_seconds')
+        .eq('user_id', userId)
+        .gte('prayed_at', todayStart.toISOString())
+        .order('prayed_at', { ascending: false })
+        .limit(1)
         .single();
 
-      if (!error && data) {
-        activePrayerIdRef.current = data.id;
-        const userPoint: PrayerPoint = {
-          id: data.id,
-          lat: pos.lat,
-          lng: pos.lng,
-          intensity: 1,
-          isUser: true,
-          isActive: true,
-        };
-        setPoints((prev) => [...prev, userPoint]);
+      if (existing) {
+        // Update existing: new location, reset to active
+        await supabase
+          .from('prayers')
+          .update({ lat: pos.lat, lng: pos.lng, prayed_at: new Date().toISOString(), duration_seconds: null })
+          .eq('id', existing.id);
+
+        activePrayerIdRef.current = existing.id;
+
+        // Remove old local point, add updated one
+        setPoints((prev) => {
+          const filtered = prev.filter((p) => p.id !== existing.id);
+          return [...filtered, {
+            id: existing.id,
+            lat: pos.lat,
+            lng: pos.lng,
+            intensity: 1,
+            isUser: true,
+            isActive: true,
+          }];
+        });
+
+        // Store previous duration for accumulation on end
+        prevDurationRef.current = existing.duration_seconds ?? 0;
+      } else {
+        // Insert new
+        const { data, error } = await supabase
+          .from('prayers')
+          .insert({ user_id: userId, lat: pos.lat, lng: pos.lng })
+          .select('id, prayed_at')
+          .single();
+
+        if (!error && data) {
+          activePrayerIdRef.current = data.id;
+          setPoints((prev) => [...prev, {
+            id: data.id,
+            lat: pos.lat,
+            lng: pos.lng,
+            intensity: 1,
+            isUser: true,
+            isActive: true,
+          }]);
+          prevDurationRef.current = 0;
+        }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
