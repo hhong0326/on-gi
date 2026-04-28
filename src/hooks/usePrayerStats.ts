@@ -35,9 +35,11 @@ export function usePrayerStats(period: StatsPeriod = 'week') {
       return;
     }
 
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const { data, error } = await supabase.rpc('get_prayer_stats', {
       p_user_id: user.id,
       p_period: period,
+      p_timezone: timezone,
     });
 
     if (!error && data) {
