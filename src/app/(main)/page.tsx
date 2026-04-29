@@ -115,7 +115,7 @@ export default function MainPage() {
 
       <div className="pointer-events-none absolute inset-0 z-10">
         <PrayerOverlay
-          prayerCount={state.points.length}
+          prayerCount={state.points.filter((p) => p.isActive).length}
           isPraying={state.isPraying}
           elapsedSeconds={state.elapsedSeconds}
           onTogglePrayer={state.handleTogglePrayer}
