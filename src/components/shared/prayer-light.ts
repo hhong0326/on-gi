@@ -29,7 +29,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, context = '
   }
 
   // Use SVG as center image, CSS for glow layers
-  const isActiveLight = isActive || isUser;
+  const isActiveLight = isActive;
   const svgCore = isActiveLight ? '/기도의빛_중심.svg' : '/잔상_중심.svg';
 
   const twinkleDuration = 2 + Math.random() * 4;

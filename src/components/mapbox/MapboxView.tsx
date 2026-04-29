@@ -56,7 +56,7 @@ interface MapboxViewProps {
 export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false }: MapboxViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef(new globalThis.Map<string, mapboxgl.Marker>());
+  const markersRef = useRef(new globalThis.Map<string, { marker: mapboxgl.Marker; isActive: boolean }>());
   const currentStyleRef = useRef(mapStyle);
 
   // Initialize map
@@ -113,7 +113,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
         });
       }
       // Re-add markers after style change
-      markersRef.current.forEach((marker) => marker.addTo(map));
+      markersRef.current.forEach(({ marker }) => marker.addTo(map));
     });
   }, [mapStyle, fogPreset, hideLabels]);
 
@@ -143,17 +143,23 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
     }
   }, [hideLabels]);
 
-  // Update markers (diff-based)
+  // Update markers (diff-based, re-create on isActive change)
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    const currentIds = new Set(points.map((p) => p.id));
+    const pointMap = new globalThis.Map(points.map((p) => [p.id, p]));
     const existing = markersRef.current;
 
-    existing.forEach((marker, id) => {
-      if (!currentIds.has(id)) {
-        marker.remove();
+    // Remove deleted or changed markers
+    existing.forEach((markerData, id) => {
+      const point = pointMap.get(id);
+      if (!point) {
+        markerData.marker.remove();
+        existing.delete(id);
+      } else if (point.isActive !== markerData.isActive) {
+        // isActive changed — remove and re-create
+        markerData.marker.remove();
         existing.delete(id);
       }
     });
@@ -175,7 +181,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
         .setLngLat([p.lng, p.lat])
         .addTo(map);
 
-      existing.set(p.id, marker);
+      existing.set(p.id, { marker, isActive: p.isActive });
     });
   }, [points]);
 
