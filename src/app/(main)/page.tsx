@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
 import { PrayerOverlay } from '@/components/ui/PrayerOverlay';
+import { HistoryView } from '@/components/ui/HistoryView';
+import { PrayerCompleteModal } from '@/components/ui/PrayerCompleteModal';
 import type { MapboxStyle, FogPreset } from '@/components/mapbox/MapboxView';
 
 const MapboxView = dynamic(
@@ -33,10 +35,32 @@ export default function MainPage() {
   const [fogPreset, setFogPreset] = useState<FogPreset>('dark');
   const [hideLabels, setHideLabels] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [completedDuration, setCompletedDuration] = useState<number | null>(null);
 
   const handleTabChange = (tab: ViewTab) => {
-    if (tab === 'settings') setShowSettings((v) => !v);
-    else state.setActiveTab(tab);
+    if (tab === 'settings') {
+      setShowSettings((v) => !v);
+      setShowHistory(false);
+    } else if (tab === 'history') {
+      setShowHistory(true);
+      setShowSettings(false);
+    } else {
+      setShowHistory(false);
+      setShowSettings(false);
+      state.setActiveTab(tab);
+    }
+  };
+
+  const handleTogglePrayer = async () => {
+    if (state.isPraying) {
+      // Capture elapsed before state resets
+      const elapsed = state.elapsedSeconds;
+      await state.handleTogglePrayer();
+      if (elapsed > 0) setCompletedDuration(elapsed);
+      return;
+    }
+    await state.handleTogglePrayer();
   };
 
   if (!state.ready) return null;
@@ -113,13 +137,24 @@ export default function MainPage() {
         </div>
       )}
 
+      {showHistory && (
+        <HistoryView onClose={() => setShowHistory(false)} />
+      )}
+
+      {completedDuration !== null && (
+        <PrayerCompleteModal
+          durationSeconds={completedDuration}
+          onClose={() => setCompletedDuration(null)}
+        />
+      )}
+
       <div className="pointer-events-none absolute inset-0 z-10">
         <PrayerOverlay
           prayerCount={state.points.filter((p) => p.isActive).length}
           isPraying={state.isPraying}
           elapsedSeconds={state.elapsedSeconds}
-          onTogglePrayer={state.handleTogglePrayer}
-          activeTab={state.activeTab}
+          onTogglePrayer={handleTogglePrayer}
+          activeTab={showHistory ? 'history' : state.activeTab}
           onTabChange={handleTabChange}
         />
       </div>
