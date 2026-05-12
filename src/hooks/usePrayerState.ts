@@ -12,6 +12,14 @@ export type ViewTab = 'home' | 'history' | 'settings';
 const POLL_INTERVAL_MS = 3000;
 const SEVEN_DAYS_ISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
+// Privacy: round GPS to ~50km grid to protect exact location
+function fuzzyPosition(pos: { lat: number; lng: number }) {
+  return {
+    lat: Math.round(pos.lat * 2) / 2,
+    lng: Math.round(pos.lng * 2) / 2,
+  };
+}
+
 export function usePrayerState(defaultTab: ViewTab = 'home') {
   const [nickname, setNickname] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -139,7 +147,8 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
     } else {
       // Start praying — upsert today's row
       setIsPraying(true);
-      const pos = await getCurrentPosition();
+      const rawPos = await getCurrentPosition();
+      const pos = fuzzyPosition(rawPos);
       const userId = userIdRef.current;
       if (!userId) return;
 

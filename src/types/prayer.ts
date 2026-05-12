@@ -18,6 +18,7 @@ export interface PrayerRow {
 }
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const THIRTY_MINUTES_MS = 30 * 60 * 1000;
 
 export function calculateIntensity(prayedAt: string): number {
   const elapsed = Date.now() - new Date(prayedAt).getTime();
@@ -31,6 +32,8 @@ export function prayerRowToPoint(row: PrayerRow, currentUserId: string | null): 
     lng: row.lng,
     intensity: calculateIntensity(row.prayed_at),
     isUser: row.user_id === currentUserId,
-    isActive: row.duration_seconds === null, // null = 아직 기도 중
+    // null = 기도 중이지만, 30분 초과하면 자동 비활성 (미종료 방치 방지)
+    isActive: row.duration_seconds === null &&
+      (Date.now() - new Date(row.prayed_at).getTime()) < THIRTY_MINUTES_MS,
   };
 }

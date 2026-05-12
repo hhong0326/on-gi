@@ -29,6 +29,12 @@ export async function middleware(request: NextRequest) {
 
   // Invite code verification: /invite/[code] — runs before auth check
   if (pathname.startsWith('/invite/')) {
+    // If user already has a session, skip onboarding
+    const { data: { user: existingUser } } = await supabase.auth.getUser()
+    if (existingUser) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+
     const code = pathname.replace('/invite/', '')
     if (!code) return NextResponse.redirect(new URL('/', request.url))
 
