@@ -216,6 +216,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
 
   return {
     nickname,
+    setNickname,
     ready,
     points,
     isPraying,
