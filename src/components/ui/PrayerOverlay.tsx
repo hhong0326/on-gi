@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type { ViewTab } from '@/hooks/usePrayerState';
 
 interface PrayerOverlayProps {
@@ -34,13 +35,17 @@ export function PrayerOverlay({
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col">
       {/* Header */}
-      <header className="pointer-events-auto flex items-center gap-2 px-5 pt-14 pb-4">
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
-        </span>
-        <span className="text-sm text-gray-400">지금 기도하는 사람들</span>
-        <span className="ml-1 text-2xl font-bold text-white">{prayerCount}</span>
+      <header className="pointer-events-auto flex items-center justify-between px-5 pt-14 pb-4">
+        <div style={{ filter: 'drop-shadow(0 0 8px rgba(212, 164, 76, 0.3))' }}>
+          <Image src="/logo-en-sm.svg" alt="ON-GI" width={57} height={20} />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+          </span>
+          <span className="text-sm text-gray-400">{prayerCount}</span>
+        </div>
       </header>
 
       {/* Spacer */}
@@ -61,17 +66,19 @@ export function PrayerOverlay({
       </div>
 
       {/* Tab Bar */}
-      <nav className="pointer-events-auto flex justify-around border-t border-white/10 bg-[#08080F]/90 px-2 pb-8 pt-3 backdrop-blur-sm">
+      <nav className="pointer-events-auto flex justify-evenly border-t border-white/10 bg-[#08080F]/90 px-4 pb-8 pt-3 backdrop-blur-sm">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex flex-col items-center gap-1 text-xs ${
-              activeTab === tab.key ? 'text-white' : 'text-gray-500'
+            className={`flex items-center justify-center w-12 h-12 rounded-full text-xl transition-all ${
+              activeTab === tab.key
+                ? 'text-white bg-white/10'
+                : 'text-gray-500'
             }`}
+            aria-label={tab.label}
           >
-            <span className="text-lg">{tab.icon}</span>
-            <span>{tab.label}</span>
+            {tab.icon}
           </button>
         ))}
       </nav>

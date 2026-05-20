@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
@@ -249,9 +248,6 @@ export default function MainPage() {
           activeTab={showHistory ? 'history' : state.activeTab}
           onTabChange={handleTabChange}
         />
-      </div>
-      <div className="absolute left-4 top-14 z-20" style={{ filter: 'drop-shadow(0 0 8px rgba(212, 164, 76, 0.3))' }}>
-        <Image src="/logo-en-sm.svg" alt="ON-GI" width={57} height={20} />
       </div>
       <div className="absolute right-4 top-14 z-20">
         <span className="text-xs text-white/50">{state.nickname}님</span>
