@@ -24,6 +24,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'ON-GI — 기도의 불',
   description: '실시간 글로벌 기도를 3D 지구본 위 따뜻한 빛으로 시각화하는 기독교 기도 웹앱',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon-bulb-sm.svg',
+    apple: '/icon-bulb-lg.svg',
+  },
+  themeColor: '#D4A44C',
 };
 
 export default function RootLayout({

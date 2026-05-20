@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous-auth'
 
@@ -142,17 +143,9 @@ export default function OnboardingPage() {
 
       <div className="relative z-10 flex flex-col items-center text-center w-full max-w-sm">
         {/* Logo */}
-        <h1
-          className="text-4xl font-bold tracking-wider mb-10"
-          style={{
-            background: 'linear-gradient(135deg, #D4A44C 0%, #F5D98A 40%, #E8C35A 60%, #D4A44C 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 12px rgba(212, 164, 76, 0.4))',
-          }}
-        >
-          ON-GI
-        </h1>
+        <div className="mb-10" style={{ filter: 'drop-shadow(0 0 12px rgba(212, 164, 76, 0.4))' }}>
+          <Image src="/logo-en-lg.svg" alt="ON-GI" width={113} height={40} priority />
+        </div>
 
         {/* Description */}
         <p className="text-sm leading-relaxed mb-12" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
