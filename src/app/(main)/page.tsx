@@ -247,10 +247,8 @@ export default function MainPage() {
           onTogglePrayer={handleTogglePrayer}
           activeTab={showHistory ? 'history' : state.activeTab}
           onTabChange={handleTabChange}
+          nickname={state.nickname}
         />
-      </div>
-      <div className="absolute right-4 top-14 z-20">
-        <span className="text-xs text-white/50">{state.nickname}님</span>
       </div>
     </div>
   );

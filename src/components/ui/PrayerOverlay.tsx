@@ -10,6 +10,7 @@ interface PrayerOverlayProps {
   onTogglePrayer: () => void;
   activeTab: ViewTab;
   onTabChange: (tab: ViewTab) => void;
+  nickname?: string | null;
 }
 
 function formatTime(seconds: number): string {
@@ -31,6 +32,7 @@ export function PrayerOverlay({
   onTogglePrayer,
   activeTab,
   onTabChange,
+  nickname,
 }: PrayerOverlayProps) {
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col">
@@ -39,12 +41,17 @@ export function PrayerOverlay({
         <div style={{ filter: 'drop-shadow(0 0 8px rgba(212, 164, 76, 0.3))' }}>
           <Image src="/logo-en-sm.svg" alt="ON-GI" width={57} height={20} />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
-          </span>
-          <span className="text-sm text-gray-400">{prayerCount}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+            </span>
+            <span className="text-xs text-gray-400">{prayerCount}</span>
+          </div>
+          {nickname && (
+            <span className="text-xs text-white/50">{nickname}님</span>
+          )}
         </div>
       </header>
 
