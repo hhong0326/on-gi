@@ -29,13 +29,20 @@ export async function middleware(request: NextRequest) {
 
   // Invite code verification: /invite/[code] — runs before auth check
   if (pathname.startsWith('/invite/')) {
+    const code = pathname.replace('/invite/', '')
+
+    // Allow OG crawlers (bots) to see the page with meta tags
+    const userAgent = request.headers.get('user-agent') || ''
+    const isBot = /bot|crawl|spider|slurp|facebookexternalhit|kakaotalk|twitterbot|linkedinbot|discord|telegram|whatsapp/i.test(userAgent)
+    if (isBot && code) {
+      return response // Let Next.js render the page with OG tags
+    }
+
     // If user already has a session, skip onboarding
     const { data: { user: existingUser } } = await supabase.auth.getUser()
     if (existingUser) {
       return NextResponse.redirect(new URL('/', request.url))
     }
-
-    const code = pathname.replace('/invite/', '')
     if (!code) return NextResponse.redirect(new URL('/', request.url))
 
     try {
