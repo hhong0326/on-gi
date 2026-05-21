@@ -28,18 +28,17 @@ export async function generateMetadata({ params }: InvitePageProps): Promise<Met
   };
 }
 
-export default async function InvitePage({ params }: InvitePageProps) {
-  const { code } = await params;
-
+export default async function InvitePage() {
+  // This page only serves OG meta tags for bots/crawlers.
+  // Normal users are redirected by middleware before reaching here.
   return (
     <div
       className="flex min-h-dvh flex-col items-center justify-center px-6"
       style={{ background: '#08080F' }}
     >
-      <p className="text-center text-sm text-white/60">
-        초대 코드를 확인하고 있습니다...
+      <p className="text-center text-sm text-white/40">
+        ON-GI — 기도의 불
       </p>
-      <meta httpEquiv="refresh" content={`0;url=/invite/${code}`} />
     </div>
   );
 }
