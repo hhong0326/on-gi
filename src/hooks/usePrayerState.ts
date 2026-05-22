@@ -12,11 +12,11 @@ export type ViewTab = 'home' | 'history' | 'settings';
 const POLL_INTERVAL_MS = 3000;
 const SEVEN_DAYS_ISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-// Privacy: round GPS to ~50km grid to protect exact location
+/// Privacy: round GPS to ~10km grid to protect exact location
 function fuzzyPosition(pos: { lat: number; lng: number }) {
   return {
-    lat: Math.round(pos.lat * 2) / 2,
-    lng: Math.round(pos.lng * 2) / 2,
+    lat: Math.round(pos.lat * 10) / 10,
+    lng: Math.round(pos.lng * 10) / 10,
   };
 }
 

@@ -94,12 +94,6 @@ export default function MainPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
-  };
 
   const handleTabChange = (tab: ViewTab) => {
     if (tab === 'settings') {
@@ -182,16 +176,12 @@ export default function MainPage() {
               </button>
             </div>
 
-            {/* Logout */}
-            <button onClick={handleLogout} className="w-full rounded-lg bg-red-500/10 py-2 text-xs text-red-400">
-              로그아웃
-            </button>
 
           {/* Privacy notice */}
           <div className="mb-3 border-t border-white/10 pt-3">
             <p className="mb-1 text-xs font-medium text-white/70">🔒 프라이버시</p>
             <p className="text-xs leading-relaxed text-white/30">
-              위치 정보는 약 50km 단위로 대략화되어 저장됩니다. 정확한 위치는 수집하지 않습니다.
+              위치 정보는 약 10km 단위로 대략화되어 저장됩니다. 정확한 위치는 수집하지 않습니다.
             </p>
           </div>
 
