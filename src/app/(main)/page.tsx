@@ -131,6 +131,8 @@ export default function MainPage() {
       <div className="absolute inset-0">
         <MapboxView
           points={state.points}
+          isPraying={state.isPraying}
+          userPosition={state.userPosition}
         />
       </div>
 

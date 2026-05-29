@@ -27,6 +27,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   const [isPraying, setIsPraying] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [activeTab, setActiveTab] = useState<ViewTab>(defaultTab);
+  const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activePrayerIdRef = useRef<string | null>(null);
   const prevDurationRef = useRef(0);
@@ -128,6 +129,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
     if (isPraying) {
       // Stop praying — accumulate duration (previous + this session)
       setIsPraying(false);
+      setUserPosition(null);
       if (activePrayerIdRef.current) {
         const totalDuration = prevDurationRef.current + elapsedSeconds;
         await supabase
@@ -148,6 +150,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       // Start praying — upsert today's row
       setIsPraying(true);
       const rawPos = await getCurrentPosition();
+      setUserPosition(rawPos);
       const pos = fuzzyPosition(rawPos);
       const userId = userIdRef.current;
       if (!userId) return;
@@ -224,5 +227,6 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
     activeTab,
     setActiveTab,
     handleTogglePrayer,
+    userPosition,
   };
 }
