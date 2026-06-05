@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -61,15 +61,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
   const markersRef = useRef(new globalThis.Map<string, { marker: mapboxgl.Marker; isActive: boolean }>());
   const currentStyleRef = useRef(mapStyle);
   const spinningRef = useRef(true);
-  const userInteractingRef = useRef(false);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
-
-  const scheduleResume = useCallback(() => {
-    userInteractingRef.current = false;
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => { spinningRef.current = true; }, 5000);
-  }, []);
 
   // Initialize map
   useEffect(() => {
@@ -97,9 +89,9 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
       }
     });
 
-    // Auto-spin
+    // Auto-spin: only on initial load, stops permanently on first touch
     function spin() {
-      if (map && spinningRef.current && !userInteractingRef.current) {
+      if (map && spinningRef.current) {
         const center = map.getCenter();
         center.lng += 0.05;
         map.easeTo({ center, duration: 0, easing: (t: number) => t });
@@ -107,13 +99,14 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
       animFrameRef.current = requestAnimationFrame(spin);
     }
 
-    // User interaction detection
-    const onInteractStart = () => { userInteractingRef.current = true; };
-    const onInteractEnd = () => { scheduleResume(); };
-    map.on('mousedown', onInteractStart);
-    map.on('touchstart', onInteractStart);
-    map.on('mouseup', onInteractEnd);
-    map.on('touchend', onInteractEnd);
+    // Stop spin permanently on first user interaction
+    const stopSpin = () => {
+      spinningRef.current = false;
+      map.off('mousedown', stopSpin);
+      map.off('touchstart', stopSpin);
+    };
+    map.on('mousedown', stopSpin);
+    map.on('touchstart', stopSpin);
 
     mapRef.current = map;
     currentStyleRef.current = mapStyle;
@@ -121,7 +114,6 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
 
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
       map.remove();
       mapRef.current = null;
     };
@@ -161,15 +153,13 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
     }
   }, [fogPreset]);
 
-  // Handle prayer state: stop spin + fly to user location
+  // Handle prayer state: fly to user location
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
     if (isPraying && userPosition) {
       spinningRef.current = false;
-      userInteractingRef.current = false;
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
       map.flyTo({
         center: [userPosition.lng, userPosition.lat],
         zoom: 5,
@@ -177,7 +167,6 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
       });
     } else if (!isPraying) {
       map.flyTo({ zoom: 1.5, duration: 2000 });
-      setTimeout(() => { spinningRef.current = true; }, 2500);
     }
   }, [isPraying, userPosition]);
 
