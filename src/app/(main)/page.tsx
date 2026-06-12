@@ -24,7 +24,7 @@ function InviteCodeEntry() {
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) return;
     setError('');
-    router.push(`/invite/${trimmed}`);
+    router.push(`/?code=${trimmed}`);
   };
 
   return (
@@ -88,7 +88,7 @@ export default function MainPage() {
   };
 
   const handleShareInvite = async () => {
-    const url = `${window.location.origin}/invite/ONGI2026`;
+    const url = `${window.location.origin}?code=ONGI2026`;
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
