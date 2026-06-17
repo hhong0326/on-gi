@@ -41,7 +41,7 @@ function InviteCodeEntry() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
-          placeholder="ONGI2026"
+          placeholder=""
           className="flex-1 rounded-lg bg-white/10 px-4 py-3 text-center text-sm text-white outline-none placeholder:text-white/20"
           autoFocus
         />
