@@ -41,17 +41,17 @@ function InviteCodeEntry() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
-          placeholder=""
+          placeholder="ONGI2026"
           className="flex-1 rounded-lg bg-white/10 px-4 py-3 text-center text-sm text-white outline-none placeholder:text-white/20"
           autoFocus
         />
         <button
+          type="button"
           onClick={handleSubmit}
-          disabled={!code.trim()}
-          className={`rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+          className={`rounded-lg px-5 py-3 text-sm font-medium transition-all active:scale-95 ${
             code.trim()
-              ? 'bg-amber-500/90 text-white'
-              : 'bg-white/5 text-white/20'
+              ? 'bg-amber-500 text-white'
+              : 'bg-amber-500/40 text-white/60'
           }`}
         >
           입장
