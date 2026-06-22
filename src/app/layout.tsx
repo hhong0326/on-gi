@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AgentationLoader } from "@/components/dev/AgentationLoader";
+import { PwaRegistrar } from "@/components/ui/PwaRegistrar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  themeColor: '#D4A44C',
 };
 
 export const metadata: Metadata = {
@@ -30,7 +32,6 @@ export const metadata: Metadata = {
     icon: '/icon-bulb-sm.svg',
     apple: '/icon-bulb-lg.svg',
   },
-  themeColor: '#D4A44C',
   openGraph: {
     title: 'ON-GI — 기도의 불',
     description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
@@ -57,6 +58,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <PwaRegistrar />
         <AgentationLoader />
       </body>
     </html>

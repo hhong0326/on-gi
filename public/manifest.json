@@ -4,13 +4,22 @@
   "description": "실시간 글로벌 기도를 3D 지구본 위 따뜻한 빛으로 시각화하는 기독교 기도 웹앱",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#08080F",
   "theme_color": "#D4A44C",
+  "categories": ["lifestyle", "social"],
   "icons": [
     {
       "src": "/icon-bulb-lg.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-bulb-lg.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
