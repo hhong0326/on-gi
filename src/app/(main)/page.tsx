@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 
@@ -14,53 +14,6 @@ const MapboxView = dynamic(
   () => import('@/components/mapbox/MapboxView').then((m) => m.MapboxView),
   { ssr: false }
 );
-
-function InviteCodeEntry() {
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const router = useRouter();
-
-  const handleSubmit = () => {
-    const trimmed = code.trim().toUpperCase();
-    if (!trimmed) return;
-    setError('');
-    router.push(`/?code=${trimmed}`);
-  };
-
-  return (
-    <div
-      className="flex min-h-dvh flex-col items-center justify-center px-6"
-      style={{ background: '#08080F' }}
-    >
-      <p className="mb-6 text-center text-sm text-white/40">
-        초대 코드를 입력해주세요
-      </p>
-      <div className="flex w-full max-w-xs gap-2">
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
-          placeholder="ONGI2026"
-          className="flex-1 rounded-lg bg-white/10 px-4 py-3 text-center text-sm text-white outline-none placeholder:text-white/20"
-          autoFocus
-        />
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className={`rounded-lg px-5 py-3 text-sm font-medium transition-all active:scale-95 ${
-            code.trim()
-              ? 'bg-amber-500 text-white'
-              : 'bg-amber-500/40 text-white/60'
-          }`}
-        >
-          입장
-        </button>
-      </div>
-      {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
-    </div>
-  );
-}
 
 export default function MainPage() {
   const state = usePrayerState('home');
@@ -120,11 +73,13 @@ export default function MainPage() {
     await state.handleTogglePrayer();
   };
 
-  if (!state.ready) return null;
+  useEffect(() => {
+    if (state.ready && !state.nickname) {
+      router.push('/onboarding');
+    }
+  }, [state.ready, state.nickname, router]);
 
-  if (!state.nickname) {
-    return <InviteCodeEntry />;
-  }
+  if (!state.ready || !state.nickname) return null;
 
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
