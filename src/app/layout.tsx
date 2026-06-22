@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon-bulb-sm.svg',
-    apple: '/icon-bulb-lg.svg',
+    icon: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
   },
   openGraph: {
     title: 'ON-GI — 기도의 불',

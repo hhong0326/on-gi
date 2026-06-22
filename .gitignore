@@ -40,5 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 *.png
+!public/icon-*.png
+!public/apple-touch-icon.png
 .playwright-mcp/
 
