@@ -187,6 +187,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
             intensity: 1,
             isUser: true,
             isActive: true,
+            prayedAt: new Date().toISOString(),
           }];
         });
 
@@ -209,6 +210,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
             intensity: 1,
             isUser: true,
             isActive: true,
+            prayedAt: data.prayed_at ?? new Date().toISOString(),
           }]);
           prevDurationRef.current = 0;
         }

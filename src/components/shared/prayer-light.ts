@@ -1,15 +1,19 @@
+import { formatRelativeTime } from '@/lib/format';
+
 interface PrayerLightOptions {
   weight: number;
   isUser: boolean;
   isActive: boolean;
   lat: number;
   lng: number;
+  prayedAt?: string;
   context?: 'globe' | 'map';
 }
 
-export function createPrayerLightElement({ weight, isUser, isActive, context = 'globe' }: PrayerLightOptions): HTMLElement {
+export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, context = 'globe' }: PrayerLightOptions): HTMLElement {
   const el = document.createElement('div');
-  el.style.cssText = 'position:relative; transform:translate(-50%,-50%); pointer-events:none;';
+  const tappable = !isActive && !!prayedAt;
+  el.style.cssText = `position:relative; transform:translate(-50%,-50%); pointer-events:${tappable ? 'auto' : 'none'}; ${tappable ? 'cursor:pointer;' : ''}`;
 
   const clamped = Math.min(weight, 8);
 
@@ -80,6 +84,21 @@ export function createPrayerLightElement({ weight, isUser, isActive, context = '
     ${anim} ${dimOpacity}
   `;
   el.appendChild(core);
+
+  if (tappable && prayedAt) {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const existing = el.querySelector('.prayer-tooltip');
+      if (existing) existing.remove();
+
+      const tip = document.createElement('div');
+      tip.className = 'prayer-tooltip';
+      tip.textContent = formatRelativeTime(prayedAt) + '에 기도';
+      el.appendChild(tip);
+
+      tip.addEventListener('animationend', () => tip.remove());
+    });
+  }
 
   return el;
 }

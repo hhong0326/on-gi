@@ -7,3 +7,26 @@
   75% { opacity: 0.55; }
   90% { opacity: 0.95; }
 }
+
+@keyframes tooltip-fade {
+  0%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.prayer-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #FFD700;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: tooltip-fade 1.5s ease-out forwards;
+  z-index: 50;
+}

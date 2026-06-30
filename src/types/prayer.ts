@@ -5,6 +5,7 @@ export interface PrayerPoint {
   intensity: number;
   isUser: boolean;
   isActive: boolean; // true: 기도 중, false: 잔상 (7일 후 사라짐)
+  prayedAt: string;
 }
 
 export interface PrayerRow {
@@ -35,5 +36,6 @@ export function prayerRowToPoint(row: PrayerRow, currentUserId: string | null): 
     // null = 기도 중이지만, 30분 초과하면 자동 비활성 (미종료 방치 방지)
     isActive: row.duration_seconds === null &&
       (Date.now() - new Date(row.prayed_at).getTime()) < THIRTY_MINUTES_MS,
+    prayedAt: row.prayed_at,
   };
 }

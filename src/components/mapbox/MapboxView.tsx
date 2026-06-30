@@ -216,6 +216,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
         isActive: p.isActive,
         lat: p.lat,
         lng: p.lng,
+        prayedAt: p.prayedAt,
         context: 'map',
       });
 
