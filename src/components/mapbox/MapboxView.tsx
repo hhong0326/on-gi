@@ -162,7 +162,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
       spinningRef.current = false;
       map.flyTo({
         center: [userPosition.lng, userPosition.lat],
-        zoom: 5,
+        zoom: 8,
         duration: 2000,
       });
     } else if (!isPraying) {
