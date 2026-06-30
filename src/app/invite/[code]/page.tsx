@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: InvitePageProps): Promise<Met
       url: `${siteUrl}/invite/${code}`,
       siteName: 'ON-GI',
       type: 'website',
-      images: [{ url: `${siteUrl}/og-image.png`, width: 1200, height: 600, alt: 'ON-GI' }],
+      images: [{ url: `${siteUrl}/og-image.png`, width: 1200, height: 630, alt: 'ON-GI' }],
     },
     twitter: {
       card: 'summary_large_image',
