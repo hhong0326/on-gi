@@ -42,5 +42,6 @@ next-env.d.ts
 *.png
 !public/icon-*.png
 !public/apple-touch-icon.png
+!public/og-image.png
 .playwright-mcp/
 

@@ -9,21 +9,21 @@ export async function generateMetadata({ params }: InvitePageProps): Promise<Met
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi.app';
 
   return {
-    title: 'ON-GI — 기도의 불',
+    title: 'ON-GI',
     description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요. 초대 링크를 통해 함께 기도에 참여하세요.',
     openGraph: {
-      title: 'ON-GI — 기도의 불',
+      title: 'ON-GI',
       description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
       url: `${siteUrl}/invite/${code}`,
       siteName: 'ON-GI',
       type: 'website',
-      images: [{ url: `${siteUrl}/logo-en-lg.svg`, width: 113, height: 40, alt: 'ON-GI' }],
+      images: [{ url: `${siteUrl}/og-image.png`, width: 1200, height: 600, alt: 'ON-GI' }],
     },
     twitter: {
-      card: 'summary',
-      title: 'ON-GI — 기도의 불',
+      card: 'summary_large_image',
+      title: 'ON-GI',
       description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
-      images: [`${siteUrl}/logo-en-lg.svg`],
+      images: [`${siteUrl}/og-image.png`],
     },
   };
 }
@@ -37,7 +37,7 @@ export default async function InvitePage() {
       style={{ background: '#08080F' }}
     >
       <p className="text-center text-sm text-white/40">
-        ON-GI — 기도의 불
+        ON-GI
       </p>
     </div>
   );

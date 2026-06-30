@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi.app'),
-  title: 'ON-GI — 기도의 불',
+  title: 'ON-GI',
   description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
   manifest: '/manifest.json',
   icons: {
@@ -33,17 +33,17 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'ON-GI — 기도의 불',
+    title: 'ON-GI',
     description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
     siteName: 'ON-GI',
     type: 'website',
-    images: [{ url: '/logo-en-lg.svg', width: 113, height: 40, alt: 'ON-GI' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 600, alt: 'ON-GI' }],
   },
   twitter: {
-    card: 'summary',
-    title: 'ON-GI — 기도의 불',
+    card: 'summary_large_image',
+    title: 'ON-GI',
     description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
-    images: ['/logo-en-lg.svg'],
+    images: ['/og-image.png'],
   },
 };
 
