@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi-five.vercel.app'),
   title: 'ON-GI',
   description: '세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.',
   manifest: '/manifest.json',

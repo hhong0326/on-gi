@@ -6,7 +6,7 @@ interface InvitePageProps {
 
 export async function generateMetadata({ params }: InvitePageProps): Promise<Metadata> {
   const { code } = await params;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi-five.vercel.app';
 
   return {
     title: 'ON-GI',
