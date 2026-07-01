@@ -31,6 +31,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activePrayerIdRef = useRef<string | null>(null);
   const prevDurationRef = useRef(0);
+  const prayerStartRef = useRef(0);
   const userIdRef = useRef<string | null>(null);
   const lastFetchTimeRef = useRef<string>(SEVEN_DAYS_ISO);
 
@@ -107,22 +108,32 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  // Prayer timer
+  // Prayer timer — Date.now() 기준 계산 (백그라운드 복귀 시 정확한 시간)
   useEffect(() => {
     if (isPraying) {
+      prayerStartRef.current = Date.now();
       setElapsedSeconds(0);
       timerRef.current = setInterval(() => {
-        setElapsedSeconds((s) => s + 1);
+        setElapsedSeconds(Math.floor((Date.now() - prayerStartRef.current) / 1000));
       }, 1000);
+
+      const onVisibilityChange = () => {
+        if (document.visibilityState === 'visible' && prayerStartRef.current) {
+          setElapsedSeconds(Math.floor((Date.now() - prayerStartRef.current) / 1000));
+        }
+      };
+      document.addEventListener('visibilitychange', onVisibilityChange);
+
+      return () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      };
     } else {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
   }, [isPraying]);
 
   const handleTogglePrayer = useCallback(async () => {
@@ -131,7 +142,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       setIsPraying(false);
       setUserPosition(null);
       if (activePrayerIdRef.current) {
-        const totalDuration = prevDurationRef.current + elapsedSeconds;
+        const totalDuration = prevDurationRef.current + Math.floor((Date.now() - prayerStartRef.current) / 1000);
         await supabase
           .from('prayers')
           .update({ duration_seconds: totalDuration })
@@ -217,7 +228,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPraying, elapsedSeconds]);
+  }, [isPraying]);
 
   return {
     nickname,
