@@ -1,0 +1,72 @@
+{
+  "onboarding": {
+    "tagline1": "You are the light of the world,",
+    "tagline2": "Let's brighten the darkness with the warmth of prayer",
+    "verse": "is the light of the world",
+    "verseRef": "-Matthew 5:14",
+    "join": "Join",
+    "title": "ON-GI — Pray Together"
+  },
+  "prayer": {
+    "start": "Pray Together Now",
+    "stop": "Finish Prayer {time}",
+    "complete": "You prayed for {duration}",
+    "completeMessage": "Your prayer lights up the world",
+    "amen": "Amen",
+    "prayedAt": "Prayed {time}",
+    "praying": "Praying"
+  },
+  "tab": {
+    "home": "Prayer Globe",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "history": {
+    "title": "Prayer History",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "thisMonth": "This Month",
+    "all": "All",
+    "count": "Prayer Count",
+    "totalTime": "Total Time",
+    "average": "Average",
+    "empty": "No prayer records",
+    "loading": "Loading...",
+    "seconds": "sec",
+    "minutes": "min",
+    "hours": "hr",
+    "am": "AM",
+    "pm": "PM",
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
+  "settings": {
+    "account": "👤 Account",
+    "nickname": "Nickname",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "language": "🌐 Language",
+    "appLanguage": "App Language",
+    "invite": "Invite Link",
+    "inviteCopied": "✅ Copied",
+    "inviteCopy": "📋 Copy",
+    "privacy": "🔒 Privacy",
+    "privacyNotice": "Location data is approximated to ~10km grid. Exact location is not collected."
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} hr ago",
+    "daysAgo": "{n} days ago"
+  },
+  "common": {
+    "nicknameSuffix": "",
+    "defaultNickname": "Pray-er",
+    "mapboxError": "Mapbox token is not configured"
+  },
+  "meta": {
+    "title": "ON-GI",
+    "description": "You are the light of the world. Let's brighten the darkness with the warmth of prayer.",
+    "inviteDescription": "You are the light of the world. Join us in prayer through this invite link."
+  }
+}

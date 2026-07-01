@@ -1,0 +1,72 @@
+{
+  "onboarding": {
+    "tagline1": "Tu eres la luz del mundo,",
+    "tagline2": "Iluminemos la oscuridad con la calidez de la oracion",
+    "verse": "es la luz del mundo",
+    "verseRef": "-Mateo 5:14",
+    "join": "Unirse",
+    "title": "ON-GI — Orar Juntos"
+  },
+  "prayer": {
+    "start": "Orar Juntos Ahora",
+    "stop": "Terminar Oracion {time}",
+    "complete": "Oraste durante {duration}",
+    "completeMessage": "Tu oracion ilumina el mundo",
+    "amen": "Amen",
+    "prayedAt": "Oro hace {time}",
+    "praying": "Orando"
+  },
+  "tab": {
+    "home": "Globo de Oracion",
+    "history": "Historial",
+    "settings": "Ajustes"
+  },
+  "history": {
+    "title": "Historial de Oracion",
+    "thisWeek": "Esta Semana",
+    "lastWeek": "Semana Pasada",
+    "thisMonth": "Este Mes",
+    "all": "Todo",
+    "count": "Veces de Oracion",
+    "totalTime": "Tiempo Total",
+    "average": "Promedio",
+    "empty": "No hay registros de oracion",
+    "loading": "Cargando...",
+    "seconds": "seg",
+    "minutes": "min",
+    "hours": "hr",
+    "am": "AM",
+    "pm": "PM",
+    "weekdays": ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"]
+  },
+  "settings": {
+    "account": "👤 Cuenta",
+    "nickname": "Apodo",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "language": "🌐 Idioma",
+    "appLanguage": "Idioma de la App",
+    "invite": "Enlace de Invitacion",
+    "inviteCopied": "✅ Copiado",
+    "inviteCopy": "📋 Copiar",
+    "privacy": "🔒 Privacidad",
+    "privacyNotice": "La ubicacion se aproxima a una cuadricula de ~10km. No se recopila la ubicacion exacta."
+  },
+  "time": {
+    "justNow": "Ahora mismo",
+    "minutesAgo": "Hace {n} min",
+    "hoursAgo": "Hace {n} hr",
+    "daysAgo": "Hace {n} dias"
+  },
+  "common": {
+    "nicknameSuffix": "",
+    "defaultNickname": "Orador",
+    "mapboxError": "El token de Mapbox no esta configurado"
+  },
+  "meta": {
+    "title": "ON-GI",
+    "description": "Tu eres la luz del mundo. Iluminemos la oscuridad con la calidez de la oracion.",
+    "inviteDescription": "Tu eres la luz del mundo. Unete a nosotros en oracion a traves de este enlace de invitacion."
+  }
+}

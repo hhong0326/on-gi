@@ -1,0 +1,72 @@
+{
+  "onboarding": {
+    "tagline1": "세상의 빛인 당신,",
+    "tagline2": "기도의 온기로 함께 어둠을 밝혀요",
+    "verse": "는 세상의 빛이라",
+    "verseRef": "-마태복음 5:14",
+    "join": "함께하기",
+    "title": "ON-GI — 함께 기도하기"
+  },
+  "prayer": {
+    "start": "지금 함께 기도하기",
+    "stop": "기도 마치기 {time}",
+    "complete": "{duration}간 기도했습니다",
+    "completeMessage": "당신의 기도가 세상을 밝힙니다",
+    "amen": "아멘",
+    "prayedAt": "{time}에 기도",
+    "praying": "기도 중"
+  },
+  "tab": {
+    "home": "기도 지구본",
+    "history": "기도 기록",
+    "settings": "설정"
+  },
+  "history": {
+    "title": "기도 기록",
+    "thisWeek": "이번 주",
+    "lastWeek": "지난 주",
+    "thisMonth": "이번 달",
+    "all": "전체",
+    "count": "기도 횟수",
+    "totalTime": "누적 시간",
+    "average": "평균",
+    "empty": "기도 기록이 없습니다",
+    "loading": "로딩 중...",
+    "seconds": "초",
+    "minutes": "분",
+    "hours": "시간",
+    "am": "오전",
+    "pm": "오후",
+    "weekdays": ["일", "월", "화", "수", "목", "금", "토"]
+  },
+  "settings": {
+    "account": "👤 계정",
+    "nickname": "닉네임",
+    "save": "저장",
+    "cancel": "취소",
+    "close": "닫기",
+    "language": "🌐 언어",
+    "appLanguage": "앱 언어",
+    "invite": "초대 링크",
+    "inviteCopied": "✅ 복사됨",
+    "inviteCopy": "📋 복사하기",
+    "privacy": "🔒 프라이버시",
+    "privacyNotice": "위치 정보는 약 10km 단위로 대략화되어 저장됩니다. 정확한 위치는 수집하지 않습니다."
+  },
+  "time": {
+    "justNow": "방금 전",
+    "minutesAgo": "{n}분 전",
+    "hoursAgo": "{n}시간 전",
+    "daysAgo": "{n}일 전"
+  },
+  "common": {
+    "nicknameSuffix": "님",
+    "defaultNickname": "기도자",
+    "mapboxError": "Mapbox 토큰이 설정되지 않았습니다"
+  },
+  "meta": {
+    "title": "ON-GI",
+    "description": "세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요.",
+    "inviteDescription": "세상의 빛인 당신, 기도의 온기로 함께 어둠을 밝혀요. 초대 링크를 통해 함께 기도에 참여하세요."
+  }
+}

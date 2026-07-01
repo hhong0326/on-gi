@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
 import { createClient } from '@/lib/supabase/client';
 import { PrayerOverlay } from '@/components/ui/PrayerOverlay';
 import { HistoryView } from '@/components/ui/HistoryView';
 import { PrayerCompleteModal } from '@/components/ui/PrayerCompleteModal';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 const MapboxView = dynamic(
   () => import('@/components/mapbox/MapboxView').then((m) => m.MapboxView),
@@ -16,6 +18,8 @@ const MapboxView = dynamic(
 );
 
 export default function MainPage() {
+  const t = useTranslations('settings');
+  const tc = useTranslations('common');
   const state = usePrayerState('home');
   const router = useRouter();
   const [showSettings, setShowSettings] = useState(false);
@@ -93,11 +97,11 @@ export default function MainPage() {
 
       {showSettings && (
         <div className="absolute bottom-28 left-1/2 z-30 w-80 -translate-x-1/2 rounded-2xl bg-black/80 p-4 backdrop-blur-md">
-          <p className="mb-3 text-xs font-medium text-white/70">👤 계정</p>
+          <p className="mb-3 text-xs font-medium text-white/70">{t('account')}</p>
 
             {/* Nickname */}
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs text-white/70">닉네임</span>
+              <span className="text-xs text-white/70">{t('nickname')}</span>
               {editingNickname ? (
                 <div className="flex items-center gap-1">
                   <input
@@ -109,10 +113,10 @@ export default function MainPage() {
                     onKeyDown={(e) => { if (e.key === 'Enter') handleNicknameUpdate(); }}
                   />
                   <button onClick={handleNicknameUpdate} className="rounded bg-amber-500 px-2 py-1 text-xs text-white" disabled={nicknameSaving}>
-                    {nicknameSaving ? '...' : '저장'}
+                    {nicknameSaving ? '...' : t('save')}
                   </button>
                   <button onClick={() => setEditingNickname(false)} className="rounded bg-white/10 px-2 py-1 text-xs text-white/60">
-                    취소
+                    {t('cancel')}
                   </button>
                 </div>
               ) : (
@@ -120,25 +124,34 @@ export default function MainPage() {
                   onClick={() => { setNewNickname(state.nickname ?? ''); setEditingNickname(true); }}
                   className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60"
                 >
-                  {state.nickname}님 ✏️
+                  {state.nickname}{tc('nicknameSuffix')} ✏️
                 </button>
               )}
             </div>
 
             {/* Invite link share */}
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs text-white/70">초대 링크</span>
+              <span className="text-xs text-white/70">{t('invite')}</span>
               <button onClick={handleShareInvite} className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60">
-                {copied ? '✅ 복사됨' : '📋 복사하기'}
+                {copied ? t('inviteCopied') : t('inviteCopy')}
               </button>
             </div>
 
 
+          {/* Language */}
+          <div className="mb-3 border-t border-white/10 pt-3">
+            <p className="mb-1 text-xs font-medium text-white/70">{t('language')}</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/70">{t('appLanguage')}</span>
+              <LanguageSelector variant="inline" />
+            </div>
+          </div>
+
           {/* Privacy notice */}
           <div className="mb-3 border-t border-white/10 pt-3">
-            <p className="mb-1 text-xs font-medium text-white/70">🔒 프라이버시</p>
+            <p className="mb-1 text-xs font-medium text-white/70">{t('privacy')}</p>
             <p className="text-xs leading-relaxed text-white/30">
-              위치 정보는 약 10km 단위로 대략화되어 저장됩니다. 정확한 위치는 수집하지 않습니다.
+              {t('privacyNotice')}
             </p>
           </div>
 
@@ -146,7 +159,7 @@ export default function MainPage() {
             onClick={() => setShowSettings(false)}
             className="w-full rounded-lg bg-white/10 py-2 text-xs text-white/60"
           >
-            닫기
+            {t('close')}
           </button>
         </div>
       )}

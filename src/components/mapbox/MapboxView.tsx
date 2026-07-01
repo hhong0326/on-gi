@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import {useTranslations} from 'next-intl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -56,6 +57,7 @@ interface MapboxViewProps {
 }
 
 export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false, isPraying = false, userPosition = null }: MapboxViewProps) {
+  const t = useTranslations('common');
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef(new globalThis.Map<string, { marker: mapboxgl.Marker; isActive: boolean }>());
@@ -231,7 +233,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
   if (!MAPBOX_TOKEN) {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: '#08080F' }}>
-        <p className="text-sm text-white/40">Mapbox 토큰이 설정되지 않았습니다</p>
+        <p className="text-sm text-white/40">{t('mapboxError')}</p>
       </div>
     );
   }

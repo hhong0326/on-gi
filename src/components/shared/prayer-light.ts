@@ -8,9 +8,10 @@ interface PrayerLightOptions {
   lng: number;
   prayedAt?: string;
   context?: 'globe' | 'map';
+  tooltipSuffix?: string;
 }
 
-export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, context = 'globe' }: PrayerLightOptions): HTMLElement {
+export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, context = 'globe', tooltipSuffix = '에 기도' }: PrayerLightOptions): HTMLElement {
   const el = document.createElement('div');
   const tappable = !isActive && !!prayedAt;
   el.style.cssText = `position:relative; transform:translate(-50%,-50%); pointer-events:${tappable ? 'auto' : 'none'}; ${tappable ? 'cursor:pointer;' : ''}`;
@@ -93,7 +94,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
 
       const tip = document.createElement('div');
       tip.className = 'prayer-tooltip';
-      tip.textContent = formatRelativeTime(prayedAt) + '에 기도';
+      tip.textContent = formatRelativeTime(prayedAt) + tooltipSuffix;
       el.appendChild(tip);
 
       tip.addEventListener('animationend', () => tip.remove());

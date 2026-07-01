@@ -1,0 +1,72 @@
+{
+  "onboarding": {
+    "tagline1": "Voce e a luz do mundo,",
+    "tagline2": "Vamos iluminar a escuridao com o calor da oracao",
+    "verse": "e a luz do mundo",
+    "verseRef": "-Mateus 5:14",
+    "join": "Participar",
+    "title": "ON-GI — Orar Juntos"
+  },
+  "prayer": {
+    "start": "Orar Juntos Agora",
+    "stop": "Encerrar Oracao {time}",
+    "complete": "Voce orou por {duration}",
+    "completeMessage": "Sua oracao ilumina o mundo",
+    "amen": "Amem",
+    "prayedAt": "Orou ha {time}",
+    "praying": "Orando"
+  },
+  "tab": {
+    "home": "Globo de Oracao",
+    "history": "Historico",
+    "settings": "Configuracoes"
+  },
+  "history": {
+    "title": "Historico de Oracao",
+    "thisWeek": "Esta Semana",
+    "lastWeek": "Semana Passada",
+    "thisMonth": "Este Mes",
+    "all": "Tudo",
+    "count": "Vezes de Oracao",
+    "totalTime": "Tempo Total",
+    "average": "Media",
+    "empty": "Nenhum registro de oracao",
+    "loading": "Carregando...",
+    "seconds": "seg",
+    "minutes": "min",
+    "hours": "hr",
+    "am": "AM",
+    "pm": "PM",
+    "weekdays": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"]
+  },
+  "settings": {
+    "account": "👤 Conta",
+    "nickname": "Apelido",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "language": "🌐 Idioma",
+    "appLanguage": "Idioma do App",
+    "invite": "Link de Convite",
+    "inviteCopied": "✅ Copiado",
+    "inviteCopy": "📋 Copiar",
+    "privacy": "🔒 Privacidade",
+    "privacyNotice": "A localizacao e aproximada em uma grade de ~10km. A localizacao exata nao e coletada."
+  },
+  "time": {
+    "justNow": "Agora mesmo",
+    "minutesAgo": "Ha {n} min",
+    "hoursAgo": "Ha {n} hr",
+    "daysAgo": "Ha {n} dias"
+  },
+  "common": {
+    "nicknameSuffix": "",
+    "defaultNickname": "Orador",
+    "mapboxError": "O token do Mapbox nao esta configurado"
+  },
+  "meta": {
+    "title": "ON-GI",
+    "description": "Voce e a luz do mundo. Vamos iluminar a escuridao com o calor da oracao.",
+    "inviteDescription": "Voce e a luz do mundo. Junte-se a nos em oracao atraves deste link de convite."
+  }
+}

@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous-auth'
+import { LanguageSelector } from '@/components/ui/LanguageSelector'
 
 function Starfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -81,6 +83,8 @@ function Starfield() {
 }
 
 export default function OnboardingPage() {
+  const t = useTranslations('onboarding')
+  const tc = useTranslations('common')
   const [nickname, setNickname] = useState('')
   const [loading, setLoading] = useState(false)
   const [authReady, setAuthReady] = useState(false)
@@ -100,7 +104,7 @@ export default function OnboardingPage() {
         .eq('id', session.user.id)
         .single()
 
-      if (data && data.nickname !== '기도자') {
+      if (data && data.nickname !== tc('defaultNickname')) {
         router.replace('/')
         return
       }
@@ -149,9 +153,9 @@ export default function OnboardingPage() {
 
         {/* Description */}
         <p className="text-sm leading-relaxed mb-12" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-          세상의 빛인 당신,
+          {t('tagline1')}
           <br />
-          기도의 온기로 함께 어둠을 밝혀요
+          {t('tagline2')}
         </p>
 
         {/* Nickname input as inline Bible verse */}
@@ -178,12 +182,12 @@ export default function OnboardingPage() {
             }}
             autoFocus
           />
-          <span>는 세상의 빛이라</span>
+          <span>{t('verse')}</span>
         </div>
 
         {/* Bible verse reference */}
         <p className="text-xs mb-14" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>
-          -마태복음 5:14
+          {t('verseRef')}
         </p>
 
         {/* Submit button */}
@@ -203,9 +207,14 @@ export default function OnboardingPage() {
           {loading ? (
             <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
           ) : (
-            '함께하기'
+            t('join')
           )}
         </button>
+      </div>
+
+      {/* Language selector */}
+      <div className="absolute bottom-8 z-10">
+        <LanguageSelector />
       </div>
     </div>
   )

@@ -1,0 +1,72 @@
+{
+  "onboarding": {
+    "tagline1": "Vous etes la lumiere du monde,",
+    "tagline2": "Eclairons les tenebres par la chaleur de la priere",
+    "verse": "est la lumiere du monde",
+    "verseRef": "-Matthieu 5:14",
+    "join": "Rejoindre",
+    "title": "ON-GI — Prier Ensemble"
+  },
+  "prayer": {
+    "start": "Prier Ensemble Maintenant",
+    "stop": "Terminer la Priere {time}",
+    "complete": "Vous avez prie pendant {duration}",
+    "completeMessage": "Votre priere eclaire le monde",
+    "amen": "Amen",
+    "prayedAt": "A prie il y a {time}",
+    "praying": "En priere"
+  },
+  "tab": {
+    "home": "Globe de Priere",
+    "history": "Historique",
+    "settings": "Parametres"
+  },
+  "history": {
+    "title": "Historique de Priere",
+    "thisWeek": "Cette Semaine",
+    "lastWeek": "Semaine Derniere",
+    "thisMonth": "Ce Mois",
+    "all": "Tout",
+    "count": "Nombre de Prieres",
+    "totalTime": "Temps Total",
+    "average": "Moyenne",
+    "empty": "Aucun enregistrement de priere",
+    "loading": "Chargement...",
+    "seconds": "sec",
+    "minutes": "min",
+    "hours": "hr",
+    "am": "AM",
+    "pm": "PM",
+    "weekdays": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+  },
+  "settings": {
+    "account": "👤 Compte",
+    "nickname": "Pseudo",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "language": "🌐 Langue",
+    "appLanguage": "Langue de l'App",
+    "invite": "Lien d'Invitation",
+    "inviteCopied": "✅ Copie",
+    "inviteCopy": "📋 Copier",
+    "privacy": "🔒 Confidentialite",
+    "privacyNotice": "La localisation est approximee a une grille de ~10km. La position exacte n'est pas collectee."
+  },
+  "time": {
+    "justNow": "A l'instant",
+    "minutesAgo": "Il y a {n} min",
+    "hoursAgo": "Il y a {n} hr",
+    "daysAgo": "Il y a {n} jours"
+  },
+  "common": {
+    "nicknameSuffix": "",
+    "defaultNickname": "Prieur",
+    "mapboxError": "Le token Mapbox n'est pas configure"
+  },
+  "meta": {
+    "title": "ON-GI",
+    "description": "Vous etes la lumiere du monde. Eclairons les tenebres par la chaleur de la priere.",
+    "inviteDescription": "Vous etes la lumiere du monde. Rejoignez-nous en priere via ce lien d'invitation."
+  }
+}

@@ -1,13 +1,20 @@
-import { NextResponse, type NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import {type NextRequest} from 'next/server';
+import {createServerClient} from '@supabase/ssr';
+import createMiddleware from 'next-intl/middleware';
+import {routing} from './i18n/routing';
 
-const BOT_PATTERN = /bot|crawl|spider|slurp|facebookexternalhit|kakaotalk|twitterbot|linkedinbot|discord|telegram|whatsapp/i
+const BOT_PATTERN = /bot|crawl|spider|slurp|facebookexternalhit|kakaotalk|twitterbot|linkedinbot|discord|telegram|whatsapp/i;
+
+const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  })
+  const userAgent = request.headers.get('user-agent') || '';
+  const isBot = BOT_PATTERN.test(userAgent);
 
+  // Run next-intl middleware first (locale detection + redirect)
+  const response = intlMiddleware(request);
+
+  // Set up Supabase auth (preserves session cookies)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -15,32 +22,22 @@ export async function middleware(request: NextRequest) {
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value)
-          })
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
-          })
+          cookiesToSet.forEach(({name, value, options}) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
     },
-  )
+  );
 
-  const { pathname } = request.nextUrl
-  const userAgent = request.headers.get('user-agent') || ''
-  const isBot = BOT_PATTERN.test(userAgent)
+  // Allow bots to see OG tags without auth check
+  if (!isBot) {
+    await supabase.auth.getUser();
+  }
 
-  // Allow bots to see OG tags on any page
-  if (isBot) return response
-
-  await supabase.auth.getUser()
-
-  return response
+  return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
-}
+  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)',
+};

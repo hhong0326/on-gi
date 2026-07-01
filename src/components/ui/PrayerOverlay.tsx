@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import {useTranslations} from 'next-intl';
 import type { ViewTab } from '@/hooks/usePrayerState';
 
 interface PrayerOverlayProps {
@@ -19,10 +20,10 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-const TABS: { key: ViewTab; icon: string; label: string }[] = [
-  { key: 'home', icon: '🌍', label: '기도 지구본' },
-  { key: 'history', icon: '📖', label: '기도 기록' },
-  { key: 'settings', icon: '⚙️', label: '설정' },
+const TABS: { key: ViewTab; icon: string }[] = [
+  { key: 'home', icon: '🌍' },
+  { key: 'history', icon: '📖' },
+  { key: 'settings', icon: '⚙️' },
 ];
 
 export function PrayerOverlay({
@@ -34,6 +35,10 @@ export function PrayerOverlay({
   onTabChange,
   nickname,
 }: PrayerOverlayProps) {
+  const t = useTranslations('prayer');
+  const tt = useTranslations('tab');
+  const tc = useTranslations('common');
+
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col">
       {/* Header */}
@@ -50,7 +55,7 @@ export function PrayerOverlay({
             <span className="text-xs text-gray-400">{prayerCount}</span>
           </div>
           {nickname && (
-            <span className="text-xs text-white/50">{nickname}님</span>
+            <span className="text-xs text-white/50">{nickname}{tc('nicknameSuffix')}</span>
           )}
         </div>
       </header>
@@ -68,7 +73,7 @@ export function PrayerOverlay({
               : 'border border-gray-500/50 bg-white/5 text-gray-300 backdrop-blur-sm hover:border-gray-400 hover:text-white'
           }`}
         >
-          {isPraying ? `기도 마치기 ${formatTime(elapsedSeconds)}` : '지금 함께 기도하기'}
+          {isPraying ? t('stop', {time: formatTime(elapsedSeconds)}) : t('start')}
         </button>
       </div>
 
@@ -83,7 +88,7 @@ export function PrayerOverlay({
                 ? 'text-white bg-white/10'
                 : 'text-gray-500'
             }`}
-            aria-label={tab.label}
+            aria-label={tt(tab.key)}
           >
             {tab.icon}
           </button>
