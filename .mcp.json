@@ -2,11 +2,23 @@
   "mcpServers": {
     "playwright": {
       "type": "stdio",
-      "command": "npx",
+      "command": "/Users/inout_sunil/.nvm/versions/node/v20.11.1/bin/npx",
       "args": [
         "@playwright/mcp@latest"
       ],
-      "env": {}
+      "env": {
+        "PATH": "/Users/inout_sunil/.nvm/versions/node/v20.11.1/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    },
+    "chrome": {
+      "type": "stdio",
+      "command": "/Users/inout_sunil/.nvm/versions/node/v20.11.1/bin/npx",
+      "args": [
+        "@anthropic-ai/chrome-mcp@latest"
+      ],
+      "env": {
+        "PATH": "/Users/inout_sunil/.nvm/versions/node/v20.11.1/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     "supabase": {
       "type": "http",
