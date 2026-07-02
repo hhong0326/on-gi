@@ -28,80 +28,68 @@ export function LanguageSelector({ variant = 'dropdown' }: LanguageSelectorProps
     setOpen(false);
   };
 
-  if (variant === 'inline') {
-    return (
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs"
-        style={{
-          background: 'rgba(212, 164, 76, 0.15)',
-          border: '1px solid rgba(212, 164, 76, 0.3)',
-          color: '#D4A44C',
-        }}
-      >
-        {LOCALE_LABELS[locale]}
-        <span className="text-[10px]">›</span>
-        {open && (
-          <div
-            className="absolute right-0 top-full mt-1 z-50 rounded-xl overflow-hidden"
-            style={{ background: 'rgba(0, 0, 0, 0.9)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
-          >
-            {routing.locales.map((loc) => (
-              <button
-                key={loc}
-                onClick={(e) => { e.stopPropagation(); handleSelect(loc); }}
-                className={`block w-full px-4 py-2.5 text-left text-xs transition-colors ${
-                  loc === locale ? 'text-amber-400' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                {LOCALE_LABELS[loc]}
-              </button>
-            ))}
-          </div>
-        )}
-      </button>
-    );
-  }
+  const triggerButton = variant === 'inline' ? (
+    <button
+      onClick={() => setOpen(true)}
+      className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs"
+      style={{
+        background: 'rgba(212, 164, 76, 0.15)',
+        border: '1px solid rgba(212, 164, 76, 0.3)',
+        color: '#D4A44C',
+      }}
+    >
+      {LOCALE_LABELS[locale]}
+      <span className="text-[10px]">›</span>
+    </button>
+  ) : (
+    <button
+      onClick={() => setOpen(true)}
+      className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-all"
+      style={{
+        background: 'rgba(255, 255, 255, 0.06)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        color: '#D4A44C',
+      }}
+    >
+      🌐 {LOCALE_LABELS[locale]} ▾
+    </button>
+  );
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-all"
-        style={{
-          background: 'rgba(255, 255, 255, 0.06)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          color: '#D4A44C',
-        }}
-      >
-        🌐 {LOCALE_LABELS[locale]} ▾
-      </button>
+    <>
+      {triggerButton}
 
       {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setOpen(false)}>
+          <div className="fixed inset-0 bg-black/50" />
           <div
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl overflow-hidden"
+            className="relative w-full max-w-sm rounded-t-2xl pb-8 pt-3"
             style={{
-              background: 'rgba(0, 0, 0, 0.9)',
+              background: '#1a1a2e',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(12px)',
+              borderBottom: 'none',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
+            <p className="px-5 pb-2 text-xs text-white/40">🌐 Language</p>
             {routing.locales.map((loc) => (
               <button
                 key={loc}
                 onClick={() => handleSelect(loc)}
-                className={`block w-full px-5 py-2.5 text-left text-xs whitespace-nowrap transition-colors ${
-                  loc === locale ? 'text-amber-400 bg-white/5' : 'text-white/60 hover:text-white hover:bg-white/5'
+                className={`flex w-full items-center justify-between px-5 py-3 text-sm transition-colors ${
+                  loc === locale
+                    ? 'text-amber-400'
+                    : 'text-white/60 active:bg-white/5'
                 }`}
               >
                 {LOCALE_LABELS[loc]}
+                {loc === locale && <span className="text-amber-400">✓</span>}
               </button>
             ))}
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
