@@ -21,6 +21,11 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://on-gi-five.vercel.app'),
     title: t('title'),
     description: t('description'),
+    manifest: '/manifest.json',
+    icons: {
+      icon: '/icon-192.png',
+      apple: '/apple-touch-icon.png',
+    },
     openGraph: {
       title: t('title'),
       description: t('description'),
