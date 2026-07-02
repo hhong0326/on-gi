@@ -104,7 +104,7 @@ export default function OnboardingPage() {
         .eq('id', session.user.id)
         .single()
 
-      if (data && data.nickname !== tc('defaultNickname')) {
+      if (data && data.nickname !== '기도자') {
         router.replace('/')
         return
       }
