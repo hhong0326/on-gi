@@ -62,12 +62,12 @@ const JERUSALEM: [number, number] = [35.2137, 31.7683];
 
 function createBulbMarkerElement(onClick?: () => void): HTMLElement {
   const el = document.createElement('div');
-  el.style.cssText = 'position:relative; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer;';
+  el.style.cssText = 'pointer-events:auto; cursor:pointer; display:flex; align-items:center; justify-content:center;';
 
   const img = document.createElement('img');
   img.src = '/icon-bulb-sm.svg';
   img.style.cssText = `
-    width:8px; height:12px;
+    width:6px; height:9px;
     filter: brightness(1.5) drop-shadow(0 0 4px #D4A44C) drop-shadow(0 0 8px #D4A44C80);
     pointer-events:none;
   `;
