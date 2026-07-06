@@ -68,5 +68,19 @@
     "title": "ON-GI",
     "description": "Voce e a luz do mundo. Vamos iluminar a escuridao com o calor da oracao.",
     "inviteDescription": "Voce e a luz do mundo. Junte-se a nos em oracao atraves deste link de convite."
+  },
+  "easter": {
+    "verse1": "Vos sois a luz do mundo.\nNao se pode esconder uma cidade edificada sobre um monte.",
+    "verse1Ref": "— Mateus 5:14",
+    "title": "A historia de quem criou este app",
+    "story1": "Um era profissional de marketing.\nDurante seis anos trabalhou intensamente em uma agencia de publicidade. Tinha certeza de que Deus o havia guiado ate ali, mas vagava sem encontrar sentido no trabalho diario.",
+    "story2": "Depois de anos de oracao, chegou uma pequena esperanca.\n\"Sera que tecnologias de ponta, como a IA, poderiam servir a igreja e a fe dos cristaos?\"",
+    "story3": "Carregando essa esperanca, ele saiu em busca de um cooperador na fe.",
+    "story4": "O outro era desenvolvedor.\nSonhava com uma startup de sucesso, mas nunca havia buscado de verdade a obra que o Senhor desejava. Passou tres anos esperando o tempo do Senhor — compartilhando o evangelho no trabalho e orando por visao e chamado.",
+    "story5": "Em um inverno, num dia de missao de futsal, uma pequena ideia compartilhada por um irmao se tornou uma faisca. Dessa faisca nasceu o primeiro esboco de 'a Luz de Oracao'.",
+    "story6": "Assim os dois se encontraram.\nSem pedir nada em troca, apenas buscando provar o que e agradavel ao Senhor.",
+    "story7": "Esperamos que este app seja a luz das oracoes que sobem de todos os cantos do mundo,\ne que essa luz ilumine as trevas.",
+    "verse2": "Para que aproveis as coisas excelentes,\ncheios do fruto de justica, que e por Jesus Cristo,\npara gloria e louvor de Deus.",
+    "verse2Ref": "— Filipenses 1:9-11"
   }
 }

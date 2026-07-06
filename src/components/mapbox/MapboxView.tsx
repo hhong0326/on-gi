@@ -54,13 +54,43 @@ interface MapboxViewProps {
   hideLabels?: boolean;
   isPraying?: boolean;
   userPosition?: { lat: number; lng: number } | null;
+  onEasterEggClick?: () => void;
 }
 
-export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false, isPraying = false, userPosition = null }: MapboxViewProps) {
+// Jerusalem easter egg marker
+const JERUSALEM: [number, number] = [35.2137, 31.7683];
+
+function createBulbMarkerElement(onClick?: () => void): HTMLElement {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:relative; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer;';
+
+  const img = document.createElement('img');
+  img.src = '/icon-bulb-sm.svg';
+  img.style.cssText = `
+    width:8px; height:12px;
+    filter: brightness(1.5) drop-shadow(0 0 4px #D4A44C) drop-shadow(0 0 8px #D4A44C80);
+    pointer-events:none;
+  `;
+  el.appendChild(img);
+
+  if (onClick) {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onClick();
+    });
+  }
+
+  return el;
+}
+
+export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick }: MapboxViewProps) {
   const t = useTranslations('common');
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef(new globalThis.Map<string, { marker: mapboxgl.Marker; isActive: boolean }>());
+  const easterMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const onEasterEggClickRef = useRef(onEasterEggClick);
+  onEasterEggClickRef.current = onEasterEggClick;
   const currentStyleRef = useRef(mapStyle);
   const spinningRef = useRef(true);
   const animFrameRef = useRef<number | null>(null);
@@ -110,12 +140,20 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
     map.on('mousedown', stopSpin);
     map.on('touchstart', stopSpin);
 
+    // Jerusalem easter egg marker (fixed, always visible)
+    const bulbEl = createBulbMarkerElement(() => onEasterEggClickRef.current?.());
+    easterMarkerRef.current = new mapboxgl.Marker({ element: bulbEl, anchor: 'center' })
+      .setLngLat(JERUSALEM)
+      .addTo(map);
+
     mapRef.current = map;
     currentStyleRef.current = mapStyle;
     animFrameRef.current = requestAnimationFrame(spin);
 
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      easterMarkerRef.current?.remove();
+      easterMarkerRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -141,6 +179,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
       }
       // Re-add markers after style change
       markersRef.current.forEach(({ marker }) => marker.addTo(map));
+      easterMarkerRef.current?.addTo(map);
     });
   }, [mapStyle, fogPreset, hideLabels]);
 

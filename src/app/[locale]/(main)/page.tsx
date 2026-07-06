@@ -11,6 +11,7 @@ import { PrayerOverlay } from '@/components/ui/PrayerOverlay';
 import { HistoryView } from '@/components/ui/HistoryView';
 import { PrayerCompleteModal } from '@/components/ui/PrayerCompleteModal';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { EasterEggModal } from '@/components/ui/EasterEggModal';
 
 const MapboxView = dynamic(
   () => import('@/components/mapbox/MapboxView').then((m) => m.MapboxView),
@@ -29,6 +30,7 @@ export default function MainPage() {
   const [newNickname, setNewNickname] = useState('');
   const [nicknameSaving, setNicknameSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
 
   const handleNicknameUpdate = async () => {
     const trimmed = newNickname.trim();
@@ -92,6 +94,7 @@ export default function MainPage() {
           points={state.points}
           isPraying={state.isPraying}
           userPosition={state.userPosition}
+          onEasterEggClick={() => setShowEasterEgg(true)}
         />
       </div>
 
@@ -166,6 +169,10 @@ export default function MainPage() {
 
       {showHistory && (
         <HistoryView onClose={() => setShowHistory(false)} />
+      )}
+
+      {showEasterEgg && (
+        <EasterEggModal onClose={() => setShowEasterEgg(false)} />
       )}
 
       {completedDuration !== null && (

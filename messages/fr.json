@@ -68,5 +68,19 @@
     "title": "ON-GI",
     "description": "Vous etes la lumiere du monde. Eclairons les tenebres par la chaleur de la priere.",
     "inviteDescription": "Vous etes la lumiere du monde. Rejoignez-nous en priere via ce lien d'invitation."
+  },
+  "easter": {
+    "verse1": "Vous etes la lumiere du monde.\nUne ville situee sur une montagne ne peut etre cachee.",
+    "verse1Ref": "— Matthieu 5:14",
+    "title": "L'histoire de ceux qui l'ont cree",
+    "story1": "L'un etait marketeur.\nPendant six ans, il a travaille sans relache dans une agence de publicite. Il etait convaincu que Dieu l'avait conduit la, mais il errait, incapable de trouver un sens dans son travail quotidien.",
+    "story2": "Apres des annees de priere, une petite esperance est venue.\n\"Une technologie de pointe comme l'IA pourrait-elle servir l'Eglise et la foi des chretiens ?\"",
+    "story3": "Portant cette esperance, il est parti chercher un compagnon d'oeuvre.",
+    "story4": "L'autre etait developpeur.\nIl revait d'une startup a succes, mais n'avait jamais vraiment cherche l'oeuvre que le Seigneur desirait. Il a passe trois ans a attendre le temps du Seigneur — partageant l'evangile a son travail, priant pour une vision et un appel.",
+    "story5": "Un hiver, lors d'une journee de mission futsal, une petite idee partagee par un frere est devenue une etincelle. De cette etincelle est nee la premiere esquisse de 'la Lumiere de Priere'.",
+    "story6": "C'est ainsi que les deux se sont rencontres.\nSans rien attendre en retour, cherchant simplement a discerner ce qui est agreable au Seigneur.",
+    "story7": "Nous esperons que cette app devienne la lumiere des prieres qui s'elevent de tous les coins du monde,\net que cette lumiere eclaire les tenebres.",
+    "verse2": "Pour discerner ce qui est le meilleur,\nremplis du fruit de justice qui est par Jesus-Christ,\na la gloire et a la louange de Dieu.",
+    "verse2Ref": "— Philippiens 1:9-11"
   }
 }

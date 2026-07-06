@@ -68,5 +68,19 @@
     "title": "ON-GI",
     "description": "You are the light of the world. Let's brighten the darkness with the warmth of prayer.",
     "inviteDescription": "You are the light of the world. Join us in prayer through this invite link."
+  },
+  "easter": {
+    "verse1": "You are the light of the world.\nA city set on a hill cannot be hidden.",
+    "verse1Ref": "— Matthew 5:14",
+    "title": "The Story of Those Who Made This",
+    "story1": "One of us was a marketer.\nFor six years he worked fiercely at an ad agency. He was certain God had led him there, yet he wandered, unable to find meaning in his daily work.",
+    "story2": "After years of prayer, a small hope arrived.\n\"Could cutting-edge technology like AI serve the church and the faith of Christians?\"",
+    "story3": "Carrying that hope, he set out to find a fellow worker.",
+    "story4": "The other was a developer.\nHe dreamed of building a successful startup, yet had never truly sought the work the Lord desired. He spent three years waiting for the Lord's timing — sharing the gospel at his workplace, praying for vision and calling.",
+    "story5": "One winter, on a day of futsal outreach, a small idea shared by a brother became a spark. From that spark, 'the Prayer Light' was first sketched.",
+    "story6": "And so the two met.\nAsking for nothing in return, simply seeking to discern what is pleasing to the Lord.",
+    "story7": "We hope this app becomes the light of prayers rising from every corner of the world,\nand that this light shines into the darkness.",
+    "verse2": "So that you may approve what is excellent,\nfilled with the fruit of righteousness that comes through Jesus Christ,\nto the glory and praise of God.",
+    "verse2Ref": "— Philippians 1:9-11"
   }
 }
