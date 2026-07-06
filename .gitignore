@@ -46,3 +46,6 @@ next-env.d.ts
 !public/splash-icon-512.png
 .playwright-mcp/
 
+# generated service worker (from sw.template.js)
+public/sw.js
+
