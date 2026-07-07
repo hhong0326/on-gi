@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -31,6 +31,8 @@ export default function MainPage() {
   const [nicknameSaving, setNicknameSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [spinAvailable, setSpinAvailable] = useState(true);
+  const resumeSpinRef = useRef<(() => void) | null>(null);
 
   const handleNicknameUpdate = async () => {
     const trimmed = newNickname.trim();
@@ -95,6 +97,8 @@ export default function MainPage() {
           isPraying={state.isPraying}
           userPosition={state.userPosition}
           onEasterEggClick={() => setShowEasterEgg(true)}
+          onSpinAvailableChange={setSpinAvailable}
+          resumeSpinRef={resumeSpinRef}
         />
       </div>
 
@@ -191,6 +195,8 @@ export default function MainPage() {
           activeTab={showHistory ? 'history' : state.activeTab}
           onTabChange={handleTabChange}
           nickname={state.nickname}
+          showSpinButton={spinAvailable}
+          onSpinClick={() => resumeSpinRef.current?.()}
         />
       </div>
     </div>

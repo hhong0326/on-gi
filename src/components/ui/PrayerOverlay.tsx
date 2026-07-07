@@ -12,6 +12,8 @@ interface PrayerOverlayProps {
   activeTab: ViewTab;
   onTabChange: (tab: ViewTab) => void;
   nickname?: string | null;
+  showSpinButton?: boolean;
+  onSpinClick?: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -34,6 +36,8 @@ export function PrayerOverlay({
   activeTab,
   onTabChange,
   nickname,
+  showSpinButton = false,
+  onSpinClick,
 }: PrayerOverlayProps) {
   const t = useTranslations('prayer');
   const tt = useTranslations('tab');
@@ -64,7 +68,7 @@ export function PrayerOverlay({
       <div className="flex-1" />
 
       {/* CTA Button */}
-      <div className="pointer-events-auto flex justify-center px-5 pb-6">
+      <div className="pointer-events-auto relative flex items-center justify-center px-5 pb-6">
         <button
           onClick={onTogglePrayer}
           className={`rounded-full px-8 py-3.5 text-base font-medium transition-all ${
@@ -75,6 +79,17 @@ export function PrayerOverlay({
         >
           {isPraying ? t('stop', {time: formatTime(elapsedSeconds)}) : t('start')}
         </button>
+
+        {/* Spin resume button */}
+        {showSpinButton && !isPraying && (
+          <button
+            onClick={onSpinClick}
+            className="absolute right-5 flex h-11 w-11 items-center justify-center rounded-full border border-gray-500/50 bg-white/5 text-lg backdrop-blur-sm transition-all hover:border-gray-400"
+            aria-label="resume globe spin"
+          >
+            💫
+          </button>
+        )}
       </div>
 
       {/* Tab Bar */}

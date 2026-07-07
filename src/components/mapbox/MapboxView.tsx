@@ -55,6 +55,8 @@ interface MapboxViewProps {
   isPraying?: boolean;
   userPosition?: { lat: number; lng: number } | null;
   onEasterEggClick?: () => void;
+  onSpinAvailableChange?: (available: boolean) => void;
+  resumeSpinRef?: React.RefObject<(() => void) | null>;
 }
 
 // Jerusalem easter egg marker
@@ -83,7 +85,7 @@ function createBulbMarkerElement(onClick?: () => void): HTMLElement {
   return el;
 }
 
-export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick }: MapboxViewProps) {
+export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick, onSpinAvailableChange, resumeSpinRef }: MapboxViewProps) {
   const t = useTranslations('common');
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -91,6 +93,8 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
   const easterMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const onEasterEggClickRef = useRef(onEasterEggClick);
   onEasterEggClickRef.current = onEasterEggClick;
+  const onSpinAvailableChangeRef = useRef(onSpinAvailableChange);
+  onSpinAvailableChangeRef.current = onSpinAvailableChange;
   const currentStyleRef = useRef(mapStyle);
   const spinningRef = useRef(true);
   const animFrameRef = useRef<number | null>(null);
@@ -131,14 +135,26 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
       animFrameRef.current = requestAnimationFrame(spin);
     }
 
-    // Stop spin permanently on first user interaction
+    // Stop spin on user interaction (resumable via 💫 button)
     const stopSpin = () => {
       spinningRef.current = false;
-      map.off('mousedown', stopSpin);
-      map.off('touchstart', stopSpin);
     };
     map.on('mousedown', stopSpin);
     map.on('touchstart', stopSpin);
+
+    // Expose resume function to parent (💫 button)
+    if (resumeSpinRef) {
+      resumeSpinRef.current = () => {
+        spinningRef.current = true;
+      };
+    }
+
+    // Track zoom: spin button only available at globe-scale zoom (<= 1.6)
+    const notifySpinAvailable = () => {
+      onSpinAvailableChangeRef.current?.(map.getZoom() <= 1.6);
+    };
+    map.on('zoom', notifySpinAvailable);
+    notifySpinAvailable();
 
     // Jerusalem easter egg marker (fixed, always visible)
     const bulbEl = createBulbMarkerElement(() => onEasterEggClickRef.current?.());
@@ -152,6 +168,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
 
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (resumeSpinRef) resumeSpinRef.current = null;
       easterMarkerRef.current?.remove();
       easterMarkerRef.current = null;
       map.remove();
