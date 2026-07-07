@@ -261,6 +261,9 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
         context: 'map',
       });
 
+      // 같은 위치에 겹칠 때 가장 최근 기도가 위로 (터치 우선)
+      el.style.zIndex = String(Math.floor(new Date(p.prayedAt).getTime() / 1000) - 1_700_000_000);
+
       const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([p.lng, p.lat])
         .addTo(map);
