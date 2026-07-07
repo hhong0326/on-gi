@@ -84,7 +84,7 @@ export function PrayerOverlay({
         {showSpinButton && !isPraying && (
           <button
             onClick={onSpinClick}
-            className="absolute right-5 flex h-11 w-11 items-center justify-center rounded-full border border-gray-500/50 bg-white/5 text-lg backdrop-blur-sm transition-all hover:border-gray-400"
+            className="absolute right-5 flex h-11 w-11 items-center justify-center text-xl transition-transform active:scale-90"
             aria-label="resume globe spin"
           >
             💫

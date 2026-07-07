@@ -151,7 +151,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
 
     // Track zoom: spin button only available at globe-scale zoom (<= 1.6)
     const notifySpinAvailable = () => {
-      onSpinAvailableChangeRef.current?.(map.getZoom() <= 1.6);
+      onSpinAvailableChangeRef.current?.(map.getZoom() <= 2);
     };
     map.on('zoom', notifySpinAvailable);
     notifySpinAvailable();
