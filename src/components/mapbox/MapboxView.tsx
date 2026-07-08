@@ -87,6 +87,16 @@ function createBulbMarkerElement(onClick?: () => void): HTMLElement {
 
 export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick, onSpinAvailableChange, resumeSpinRef }: MapboxViewProps) {
   const t = useTranslations('common');
+  const ttime = useTranslations('time');
+  const tprayer = useTranslations('prayer');
+  const tooltipLabelsRef = useRef({justNow: '', minutesAgo: '', hoursAgo: '', daysAgo: '', prayedAt: ''});
+  tooltipLabelsRef.current = {
+    justNow: ttime('justNow'),
+    minutesAgo: ttime('minutesAgo', {n: '{n}'}),
+    hoursAgo: ttime('hoursAgo', {n: '{n}'}),
+    daysAgo: ttime('daysAgo', {n: '{n}'}),
+    prayedAt: tprayer('prayedAt', {time: '{time}'}),
+  };
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef(new globalThis.Map<string, { marker: mapboxgl.Marker; isActive: boolean }>());
@@ -276,6 +286,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'dark', hide
         lng: p.lng,
         prayedAt: p.prayedAt,
         context: 'map',
+        tooltipLabels: tooltipLabelsRef.current,
       });
 
       // 같은 위치에 겹칠 때 가장 최근 기도가 위로 (터치 우선)

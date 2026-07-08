@@ -1,5 +1,13 @@
 import { formatRelativeTime } from '@/lib/format';
 
+export interface TooltipLabels {
+  justNow: string;
+  minutesAgo: string;
+  hoursAgo: string;
+  daysAgo: string;
+  prayedAt: string; // "{time}에 기도" / "Prayed {time}"
+}
+
 interface PrayerLightOptions {
   weight: number;
   isUser: boolean;
@@ -8,10 +16,10 @@ interface PrayerLightOptions {
   lng: number;
   prayedAt?: string;
   context?: 'globe' | 'map';
-  tooltipSuffix?: string;
+  tooltipLabels?: TooltipLabels;
 }
 
-export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, context = 'globe', tooltipSuffix = '에 기도' }: PrayerLightOptions): HTMLElement {
+export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, context = 'globe', tooltipLabels }: PrayerLightOptions): HTMLElement {
   const el = document.createElement('div');
   const tappable = !isActive && !!prayedAt;
   el.style.cssText = `position:relative; transform:translate(-50%,-50%); pointer-events:${tappable ? 'auto' : 'none'}; ${tappable ? 'cursor:pointer;' : ''}`;
@@ -94,7 +102,10 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
 
       const tip = document.createElement('div');
       tip.className = 'prayer-tooltip';
-      tip.textContent = formatRelativeTime(prayedAt) + tooltipSuffix;
+      const relTime = formatRelativeTime(prayedAt, tooltipLabels);
+      tip.textContent = tooltipLabels
+        ? tooltipLabels.prayedAt.replace('{time}', relTime)
+        : relTime + '에 기도';
       el.appendChild(tip);
 
       tip.addEventListener('animationend', () => tip.remove());
