@@ -91,7 +91,7 @@ export default function MainPage() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <MapboxView
           points={state.points}
           isPraying={state.isPraying}
