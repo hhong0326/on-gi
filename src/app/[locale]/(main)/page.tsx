@@ -103,7 +103,7 @@ export default function MainPage() {
       </div>
 
       {showSettings && (
-        <div className="absolute bottom-28 left-1/2 z-30 w-80 -translate-x-1/2 rounded-2xl bg-black/80 p-4 backdrop-blur-md">
+        <div className="absolute bottom-28 left-1/2 z-30 w-80 -translate-x-1/2 rounded-2xl bg-[#12121F] p-4">
           <p className="mb-3 text-xs font-medium text-white/70">{t('account')}</p>
 
             {/* Nickname */}

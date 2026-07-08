@@ -61,7 +61,7 @@ export function LanguageSelector({ variant = 'dropdown' }: LanguageSelectorProps
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setOpen(false)}>
-          <div className="fixed inset-0 bg-black/50" />
+          <div className="fixed inset-0 bg-black/80" />
           <div
             className="relative w-full max-w-sm rounded-t-2xl pb-8 pt-3"
             style={{

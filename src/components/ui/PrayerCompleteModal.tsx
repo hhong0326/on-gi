@@ -35,7 +35,7 @@ export function PrayerCompleteModal({ durationSeconds, onClose }: PrayerComplete
   });
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/85">
       <div className="mx-8 w-full max-w-sm rounded-2xl bg-[#12121F] p-8 text-center shadow-2xl">
         <p className="text-4xl">🙏</p>
         <p className="mt-4 text-lg font-medium text-white">
