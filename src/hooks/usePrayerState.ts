@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getCurrentPosition } from '@/lib/bridge';
 import type { PrayerPoint, PrayerRow } from '@/types/prayer';
-import { prayerRowToPoint } from '@/types/prayer';
+import { hashJitter, prayerRowToPoint } from '@/types/prayer';
 
 export type ViewTab = 'home' | 'history' | 'settings';
 
@@ -191,10 +191,11 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
         // Remove old local point, add updated one
         setPoints((prev) => {
           const filtered = prev.filter((p) => p.id !== existing.id);
+          const j = hashJitter(existing.id);
           return [...filtered, {
             id: existing.id,
-            lat: pos.lat,
-            lng: pos.lng,
+            lat: pos.lat + j.dLat,
+            lng: pos.lng + j.dLng,
             intensity: 1,
             isUser: true,
             isActive: true,
@@ -214,10 +215,11 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
 
         if (!error && data) {
           activePrayerIdRef.current = data.id;
+          const j = hashJitter(data.id);
           setPoints((prev) => [...prev, {
             id: data.id,
-            lat: pos.lat,
-            lng: pos.lng,
+            lat: pos.lat + j.dLat,
+            lng: pos.lng + j.dLng,
             intensity: 1,
             isUser: true,
             isActive: true,
