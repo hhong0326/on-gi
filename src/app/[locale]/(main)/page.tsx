@@ -87,7 +87,9 @@ export default function MainPage() {
     }
   }, [state.ready, state.nickname, router]);
 
-  if (!state.ready || !state.nickname) return null;
+  // Render map immediately so the Mapbox chunk/WebGL/tiles load in parallel
+  // with Supabase auth + data queries; only overlay UI waits for readiness.
+  const uiReady = state.ready && !!state.nickname;
 
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
@@ -186,19 +188,21 @@ export default function MainPage() {
         />
       )}
 
-      <div className="pointer-events-none absolute inset-0 z-10">
-        <PrayerOverlay
-          prayerCount={state.points.filter((p) => p.isActive).length}
-          isPraying={state.isPraying}
-          elapsedSeconds={state.elapsedSeconds}
-          onTogglePrayer={handleTogglePrayer}
-          activeTab={showHistory ? 'history' : state.activeTab}
-          onTabChange={handleTabChange}
-          nickname={state.nickname}
-          showSpinButton={spinAvailable}
-          onSpinClick={() => resumeSpinRef.current?.()}
-        />
-      </div>
+      {uiReady && (
+        <div className="pointer-events-none absolute inset-0 z-10">
+          <PrayerOverlay
+            prayerCount={state.points.filter((p) => p.isActive).length}
+            isPraying={state.isPraying}
+            elapsedSeconds={state.elapsedSeconds}
+            onTogglePrayer={handleTogglePrayer}
+            activeTab={showHistory ? 'history' : state.activeTab}
+            onTabChange={handleTabChange}
+            nickname={state.nickname}
+            showSpinButton={spinAvailable}
+            onSpinClick={() => resumeSpinRef.current?.()}
+          />
+        </div>
+      )}
     </div>
   );
 }

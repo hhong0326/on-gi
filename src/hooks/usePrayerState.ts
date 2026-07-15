@@ -47,23 +47,24 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       }
       userIdRef.current = user.id;
 
-      // Load nickname
-      const { data: profile } = await supabase
-        .from('users')
-        .select('nickname')
-        .eq('id', user.id)
-        .single();
+      // Load nickname + recent prayers (last 7 days) in parallel
+      const [{ data: profile }, { data: prayers }] = await Promise.all([
+        supabase
+          .from('users')
+          .select('nickname')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('prayers')
+          .select('*')
+          .gte('prayed_at', SEVEN_DAYS_ISO)
+          .order('prayed_at', { ascending: false })
+          .limit(200),
+      ]);
+
       if (profile && profile.nickname !== '기도자') {
         setNickname(profile.nickname);
       }
-
-      // Load recent prayers (last 7 days)
-      const { data: prayers } = await supabase
-        .from('prayers')
-        .select('*')
-        .gte('prayed_at', SEVEN_DAYS_ISO)
-        .order('prayed_at', { ascending: false })
-        .limit(200);
 
       if (prayers && prayers.length > 0) {
         const mapped = (prayers as PrayerRow[]).map((r) =>

@@ -12,7 +12,10 @@ const PRECACHE_URLS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) =>
+      // Precache items individually so one failure doesn't abort install
+      Promise.all(PRECACHE_URLS.map((url) => cache.add(url).catch(() => {})))
+    )
   );
   self.skipWaiting();
 });
@@ -71,10 +74,37 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation (HTML pages): Network First, fall back to cached /
+  // Navigation (HTML pages): Network First with timeout, runtime-cached fallback.
+  // Successful responses are cached so visited locale pages (/ko, /en, ...) work
+  // offline; a 3s timeout keeps PWA launch fast on flaky networks.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/').then((r) => r || Response.error()))
+      (async () => {
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 3000)
+        );
+        try {
+          const response = await Promise.race([fetch(request), timeout]);
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        } catch {
+          const cached =
+            (await caches.match(request)) || (await caches.match('/'));
+          if (!cached) return Response.error();
+          if (!cached.redirected) return cached;
+          // Rewrap: a redirected response can't be served to a navigation
+          // (its redirect mode is not 'follow') — strip the flag
+          const body = await cached.blob();
+          return new Response(body, {
+            status: cached.status,
+            statusText: cached.statusText,
+            headers: cached.headers,
+          });
+        }
+      })()
     );
     return;
   }
