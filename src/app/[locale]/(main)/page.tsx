@@ -7,7 +7,6 @@ import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
-import { getPrayerAudio } from '@/lib/audio';
 import { createClient } from '@/lib/supabase/client';
 import { PrayerOverlay } from '@/components/ui/PrayerOverlay';
 import { HistoryView } from '@/components/ui/HistoryView';
@@ -74,26 +73,14 @@ export default function MainPage() {
 
   const handleTogglePrayer = async () => {
     if (state.isPraying) {
-      getPrayerAudio().stop();
       // Capture elapsed before state resets
       const elapsed = state.elapsedSeconds;
       await state.handleTogglePrayer();
       if (elapsed > 0) setCompletedDuration(elapsed);
       return;
     }
-    // 사용자 제스처 콜스택 안에서(await 이전) 재생해야 iOS 자동재생 정책을 통과한다
-    getPrayerAudio().play();
     await state.handleTogglePrayer();
   };
-
-  // 어떤 경로로든 기도가 끝나면 음악도 반드시 멈춘다 (버튼 핸들러의 stop은 즉시성용, 이건 상태 기반 보장)
-  useEffect(() => {
-    if (!state.isPraying) getPrayerAudio().stop();
-  }, [state.isPraying]);
-
-  useEffect(() => {
-    return () => getPrayerAudio().stop();
-  }, []);
 
   useEffect(() => {
     if (state.ready && !state.nickname) {

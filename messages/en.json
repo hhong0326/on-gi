@@ -14,9 +14,7 @@
     "completeMessage": "Your prayer lights up the world",
     "amen": "Amen",
     "prayedAt": "Prayed {time}",
-    "praying": "Praying",
-    "soundOn": "Turn sound on",
-    "soundOff": "Turn sound off"
+    "praying": "Praying"
   },
   "tab": {
     "home": "Prayer Globe",
