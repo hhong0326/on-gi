@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -104,6 +105,15 @@ export default function MainPage() {
   // with Supabase auth + data queries; only overlay UI waits for readiness.
   const uiReady = state.ready && !!state.nickname;
 
+  // Splash cover: 신규 유저(닉네임 없음)는 커버가 유지된 채 온보딩으로 넘어가
+  // 지구본 깜빡임을 보지 않는다. uiReady 후 페이드아웃 → DOM 제거.
+  const [splashGone, setSplashGone] = useState(false);
+  useEffect(() => {
+    if (!uiReady) return;
+    const timeout = setTimeout(() => setSplashGone(true), 600);
+    return () => clearTimeout(timeout);
+  }, [uiReady]);
+
   return (
     <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
       <div className="absolute inset-0 z-0">
@@ -199,6 +209,19 @@ export default function MainPage() {
           durationSeconds={completedDuration}
           onClose={() => setCompletedDuration(null)}
         />
+      )}
+
+      {!splashGone && (
+        <div
+          className={`absolute inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${
+            uiReady ? 'opacity-0' : 'opacity-100'
+          }`}
+          style={{ background: '#08080F' }}
+        >
+          <div className="animate-pulse" style={{ filter: 'drop-shadow(0 0 12px rgba(212, 164, 76, 0.4))' }}>
+            <Image src="/logo-en-sm.svg" alt="ON-GI" width={86} height={30} priority />
+          </div>
+        </div>
       )}
 
       {uiReady && (
