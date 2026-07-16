@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import {useTranslations} from 'next-intl';
+import { getPrayerAudio } from '@/lib/audio';
 import type { ViewTab } from '@/hooks/usePrayerState';
 
 interface PrayerOverlayProps {
@@ -42,6 +44,15 @@ export function PrayerOverlay({
   const t = useTranslations('prayer');
   const tt = useTranslations('tab');
   const tc = useTranslations('common');
+  const [audioMuted, setAudioMuted] = useState(() =>
+    typeof window === 'undefined' ? false : getPrayerAudio().isMuted()
+  );
+
+  const handleToggleMute = () => {
+    const next = !audioMuted;
+    getPrayerAudio().setMuted(next);
+    setAudioMuted(next);
+  };
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col">
@@ -79,6 +90,17 @@ export function PrayerOverlay({
         >
           {isPraying ? t('stop', {time: formatTime(elapsedSeconds)}) : t('start')}
         </button>
+
+        {/* Audio mute toggle (praying only) */}
+        {isPraying && (
+          <button
+            onClick={handleToggleMute}
+            className="absolute right-5 flex h-11 w-11 items-center justify-center text-xl transition-transform active:scale-90"
+            aria-label={audioMuted ? t('soundOn') : t('soundOff')}
+          >
+            {audioMuted ? '🔇' : '🔊'}
+          </button>
+        )}
 
         {/* Spin resume button */}
         {showSpinButton && !isPraying && (
