@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { LogoPulse } from '@/components/ui/LogoPulse';
 
 interface InvitePageProps {
   params: Promise<{ locale: string; code: string }>;
@@ -40,9 +41,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
       className="flex min-h-dvh flex-col items-center justify-center px-6"
       style={{ background: '#08080F' }}
     >
-      <p className="text-center text-sm text-white/40">
-        ON-GI
-      </p>
+      <LogoPulse />
     </div>
   );
 }

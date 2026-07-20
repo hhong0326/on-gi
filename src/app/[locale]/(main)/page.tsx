@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
 import { createClient } from '@/lib/supabase/client';
+import { LogoPulse } from '@/components/ui/LogoPulse';
 import { PrayerOverlay } from '@/components/ui/PrayerOverlay';
 import { HistoryView } from '@/components/ui/HistoryView';
 import { PrayerCompleteModal } from '@/components/ui/PrayerCompleteModal';
@@ -205,9 +205,7 @@ export default function MainPage() {
           }`}
           style={{ background: '#08080F' }}
         >
-          <div className="animate-pulse" style={{ filter: 'drop-shadow(0 0 12px rgba(212, 164, 76, 0.4))' }}>
-            <Image src="/logo-en-sm.svg" alt="ON-GI" width={86} height={30} priority />
-          </div>
+          <LogoPulse />
         </div>
       )}
 

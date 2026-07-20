@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import {useTranslations} from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
+import { LogoPulse } from '@/components/ui/LogoPulse';
 import { usePrayerStats, type StatsPeriod } from '@/hooks/usePrayerStats';
 import type { PrayerRow } from '@/types/prayer';
 
@@ -126,7 +127,9 @@ export function HistoryView({ onClose }: HistoryViewProps) {
       {/* Stats card */}
       <div className="mx-5 mb-4 rounded-xl bg-white/5 p-4">
         {statsLoading ? (
-          <p className="text-center text-xs text-white/30">{t('loading')}</p>
+          <div className="flex justify-center py-4">
+            <LogoPulse size="sm" />
+          </div>
         ) : (
           <div className="flex justify-around text-center">
             <div>
@@ -150,7 +153,9 @@ export function HistoryView({ onClose }: HistoryViewProps) {
       {/* Prayer list */}
       <div className="flex-1 overflow-y-auto px-5 pb-28">
         {loading ? (
-          <p className="text-center text-xs text-white/30 pt-10">{t('loading')}</p>
+          <div className="flex justify-center pt-16">
+            <LogoPulse />
+          </div>
         ) : prayers.length === 0 ? (
           <p className="text-center text-xs text-white/30 pt-10">{t('empty')}</p>
         ) : (
