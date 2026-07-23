@@ -11,6 +11,30 @@ export type ViewTab = 'home' | 'history' | 'settings';
 
 const POLL_INTERVAL_MS = 3000;
 const SEVEN_DAYS_ISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+const PENDING_DURATION_KEY = 'ongi-pending-duration';
+
+interface PendingDuration {
+  id: string;
+  duration: number;
+}
+
+function readPendingDuration(): PendingDuration | null {
+  try {
+    const raw = localStorage.getItem(PENDING_DURATION_KEY);
+    return raw ? (JSON.parse(raw) as PendingDuration) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePendingDuration(value: PendingDuration | null) {
+  try {
+    if (value) localStorage.setItem(PENDING_DURATION_KEY, JSON.stringify(value));
+    else localStorage.removeItem(PENDING_DURATION_KEY);
+  } catch {
+    // storage unavailable
+  }
+}
 
 /// Privacy: round GPS to ~10km grid to protect exact location
 function fuzzyPosition(pos: { lat: number; lng: number }) {
@@ -37,6 +61,23 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
 
   const supabase = createClient();
 
+  // 백그라운드 장기 체류 후 만료 토큰으로 UPDATE가 401 거부될 수 있다 —
+  // 실패 시 세션 갱신 후 1회 재시도, 그래도 실패하면 다음 실행 때 반영(pending)
+  async function saveDuration(id: string, duration: number) {
+    const attempt = () =>
+      supabase.from('prayers').update({ duration_seconds: duration }).eq('id', id);
+    let { error } = await attempt();
+    if (error) {
+      await supabase.auth.refreshSession();
+      ({ error } = await attempt());
+    }
+    if (error) {
+      writePendingDuration({ id, duration });
+    } else if (readPendingDuration()?.id === id) {
+      writePendingDuration(null);
+    }
+  }
+
   // Load user + initial prayers
   useEffect(() => {
     async function init() {
@@ -46,6 +87,17 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
         return;
       }
       userIdRef.current = user.id;
+
+      // 이전 세션에서 저장 실패한 기도 시간 반영 (미기록 행만 채움)
+      const pending = readPendingDuration();
+      if (pending) {
+        const { error } = await supabase
+          .from('prayers')
+          .update({ duration_seconds: pending.duration })
+          .eq('id', pending.id)
+          .is('duration_seconds', null);
+        if (!error) writePendingDuration(null);
+      }
 
       // Load nickname + recent prayers (last 7 days) in parallel
       const [{ data: profile }, { data: prayers }] = await Promise.all([
@@ -121,6 +173,9 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       const onVisibilityChange = () => {
         if (document.visibilityState === 'visible' && prayerStartRef.current) {
           setElapsedSeconds(Math.floor((Date.now() - prayerStartRef.current) / 1000));
+          // 백그라운드 중 토큰이 만료됐을 수 있어 선제 갱신 —
+          // 사용자가 "기도 마치기"를 누를 때 유효 토큰을 보장
+          supabase.auth.getSession();
         }
       };
       document.addEventListener('visibilitychange', onVisibilityChange);
@@ -135,6 +190,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
         timerRef.current = null;
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPraying]);
 
   const handleTogglePrayer = useCallback(async () => {
@@ -144,10 +200,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       setUserPosition(null);
       if (activePrayerIdRef.current) {
         const totalDuration = prevDurationRef.current + Math.floor((Date.now() - prayerStartRef.current) / 1000);
-        await supabase
-          .from('prayers')
-          .update({ duration_seconds: totalDuration })
-          .eq('id', activePrayerIdRef.current);
+        await saveDuration(activePrayerIdRef.current, totalDuration);
 
         // Update local point to residual
         const prayerId = activePrayerIdRef.current;
@@ -182,10 +235,11 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
 
       if (existing) {
         // Update existing: new location, reset to active
-        await supabase
+        const { error: updateError } = await supabase
           .from('prayers')
           .update({ lat: pos.lat, lng: pos.lng, prayed_at: new Date().toISOString(), duration_seconds: null })
           .eq('id', existing.id);
+        if (updateError) console.warn('prayer start update failed:', updateError.message);
 
         activePrayerIdRef.current = existing.id;
 

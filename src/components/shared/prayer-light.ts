@@ -43,7 +43,13 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
 
   // Use SVG as center image, CSS for glow layers
   const isActiveLight = isActive;
-  const svgCore = isActiveLight ? '/기도의빛_중심.svg' : '/잔상_중심.svg';
+  // 내 잔광은 "기도의 불" 느낌의 불씨(ember) 톤으로 구분
+  const isMyResidual = !isActiveLight && isUser;
+  const svgCore = isActiveLight
+    ? '/기도의빛_중심.svg'
+    : isMyResidual
+      ? '/잔상_중심_ember.svg'
+      : '/잔상_중심.svg';
 
   const twinkleDuration = 2 + Math.random() * 4;
   const twinkleDelay = Math.random() * -6;
@@ -53,7 +59,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
   const dimOpacity = isActiveLight ? '' : `opacity: ${0.4 + (clamped / 8) * 0.3};`;
 
   // Outer bloom (CSS radial gradient)
-  const bloomColor = isActiveLight ? '#FFE164' : '#AA8833';
+  const bloomColor = isActiveLight ? '#FFE164' : isMyResidual ? '#E8632F' : '#AA8833';
   const bloom = document.createElement('div');
   bloom.style.cssText = `
     position:absolute; left:50%; top:50%;
@@ -66,7 +72,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
   el.appendChild(bloom);
 
   // Inner glow (CSS radial gradient)
-  const glowColor = isActiveLight ? '#FFFAB4' : '#BB9944';
+  const glowColor = isActiveLight ? '#FFFAB4' : isMyResidual ? '#FFA274' : '#BB9944';
   const glow = document.createElement('div');
   glow.style.cssText = `
     position:absolute; left:50%; top:50%;
@@ -81,7 +87,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
   // Core (SVG image + CSS box-shadow for extra glow)
   const core = document.createElement('img');
   core.src = svgCore;
-  const shadowColor = isActiveLight ? '#FFD700' : '#AA8833';
+  const shadowColor = isActiveLight ? '#FFD700' : isMyResidual ? '#F0703E' : '#AA8833';
   core.style.cssText = `
     position:absolute; left:50%; top:50%;
     width:${coreSize}px; height:${coreSize}px;
