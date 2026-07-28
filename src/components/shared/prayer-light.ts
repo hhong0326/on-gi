@@ -1,3 +1,4 @@
+import { appConfig } from '@/lib/app-config';
 import { formatRelativeTime } from '@/lib/format';
 
 export interface TooltipLabels {
@@ -58,8 +59,13 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
     : '';
   const dimOpacity = isActiveLight ? '' : `opacity: ${0.4 + (clamped / 8) * 0.3};`;
 
+  // 잔광 팔레트는 DB app_config로 배포 없이 튜닝 가능
+  const residualPalette = isMyResidual
+    ? appConfig.residualColors.mine
+    : appConfig.residualColors.others;
+
   // Outer bloom (CSS radial gradient)
-  const bloomColor = isActiveLight ? '#FFE164' : isMyResidual ? '#E8632F' : '#AA8833';
+  const bloomColor = isActiveLight ? '#FFE164' : residualPalette.bloom;
   const bloom = document.createElement('div');
   bloom.style.cssText = `
     position:absolute; left:50%; top:50%;
@@ -72,7 +78,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
   el.appendChild(bloom);
 
   // Inner glow (CSS radial gradient)
-  const glowColor = isActiveLight ? '#FFFAB4' : isMyResidual ? '#FFA274' : '#BB9944';
+  const glowColor = isActiveLight ? '#FFFAB4' : residualPalette.glow;
   const glow = document.createElement('div');
   glow.style.cssText = `
     position:absolute; left:50%; top:50%;
@@ -87,7 +93,7 @@ export function createPrayerLightElement({ weight, isUser, isActive, prayedAt, c
   // Core (SVG image + CSS box-shadow for extra glow)
   const core = document.createElement('img');
   core.src = svgCore;
-  const shadowColor = isActiveLight ? '#FFD700' : isMyResidual ? '#F0703E' : '#AA8833';
+  const shadowColor = isActiveLight ? '#FFD700' : residualPalette.shadow;
   core.style.cssText = `
     position:absolute; left:50%; top:50%;
     width:${coreSize}px; height:${coreSize}px;

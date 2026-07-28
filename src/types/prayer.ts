@@ -1,3 +1,5 @@
+import { appConfig } from '@/lib/app-config';
+
 export interface PrayerPoint {
   id: string;
   lat: number;
@@ -18,12 +20,13 @@ export interface PrayerRow {
   duration_seconds: number | null;
 }
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const THIRTY_MINUTES_MS = 30 * 60 * 1000;
 
+// 감쇠 곡선 파라미터(days, minIntensity)는 DB app_config로 배포 없이 튜닝 가능
 export function calculateIntensity(prayedAt: string): number {
+  const decayMs = appConfig.decay.days * 24 * 60 * 60 * 1000;
   const elapsed = Date.now() - new Date(prayedAt).getTime();
-  return Math.max(0.1, 1 - elapsed / SEVEN_DAYS_MS);
+  return Math.max(appConfig.decay.minIntensity, 1 - elapsed / decayMs);
 }
 
 // 격자 스냅 패턴 완화: id 기반 결정적 오프셋 (±0.04도 ≈ ±4km)

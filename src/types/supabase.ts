@@ -34,6 +34,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       churches: {
         Row: {
           created_at: string | null
@@ -203,10 +221,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_prayer_stats: {
-        Args: { p_period?: string; p_user_id: string }
-        Returns: Json
-      }
+      get_prayer_stats:
+        | { Args: { p_period?: string; p_user_id: string }; Returns: Json }
+        | {
+            Args: { p_period?: string; p_timezone?: string; p_user_id: string }
+            Returns: Json
+          }
     }
     Enums: {
       [_ in never]: never

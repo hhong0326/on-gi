@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { loadAppConfig } from '@/lib/app-config';
 import { createClient } from '@/lib/supabase/client';
 import { getCurrentPosition } from '@/lib/bridge';
 import type { PrayerPoint, PrayerRow } from '@/types/prayer';
@@ -99,8 +100,9 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
         if (!error) writePendingDuration(null);
       }
 
-      // Load nickname + recent prayers (last 7 days) in parallel
-      const [{ data: profile }, { data: prayers }] = await Promise.all([
+      // Load app config + nickname + recent prayers (last 7 days) in parallel
+      const [, { data: profile }, { data: prayers }] = await Promise.all([
+        loadAppConfig(supabase),
         supabase
           .from('users')
           .select('nickname')
