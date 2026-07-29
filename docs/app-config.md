@@ -57,13 +57,26 @@ where key = 'decay';
 
 ### `features` — 기능 플래그
 
-`audio`: 기도 음원 재생 on/off. `false`면 기도 시작 시 음원이 재생되지 않고 음소거 버튼도 숨겨진다.
+#### `audio` — 기도 음원 재생
+
+기도 시작 시 앰비언트 음원(`public/audio/prayer-ambient-v2.m4a`, 10분 루프) 재생 여부.
+`false`면 음원이 재생되지 않고 기도 중 음소거(🔊/🔇) 버튼도 숨겨진다.
+플래그는 **앱 로드 시점에 1회 읽으므로**, 켠 뒤 사용자는 다음 접속부터 적용된다.
 
 ```sql
+-- 음원 켜기
 update app_config
 set value = jsonb_set(value, '{audio}', 'true'), updated_at = now()
 where key = 'features';
+
+-- 음원 끄기 (문제 발생 시 즉시 비활성화 — 배포 불필요)
+update app_config
+set value = jsonb_set(value, '{audio}', 'false'), updated_at = now()
+where key = 'features';
 ```
+
+음원 파일 교체 시: 새 파일을 `public/audio/prayer-ambient-v3.m4a`처럼 버전을 올려 추가하고
+`src/lib/audio.ts`의 `AUDIO_SRC` 상수를 변경해 배포한다 (파일명 버저닝은 immutable 캐시 때문에 필수).
 
 ## 현재 값 확인
 
