@@ -1,36 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ON-GI (기도의 불)
 
-## Getting Started
+실시간 글로벌 기도를 3D 지구본 위 따뜻한 빛으로 시각화하는 기독교 기도 웹앱 (PWA).
 
-First, run the development server:
+- **스택**: Next.js 16 (App Router) · Supabase (Auth/DB) · Mapbox GL (globe projection) · Tailwind CSS · next-intl (5개 언어)
+- **호스팅**: Vercel — `main` 푸시 시 자동 배포
+
+## 개발
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev              # 개발 서버
+npm run build            # 프로덕션 빌드 (sw.js 생성 포함)
+npm run lint             # ESLint
+npx supabase start       # 로컬 Supabase
+npx supabase migration up  # 로컬 DB에 마이그레이션 적용
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+환경 변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_MAPBOX_TOKEN` (`.env.local`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 운영 문서
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [app_config — 배포 없이 앱 시스템 값 튜닝](docs/app-config.md): 잔광 색상, 감쇠 곡선, 기능 플래그를 DB에서 SQL로 변경
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+프로젝트 구조·코딩 규칙은 [CLAUDE.md](CLAUDE.md) 참고.
