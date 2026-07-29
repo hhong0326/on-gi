@@ -56,6 +56,8 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Static files in /public: Cache First
+  // 주의: 오디오(m4a 등)는 의도적으로 제외 — <audio>의 Range 요청을 SW가 캐시로 응답하면
+  // iOS Safari 재생이 깨진다. 오디오는 HTTP 캐시(immutable 헤더)에 맡긴다.
   if (
     url.pathname.match(/\.(svg|png|jpg|webp|ico|json|woff2?)$/) &&
     url.origin === self.location.origin

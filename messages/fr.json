@@ -14,7 +14,9 @@
     "completeMessage": "Votre priere eclaire le monde",
     "amen": "Amen",
     "prayedAt": "A prie il y a {time}",
-    "praying": "En priere"
+    "praying": "En priere",
+    "soundOn": "Activer le son",
+    "soundOff": "Couper le son"
   },
   "tab": {
     "home": "Globe de Priere",

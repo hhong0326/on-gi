@@ -57,7 +57,7 @@ where key = 'decay';
 
 ### `features` — 기능 플래그
 
-`audio`: 기도 음원 재생 (현재 음원 기능이 revert 상태라 코드에 미연결 — 기능 복원 시 이 플래그로 켜고 끔).
+`audio`: 기도 음원 재생 on/off. `false`면 기도 시작 시 음원이 재생되지 않고 음소거 버튼도 숨겨진다.
 
 ```sql
 update app_config

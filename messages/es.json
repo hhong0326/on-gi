@@ -14,7 +14,9 @@
     "completeMessage": "Tu oracion ilumina el mundo",
     "amen": "Amen",
     "prayedAt": "Oro hace {time}",
-    "praying": "Orando"
+    "praying": "Orando",
+    "soundOn": "Activar sonido",
+    "soundOff": "Desactivar sonido"
   },
   "tab": {
     "home": "Globo de Oracion",

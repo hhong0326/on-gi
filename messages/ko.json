@@ -14,7 +14,9 @@
     "completeMessage": "당신의 기도가 세상을 밝힙니다",
     "amen": "아멘",
     "prayedAt": "{time}에 기도",
-    "praying": "기도 중"
+    "praying": "기도 중",
+    "soundOn": "소리 켜기",
+    "soundOff": "소리 끄기"
   },
   "tab": {
     "home": "기도 지구본",
