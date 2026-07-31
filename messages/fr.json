@@ -42,17 +42,18 @@
     "weekdays": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
   },
   "settings": {
-    "account": "👤 Compte",
+    "title": "Réglages",
+    "account": "Compte",
     "nickname": "Pseudo",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "close": "Fermer",
-    "language": "🌐 Langue",
+    "language": "Langue",
     "appLanguage": "Langue de l'App",
     "invite": "Lien d'Invitation",
-    "inviteCopied": "✅ Copie",
-    "inviteCopy": "📋 Copier",
-    "privacy": "🔒 Confidentialite",
+    "inviteCopied": "Copie",
+    "inviteCopy": "Copier",
+    "privacy": "Confidentialite",
     "privacyNotice": "La localisation est approximee a une grille de ~10km. La position exacte n'est pas collectee."
   },
   "time": {

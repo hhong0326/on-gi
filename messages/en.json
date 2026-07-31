@@ -42,17 +42,18 @@
     "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
   },
   "settings": {
-    "account": "👤 Account",
+    "title": "Settings",
+    "account": "Account",
     "nickname": "Nickname",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
-    "language": "🌐 Language",
+    "language": "Language",
     "appLanguage": "App Language",
     "invite": "Invite Link",
-    "inviteCopied": "✅ Copied",
-    "inviteCopy": "📋 Copy",
-    "privacy": "🔒 Privacy",
+    "inviteCopied": "Copied",
+    "inviteCopy": "Copy",
+    "privacy": "Privacy",
     "privacyNotice": "Location data is approximated to ~10km grid. Exact location is not collected."
   },
   "time": {

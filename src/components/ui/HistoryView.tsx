@@ -96,8 +96,11 @@ export function HistoryView({ onClose }: HistoryViewProps) {
     fetchPrayers();
   }, [period]);
 
+  const isLoading = statsLoading || loading;
+
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[#08080F]">
+    // bottom-[92px]: 하단 탭바(pt-3 + h-12 + pb-8) 영역을 비워 탭바 상시 노출
+    <div className="absolute inset-x-0 top-0 bottom-[92px] z-40 flex flex-col bg-[#08080F]">
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-14 pb-4">
         <h2 className="text-lg font-bold text-white">{t('title')}</h2>
@@ -124,59 +127,58 @@ export function HistoryView({ onClose }: HistoryViewProps) {
         ))}
       </div>
 
-      {/* Stats card */}
-      <div className="mx-5 mb-4 rounded-xl bg-white/5 p-4">
-        {statsLoading ? (
-          <div className="flex justify-center py-4">
-            <LogoPulse size="sm" />
-          </div>
-        ) : (
-          <div className="flex justify-around text-center">
-            <div>
-              <p className="text-2xl font-bold text-amber-400">{stats.total_count}</p>
-              <p className="text-xs text-white/40">{t('count')}</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-amber-400">{formatDuration(stats.total_seconds, timeUnits)}</p>
-              <p className="text-xs text-white/40">{t('totalTime')}</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-amber-400">
-                {stats.total_count > 0 ? formatDuration(stats.avg_seconds, timeUnits) : '-'}
-              </p>
-              <p className="text-xs text-white/40">{t('average')}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Prayer list */}
-      <div className="flex-1 overflow-y-auto px-5 pb-28">
-        {loading ? (
-          <div className="flex justify-center pt-16">
-            <LogoPulse />
-          </div>
-        ) : prayers.length === 0 ? (
-          <p className="text-center text-xs text-white/30 pt-10">{t('empty')}</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {prayers.map((p) => (
-              <div key={p.id} className="rounded-xl bg-white/5 px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/80">{formatDate(p.prayed_at, weekdays)}</span>
-                  <span className="text-xs text-white/40">{formatTime(p.prayed_at, t('am'), t('pm'))}</span>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="text-xs text-amber-400">🕯️</span>
-                  <span className="text-sm font-medium text-amber-300">
-                    {p.duration_seconds ? formatDuration(p.duration_seconds, timeUnits) : tp('praying')}
-                  </span>
-                </div>
+      {isLoading ? (
+        // 통계+목록 로딩을 묶어 화면에 로딩 표시는 하나만
+        <div className="flex justify-center pt-16">
+          <LogoPulse />
+        </div>
+      ) : (
+        <>
+          {/* Stats card */}
+          <div className="mx-5 mb-4 rounded-xl bg-white/5 p-4">
+            <div className="flex justify-around text-center">
+              <div>
+                <p className="text-2xl font-bold text-amber-400">{stats.total_count}</p>
+                <p className="text-xs text-white/40">{t('count')}</p>
               </div>
-            ))}
+              <div>
+                <p className="text-2xl font-bold text-amber-400">{formatDuration(stats.total_seconds, timeUnits)}</p>
+                <p className="text-xs text-white/40">{t('totalTime')}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-amber-400">
+                  {stats.total_count > 0 ? formatDuration(stats.avg_seconds, timeUnits) : '-'}
+                </p>
+                <p className="text-xs text-white/40">{t('average')}</p>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Prayer list */}
+          <div className="flex-1 overflow-y-auto px-5 pb-4">
+            {prayers.length === 0 ? (
+              <p className="text-center text-xs text-white/30 pt-10">{t('empty')}</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {prayers.map((p) => (
+                  <div key={p.id} className="rounded-xl bg-white/5 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/80">{formatDate(p.prayed_at, weekdays)}</span>
+                      <span className="text-xs text-white/40">{formatTime(p.prayed_at, t('am'), t('pm'))}</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xs text-amber-400">🕯️</span>
+                      <span className="text-sm font-medium text-amber-300">
+                        {p.duration_seconds ? formatDuration(p.duration_seconds, timeUnits) : tp('praying')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

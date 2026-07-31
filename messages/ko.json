@@ -50,17 +50,18 @@
     ]
   },
   "settings": {
-    "account": "👤 계정",
+    "title": "앱 설정",
+    "account": "계정",
     "nickname": "닉네임",
     "save": "저장",
     "cancel": "취소",
     "close": "닫기",
-    "language": "🌐 언어",
+    "language": "언어",
     "appLanguage": "앱 언어",
     "invite": "초대 링크",
-    "inviteCopied": "✅ 복사됨",
-    "inviteCopy": "📋 복사하기",
-    "privacy": "🔒 프라이버시",
+    "inviteCopied": "복사됨",
+    "inviteCopy": "복사하기",
+    "privacy": "프라이버시",
     "privacyNotice": "위치 정보는 약 10km 단위로 대략화되어 저장됩니다. 정확한 위치는 수집하지 않습니다."
   },
   "time": {

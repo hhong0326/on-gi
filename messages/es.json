@@ -42,17 +42,18 @@
     "weekdays": ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"]
   },
   "settings": {
-    "account": "👤 Cuenta",
+    "title": "Ajustes",
+    "account": "Cuenta",
     "nickname": "Apodo",
     "save": "Guardar",
     "cancel": "Cancelar",
     "close": "Cerrar",
-    "language": "🌐 Idioma",
+    "language": "Idioma",
     "appLanguage": "Idioma de la App",
     "invite": "Enlace de Invitacion",
-    "inviteCopied": "✅ Copiado",
-    "inviteCopy": "📋 Copiar",
-    "privacy": "🔒 Privacidad",
+    "inviteCopied": "Copiado",
+    "inviteCopy": "Copiar",
+    "privacy": "Privacidad",
     "privacyNotice": "La ubicacion se aproxima a una cuadricula de ~10km. No se recopila la ubicacion exacta."
   },
   "time": {

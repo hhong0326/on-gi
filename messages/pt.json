@@ -42,17 +42,18 @@
     "weekdays": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"]
   },
   "settings": {
-    "account": "👤 Conta",
+    "title": "Configurações",
+    "account": "Conta",
     "nickname": "Apelido",
     "save": "Salvar",
     "cancel": "Cancelar",
     "close": "Fechar",
-    "language": "🌐 Idioma",
+    "language": "Idioma",
     "appLanguage": "Idioma do App",
     "invite": "Link de Convite",
-    "inviteCopied": "✅ Copiado",
-    "inviteCopy": "📋 Copiar",
-    "privacy": "🔒 Privacidade",
+    "inviteCopied": "Copiado",
+    "inviteCopy": "Copiar",
+    "privacy": "Privacidade",
     "privacyNotice": "A localizacao e aproximada em uma grade de ~10km. A localizacao exata nao e coletada."
   },
   "time": {
