@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import {useTranslations} from 'next-intl';
+import { BookOpenText, FireSimple } from '@phosphor-icons/react';
 import { createClient } from '@/lib/supabase/client';
 import { LogoPulse } from '@/components/ui/LogoPulse';
 import { usePrayerStats, type StatsPeriod } from '@/hooks/usePrayerStats';
@@ -99,16 +100,16 @@ export function HistoryView({ onClose }: HistoryViewProps) {
   const isLoading = statsLoading || loading;
 
   return (
-    // bottom-[92px]: 하단 탭바(pt-3 + h-12 + pb-8) 영역을 비워 탭바 상시 노출
-    <div className="absolute inset-x-0 top-0 bottom-[92px] z-40 flex flex-col bg-[#08080F]">
+    // 전체 화면 패널. 플로팅 탭바(z-40)가 위에 떠 있으므로 스크롤 영역은 pb-24로 탭바 높이만큼 비운다
+    <div className="absolute inset-0 z-30 flex flex-col bg-night">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-14 pb-4">
-        <h2 className="text-lg font-bold text-white">{t('title')}</h2>
-        <button onClick={onClose} className="text-sm text-white/50">{ts('close')}</button>
+      <header className="flex items-center justify-between px-6 pt-16 pb-4">
+        <h2 className="text-lg font-semibold text-ivory">{t('title')}</h2>
+        <button onClick={onClose} className="rounded-full px-3 py-2 text-sm text-ivory/45 transition-colors duration-300 ease-weighted hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60">{ts('close')}</button>
       </header>
 
       {/* Period toggle */}
-      <div className="flex gap-2 px-5 pb-4">
+      <div className="flex gap-2 px-6 pb-4">
         {([
           { key: 'week' as const, label: t('thisWeek') },
           { key: 'prev_week' as const, label: t('lastWeek') },
@@ -118,8 +119,9 @@ export function HistoryView({ onClose }: HistoryViewProps) {
           <button
             key={p.key}
             onClick={() => setPeriod(p.key)}
-            className={`rounded-full px-3 py-1.5 text-xs ${
-              period === p.key ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/50'
+            aria-pressed={period === p.key}
+            className={`rounded-full px-3 py-2 text-xs font-semibold transition-[background-color,color] duration-300 ease-weighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 ${
+              period === p.key ? 'bg-gold text-night' : 'bg-gold/10 text-ivory/45 hover:text-ivory/70'
             }`}
           >
             {p.label}
@@ -135,40 +137,43 @@ export function HistoryView({ onClose }: HistoryViewProps) {
       ) : (
         <>
           {/* Stats card */}
-          <div className="mx-5 mb-4 rounded-xl bg-white/5 p-4">
+          <div className="mx-6 mb-4 rounded-2xl border border-gold/10 bg-gold/5 p-4">
             <div className="flex justify-around text-center">
               <div>
-                <p className="text-2xl font-bold text-amber-400">{stats.total_count}</p>
-                <p className="text-xs text-white/40">{t('count')}</p>
+                <p className="text-2xl font-semibold text-gold-light">{stats.total_count}</p>
+                <p className="text-xs text-ivory/45">{t('count')}</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-amber-400">{formatDuration(stats.total_seconds, timeUnits)}</p>
-                <p className="text-xs text-white/40">{t('totalTime')}</p>
+                <p className="text-2xl font-semibold text-gold-light">{formatDuration(stats.total_seconds, timeUnits)}</p>
+                <p className="text-xs text-ivory/45">{t('totalTime')}</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-amber-400">
+                <p className="text-2xl font-semibold text-gold-light">
                   {stats.total_count > 0 ? formatDuration(stats.avg_seconds, timeUnits) : '-'}
                 </p>
-                <p className="text-xs text-white/40">{t('average')}</p>
+                <p className="text-xs text-ivory/45">{t('average')}</p>
               </div>
             </div>
           </div>
 
           {/* Prayer list */}
-          <div className="flex-1 overflow-y-auto px-5 pb-4">
+          <div className="flex-1 overflow-y-auto px-6 pb-24">
             {prayers.length === 0 ? (
-              <p className="text-center text-xs text-white/30 pt-10">{t('empty')}</p>
+              <div className="flex flex-col items-center gap-3 pt-12 text-ivory/30">
+                <BookOpenText size={32} weight="light" />
+                <p className="text-sm">{t('empty')}</p>
+              </div>
             ) : (
               <div className="flex flex-col gap-3">
                 {prayers.map((p) => (
-                  <div key={p.id} className="rounded-xl bg-white/5 px-4 py-3">
+                  <div key={p.id} className="rounded-2xl border border-gold/10 bg-gold/5 px-4 py-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/80">{formatDate(p.prayed_at, weekdays)}</span>
-                      <span className="text-xs text-white/40">{formatTime(p.prayed_at, t('am'), t('pm'))}</span>
+                      <span className="text-sm text-ivory/70">{formatDate(p.prayed_at, weekdays)}</span>
+                      <span className="font-mono text-xs text-ivory/45">{formatTime(p.prayed_at, t('am'), t('pm'))}</span>
                     </div>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-xs text-amber-400">🕯️</span>
-                      <span className="text-sm font-medium text-amber-300">
+                    <div className="mt-1 flex items-center gap-2 text-gold-light">
+                      <FireSimple size={16} weight="fill" className="text-gold" />
+                      <span className="text-sm font-semibold">
                         {p.duration_seconds ? formatDuration(p.duration_seconds, timeUnits) : tp('praying')}
                       </span>
                     </div>

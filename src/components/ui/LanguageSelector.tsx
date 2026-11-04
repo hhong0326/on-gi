@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { CaretDown, CaretRight, Check, Globe } from '@phosphor-icons/react';
 import { routing } from '@/i18n/routing';
 
 const LOCALE_LABELS: Record<string, string> = {
@@ -31,27 +33,19 @@ export function LanguageSelector({ variant = 'dropdown' }: LanguageSelectorProps
   const triggerButton = variant === 'inline' ? (
     <button
       onClick={() => setOpen(true)}
-      className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs"
-      style={{
-        background: 'rgba(212, 164, 76, 0.15)',
-        border: '1px solid rgba(212, 164, 76, 0.3)',
-        color: '#D4A44C',
-      }}
+      className="flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-3 py-2 text-xs text-gold transition-colors duration-300 ease-weighted hover:bg-gold/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
     >
       {LOCALE_LABELS[locale]}
-      <span className="text-[10px]">›</span>
+      <CaretRight size={12} />
     </button>
   ) : (
     <button
       onClick={() => setOpen(true)}
-      className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-all"
-      style={{
-        background: 'rgba(255, 255, 255, 0.06)',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        color: '#D4A44C',
-      }}
+      className="flex items-center gap-2 rounded-full border border-gold/15 bg-gold/5 px-3 py-2 text-xs text-gold transition-colors duration-300 ease-weighted hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
     >
-      🌐 {LOCALE_LABELS[locale]} ▾
+      <Globe size={16} />
+      {LOCALE_LABELS[locale]}
+      <CaretDown size={12} />
     </button>
   );
 
@@ -59,36 +53,33 @@ export function LanguageSelector({ variant = 'dropdown' }: LanguageSelectorProps
     <>
       {triggerButton}
 
-      {open && (
+      {/* body로 portal: 부모 패널의 stacking context(z-30)에 갇혀 플로팅 탭바(z-40) 아래로 깔리지 않게 */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setOpen(false)}>
-          <div className="fixed inset-0 bg-black/80" />
+          <div className="fixed inset-0 bg-night/80" />
           <div
-            className="relative w-full max-w-sm rounded-t-2xl pb-8 pt-3"
-            style={{
-              background: '#1a1a2e',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderBottom: 'none',
-            }}
+            className="relative mx-4 mb-4 w-full max-w-sm rounded-3xl border border-gold/15 bg-night pb-4 pt-3"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
-            <p className="px-5 pb-2 text-xs text-white/40">🌐 Language</p>
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gold/20" />
+            <p className="flex items-center gap-2 px-6 pb-2 text-xs text-ivory/45"><Globe size={14} /> Language</p>
             {routing.locales.map((loc) => (
               <button
                 key={loc}
                 onClick={() => handleSelect(loc)}
-                className={`flex w-full items-center justify-between px-5 py-3 text-sm transition-colors ${
+                className={`flex w-full items-center justify-between px-6 py-3 text-sm transition-colors duration-300 ease-weighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 ${
                   loc === locale
-                    ? 'text-amber-400'
-                    : 'text-white/60 active:bg-white/5'
+                    ? 'text-gold'
+                    : 'text-ivory/70 hover:bg-gold/5 active:bg-gold/10'
                 }`}
               >
                 {LOCALE_LABELS[loc]}
-                {loc === locale && <span className="text-amber-400">✓</span>}
+                {loc === locale && <Check size={16} weight="bold" />}
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

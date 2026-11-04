@@ -76,8 +76,7 @@ function Starfield() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
+      className="fixed inset-0 z-0 pointer-events-none"
     />
   )
 }
@@ -140,28 +139,24 @@ export default function OnboardingPage() {
   const isValid = nickname.trim().length >= 1
 
   return (
-    <div className="relative min-h-dvh flex flex-col items-center justify-center px-6"
-      style={{ background: 'linear-gradient(180deg, #08080F 0%, #0A0A12 100%)' }}
-    >
+    <div className="relative min-h-dvh flex flex-col items-center justify-center bg-night px-6">
       <Starfield />
 
       <div className="relative z-10 flex flex-col items-center text-center w-full max-w-sm">
         {/* Logo */}
-        <div className="mb-10" style={{ filter: 'drop-shadow(0 0 12px rgba(212, 164, 76, 0.4))' }}>
+        <div className="mb-10 drop-shadow-glow">
           <Image src="/logo-en-lg.svg" alt="ON-GI" width={113} height={40} priority />
         </div>
 
         {/* Description */}
-        <p className="text-sm leading-relaxed mb-12" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+        <p className="text-base text-ivory/70 mb-12">
           {t('tagline1')}
           <br />
           {t('tagline2')}
         </p>
 
         {/* Nickname input as inline Bible verse */}
-        <div className="flex items-baseline justify-center flex-wrap gap-x-1 text-lg mb-2"
-          style={{ color: 'rgba(255, 255, 255, 0.9)' }}
-        >
+        <div className="flex items-baseline justify-center flex-wrap gap-x-1 text-lg text-ivory mb-2">
           <input
             ref={inputRef}
             type="text"
@@ -172,13 +167,10 @@ export default function OnboardingPage() {
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSubmit()
             }}
-            className="bg-transparent outline-none text-center text-lg"
+            className="max-w-40 border-b-2 border-gold/60 bg-transparent text-center text-lg text-gold-light caret-gold-light outline-none transition-colors duration-300 ease-weighted focus:border-gold"
+            // 입력 길이에 따라 실시간으로 늘어나는 폭 — 동적 값이라 style 유지
             style={{
-              borderBottom: '1.5px solid rgba(212, 164, 76, 0.6)',
-              color: '#F5D98A',
               width: `${Math.max([...nickname].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? 2 : 1), 0), 4)}ch`,
-              maxWidth: '10rem',
-              caretColor: '#F5D98A',
             }}
             autoFocus
           />
@@ -186,7 +178,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Bible verse reference */}
-        <p className="text-xs mb-14" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>
+        <p className="text-xs text-ivory/30 mb-16">
           {t('verseRef')}
         </p>
 
@@ -194,21 +186,13 @@ export default function OnboardingPage() {
         <button
           onClick={handleSubmit}
           disabled={!isValid || loading || !authReady}
-          className="px-8 py-3 rounded-full text-sm font-medium transition-all duration-300"
-          style={{
-            border: isValid ? '1px solid rgba(212, 164, 76, 0.7)' : '1px solid rgba(255, 255, 255, 0.15)',
-            color: isValid ? '#F5D98A' : 'rgba(255, 255, 255, 0.25)',
-            background: isValid ? 'rgba(212, 164, 76, 0.1)' : 'transparent',
-            boxShadow: isValid ? '0 0 16px rgba(212, 164, 76, 0.15)' : 'none',
-            opacity: isValid && authReady ? 1 : 0.4,
-            cursor: isValid && authReady && !loading ? 'pointer' : 'default',
-          }}
+          className={`h-12 rounded-full border px-8 text-base font-semibold transition-[background-color,border-color,color,opacity,transform] duration-300 ease-weighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 active:scale-[0.98] disabled:cursor-default ${
+            isValid
+              ? 'border-gold/60 bg-gold/10 text-gold-light hover:bg-gold/15'
+              : 'border-gold/15 text-ivory/30'
+          } ${isValid && authReady ? 'opacity-100' : 'opacity-40'}`}
         >
-          {loading ? (
-            <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-          ) : (
-            t('join')
-          )}
+          <span className={loading ? 'animate-pulse' : undefined}>{t('join')}</span>
         </button>
       </div>
 

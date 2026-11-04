@@ -9,6 +9,7 @@ import { appConfig } from '@/lib/app-config';
 import { getPrayerAudio } from '@/lib/audio';
 import { LogoPulse } from '@/components/ui/LogoPulse';
 import { PrayerOverlay } from '@/components/ui/PrayerOverlay';
+import { TabBar } from '@/components/ui/TabBar';
 import { HistoryView } from '@/components/ui/HistoryView';
 import { PrayerCompleteModal } from '@/components/ui/PrayerCompleteModal';
 import { SettingsView } from '@/components/ui/SettingsView';
@@ -88,7 +89,7 @@ export default function MainPage() {
   }, [uiReady]);
 
   return (
-    <div className="relative h-dvh w-full overflow-hidden" style={{ background: '#08080F' }}>
+    <div className="relative h-dvh w-full overflow-hidden bg-night">
       <div className="absolute inset-0 z-0">
         <MapboxView
           points={state.points}
@@ -125,10 +126,9 @@ export default function MainPage() {
 
       {!splashGone && (
         <div
-          className={`absolute inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${
+          className={`absolute inset-0 z-50 flex items-center justify-center bg-night transition-opacity duration-500 ease-weighted ${
             uiReady ? 'opacity-0' : 'opacity-100'
           }`}
-          style={{ background: '#08080F' }}
         >
           <LogoPulse />
         </div>
@@ -141,11 +141,19 @@ export default function MainPage() {
             isPraying={state.isPraying}
             elapsedSeconds={state.elapsedSeconds}
             onTogglePrayer={handleTogglePrayer}
-            activeTab={showSettings ? 'settings' : showHistory ? 'history' : state.activeTab}
-            onTabChange={handleTabChange}
             nickname={state.nickname}
             showSpinButton={spinAvailable}
             onSpinClick={() => resumeSpinRef.current?.()}
+          />
+        </div>
+      )}
+
+      {/* 플로팅 탭바 — 기록/설정 패널(z-30) 위, 모달(z-50) 아래 */}
+      {uiReady && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-40 mb-[env(safe-area-inset-bottom)] flex justify-center">
+          <TabBar
+            activeTab={showSettings ? 'settings' : showHistory ? 'history' : state.activeTab}
+            onTabChange={handleTabChange}
           />
         </div>
       )}

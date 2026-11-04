@@ -3,17 +3,15 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import {useTranslations} from 'next-intl';
+import { ArrowsClockwise, SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react';
 import { appConfig } from '@/lib/app-config';
 import { getPrayerAudio } from '@/lib/audio';
-import type { ViewTab } from '@/hooks/usePrayerState';
 
 interface PrayerOverlayProps {
   prayerCount: number;
   isPraying: boolean;
   elapsedSeconds: number;
   onTogglePrayer: () => void;
-  activeTab: ViewTab;
-  onTabChange: (tab: ViewTab) => void;
   nickname?: string | null;
   showSpinButton?: boolean;
   onSpinClick?: () => void;
@@ -25,25 +23,19 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-const TABS: { key: ViewTab; icon: string }[] = [
-  { key: 'home', icon: '🌍' },
-  { key: 'history', icon: '📖' },
-  { key: 'settings', icon: '⚙️' },
-];
+const ICON_BUTTON =
+  'absolute right-6 flex h-12 w-12 items-center justify-center rounded-full text-ivory/70 transition-[color,transform] duration-300 ease-weighted hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 active:scale-95';
 
 export function PrayerOverlay({
   prayerCount,
   isPraying,
   elapsedSeconds,
   onTogglePrayer,
-  activeTab,
-  onTabChange,
   nickname,
   showSpinButton = false,
   onSpinClick,
 }: PrayerOverlayProps) {
   const t = useTranslations('prayer');
-  const tt = useTranslations('tab');
   const tc = useTranslations('common');
   const [audioMuted, setAudioMuted] = useState(() =>
     typeof window === 'undefined' ? false : getPrayerAudio().isMuted()
@@ -58,20 +50,20 @@ export function PrayerOverlay({
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col">
       {/* Header */}
-      <header className="pointer-events-auto flex items-center justify-between px-5 pt-14 pb-4">
-        <div style={{ filter: 'drop-shadow(0 0 8px rgba(212, 164, 76, 0.3))' }}>
+      <header className="pointer-events-auto flex items-center justify-between px-6 pt-16 pb-4">
+        <div className="drop-shadow-glow-sm">
           <Image src="/logo-en-sm.svg" alt="ON-GI" width={57} height={20} />
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
             </span>
-            <span className="text-xs text-gray-400">{prayerCount}</span>
+            <span className="font-mono text-xs text-ivory/70">{prayerCount}</span>
           </div>
           {nickname && (
-            <span className="text-xs text-white/50">{nickname}{tc('nicknameSuffix')}</span>
+            <span className="text-xs text-ivory/45">{nickname}{tc('nicknameSuffix')}</span>
           )}
         </div>
       </header>
@@ -79,14 +71,14 @@ export function PrayerOverlay({
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* CTA Button */}
-      <div className="pointer-events-auto relative flex items-center justify-center px-5 pb-6">
+      {/* CTA Button — pb-24: 하단 플로팅 탭바(bottom-4 + 높이 64px) 위로 16px 간격 */}
+      <div className="pointer-events-auto relative mb-[env(safe-area-inset-bottom)] flex items-center justify-center px-6 pb-24">
         <button
           onClick={onTogglePrayer}
-          className={`rounded-full px-8 py-3.5 text-base font-medium transition-all ${
+          className={`h-12 rounded-full px-8 text-base font-semibold transition-[background-color,border-color,color,transform] duration-300 ease-weighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 active:scale-[0.98] ${
             isPraying
-              ? 'bg-amber-500/90 text-white shadow-lg shadow-amber-500/30'
-              : 'border border-gray-500/50 bg-white/5 text-gray-300 backdrop-blur-sm hover:border-gray-400 hover:text-white'
+              ? 'bg-gold text-night'
+              : 'border border-gold/30 bg-night/60 text-gold-light backdrop-blur-md hover:border-gold/60 hover:bg-gold/10'
           }`}
         >
           {isPraying ? t('stop', {time: formatTime(elapsedSeconds)}) : t('start')}
@@ -96,10 +88,10 @@ export function PrayerOverlay({
         {isPraying && appConfig.features.audio && (
           <button
             onClick={handleToggleMute}
-            className="absolute right-5 flex h-11 w-11 items-center justify-center text-xl transition-transform active:scale-90"
+            className={ICON_BUTTON}
             aria-label={audioMuted ? t('soundOn') : t('soundOff')}
           >
-            {audioMuted ? '🔇' : '🔊'}
+            {audioMuted ? <SpeakerSlash size={24} /> : <SpeakerHigh size={24} />}
           </button>
         )}
 
@@ -107,31 +99,13 @@ export function PrayerOverlay({
         {showSpinButton && !isPraying && (
           <button
             onClick={onSpinClick}
-            className="absolute right-5 flex h-11 w-11 items-center justify-center text-xl transition-transform active:scale-90"
+            className={ICON_BUTTON}
             aria-label="resume globe spin"
           >
-            💫
+            <ArrowsClockwise size={24} />
           </button>
         )}
       </div>
-
-      {/* Tab Bar */}
-      <nav className="pointer-events-auto flex justify-evenly border-t border-white/10 bg-[#08080F]/90 px-4 pb-8 pt-3 backdrop-blur-sm">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => onTabChange(tab.key)}
-            className={`flex items-center justify-center w-12 h-12 rounded-full text-xl transition-all ${
-              activeTab === tab.key
-                ? 'text-white bg-white/10'
-                : 'text-gray-500'
-            }`}
-            aria-label={tt(tab.key)}
-          >
-            {tab.icon}
-          </button>
-        ))}
-      </nav>
     </div>
   );
 }

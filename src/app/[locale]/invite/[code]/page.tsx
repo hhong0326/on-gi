@@ -38,8 +38,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
   // Normal users are redirected by middleware before reaching here.
   return (
     <div
-      className="flex min-h-dvh flex-col items-center justify-center px-6"
-      style={{ background: '#08080F' }}
+      className="flex min-h-dvh flex-col items-center justify-center bg-night px-6"
     >
       <LogoPulse />
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import {useTranslations} from 'next-intl';
+import { HandsPraying } from '@phosphor-icons/react';
 
 interface PrayerCompleteModalProps {
   durationSeconds: number;
@@ -35,19 +36,19 @@ export function PrayerCompleteModal({ durationSeconds, onClose }: PrayerComplete
   });
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/85">
-      <div className="mx-8 w-full max-w-sm rounded-2xl bg-[#12121F] p-8 text-center shadow-2xl">
-        <p className="text-4xl">🙏</p>
-        <p className="mt-4 text-lg font-medium text-white">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-night/90">
+      <div className="mx-8 flex w-full max-w-sm flex-col items-center rounded-3xl border border-gold/15 bg-night p-8 text-center">
+        <HandsPraying size={48} weight="light" className="text-gold drop-shadow-glow" />
+        <p className="mt-4 text-lg font-semibold text-ivory">
           {t('complete', {duration})}
         </p>
-        <p className="mt-2 text-sm text-white/40">
+        <p className="mt-2 text-sm text-ivory/45">
           {t('completeMessage')}
         </p>
         <div className="mt-6">
           <button
             onClick={onClose}
-            className="rounded-full bg-amber-500/20 px-6 py-2 text-sm text-amber-300"
+            className="h-12 rounded-full border border-gold/30 bg-gold/10 px-8 text-base font-semibold text-gold-light transition-[background-color,transform] duration-300 ease-weighted hover:bg-gold/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 active:scale-[0.98]"
           >
             {t('amen')}
           </button>

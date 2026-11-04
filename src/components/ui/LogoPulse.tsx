@@ -10,7 +10,7 @@ const SIZES = {
 export function LogoPulse({ size = 'md' }: { size?: keyof typeof SIZES }) {
   const { width, height } = SIZES[size];
   return (
-    <div className="animate-pulse" style={{ filter: 'drop-shadow(0 0 12px rgba(212, 164, 76, 0.4))' }}>
+    <div className="animate-pulse drop-shadow-glow">
       <Image src="/logo-en-sm.svg" alt="ON-GI" width={width} height={height} priority />
     </div>
   );
