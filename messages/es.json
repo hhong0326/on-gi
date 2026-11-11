@@ -3,9 +3,11 @@
     "tagline1": "Tu eres la luz del mundo,",
     "tagline2": "Iluminemos la oscuridad con la calidez de la oracion",
     "verse": "es la luz del mundo",
+    "verseBatchim": "es la luz del mundo",
     "verseRef": "-Mateo 5:14",
     "join": "Unirse",
-    "title": "ON-GI — Orar Juntos"
+    "title": "ON-GI — Orar Juntos",
+    "demoNames": ["Gracia", "Ana", "Sara"]
   },
   "prayer": {
     "start": "Orar Juntos Ahora",

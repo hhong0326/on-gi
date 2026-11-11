@@ -1,12 +1,46 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from 'react'
 import { useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous-auth'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
+
+// 닉네임 빈칸 타이핑 데모 — 입력란임을 안내 문구 없이 시각적으로 알려준다
+const DEMO_START_MS = 600
+const DEMO_TYPE_MS = 180
+const DEMO_HOLD_MS = 1400
+const DEMO_DELETE_MS = 90
+const DEMO_PAUSE_MS = 500
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+
+function subscribeReducedMotion(onChange: () => void) {
+  const mql = window.matchMedia(REDUCED_MOTION_QUERY)
+  mql.addEventListener('change', onChange)
+  return () => mql.removeEventListener('change', onChange)
+}
+
+function usePrefersReducedMotion() {
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
+    () => false,
+  )
+}
+
+// 한글 마지막 글자에 받침이 있으면 true — "민준은" / "은혜는" 조사 선택용
+function hasBatchim(text: string): boolean {
+  const code = text.trim().slice(-1).charCodeAt(0)
+  return code >= 0xac00 && code <= 0xd7a3 && (code - 0xac00) % 28 !== 0
+}
+
+// 한글 등 전각 문자는 2ch로 계산해 밑줄 폭을 글자에 맞춘다
+function widthInCh(text: string): number {
+  return Math.max([...text].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? 2 : 1), 0), 4)
+}
 
 function Starfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -90,6 +124,55 @@ export default function OnboardingPage() {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // 데모는 사용자가 빈칸에 처음 포커스하는 순간 영구 중단
+  const [demoStopped, setDemoStopped] = useState(false)
+  const [demoText, setDemoText] = useState('')
+  const reducedMotion = usePrefersReducedMotion()
+  const demoNamesKey = (t.raw('demoNames') as string[]).join('\n')
+  const demoActive = !demoStopped && nickname === ''
+
+  useEffect(() => {
+    if (!demoActive || reducedMotion) return
+    const names = demoNamesKey.split('\n').filter(Boolean)
+    if (names.length === 0) return
+
+    let timer: ReturnType<typeof setTimeout>
+    let nameIndex = 0
+    let length = 0
+    let deleting = false
+
+    const tick = () => {
+      const chars = [...names[nameIndex]]
+      if (!deleting) {
+        length += 1
+        setDemoText(chars.slice(0, length).join(''))
+        if (length === chars.length) {
+          deleting = true
+          timer = setTimeout(tick, DEMO_HOLD_MS)
+        } else {
+          timer = setTimeout(tick, DEMO_TYPE_MS)
+        }
+      } else {
+        length -= 1
+        setDemoText(chars.slice(0, length).join(''))
+        if (length === 0) {
+          deleting = false
+          nameIndex = (nameIndex + 1) % names.length
+          timer = setTimeout(tick, DEMO_PAUSE_MS)
+        } else {
+          timer = setTimeout(tick, DEMO_DELETE_MS)
+        }
+      }
+    }
+
+    timer = setTimeout(tick, DEMO_START_MS)
+    return () => clearTimeout(timer)
+  }, [demoActive, reducedMotion, demoNamesKey])
+
+  // 모션 축소 설정이면 애니메이션 없이 첫 예시 이름을 흐리게 고정 표시
+  const shownDemo = reducedMotion ? demoNamesKey.split('\n')[0] : demoText
+  const sentenceName = nickname || (demoActive ? shownDemo : '')
+
   useEffect(() => {
     async function init() {
       const session = await ensureAnonymousSession()
@@ -157,24 +240,34 @@ export default function OnboardingPage() {
 
         {/* Nickname input as inline Bible verse */}
         <div className="flex items-baseline justify-center flex-wrap gap-x-1 text-lg text-ivory mb-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={nickname}
-            onChange={(e) => {
-              if ([...e.target.value].length <= 10) setNickname(e.target.value)
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSubmit()
-            }}
-            className="max-w-40 border-b-2 border-gold/60 bg-transparent text-center text-lg text-gold-light caret-gold-light outline-none transition-colors duration-300 ease-weighted focus:border-gold"
-            // 입력 길이에 따라 실시간으로 늘어나는 폭 — 동적 값이라 style 유지
-            style={{
-              width: `${Math.max([...nickname].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? 2 : 1), 0), 4)}ch`,
-            }}
-            autoFocus
-          />
-          <span>{t('verse')}</span>
+          <label className="relative inline-flex justify-center">
+            <input
+              ref={inputRef}
+              type="text"
+              value={nickname}
+              onChange={(e) => {
+                if ([...e.target.value].length <= 10) setNickname(e.target.value)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSubmit()
+              }}
+              onFocus={() => setDemoStopped(true)}
+              className="max-w-40 border-b-2 border-gold/60 bg-transparent text-center text-lg text-gold-light caret-gold-light outline-none transition-colors duration-300 ease-weighted focus:border-gold"
+              // 입력(또는 데모) 길이에 따라 실시간으로 늘어나는 폭 — 동적 값이라 style 유지
+              // 데모 중엔 깜빡이는 캐럿이 밑줄 밖으로 나가지 않게 1ch 여유
+              style={{ width: `${widthInCh(sentenceName) + (demoActive && !reducedMotion ? 1 : 0)}ch` }}
+            />
+            {demoActive && (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center text-lg text-gold-light/50"
+              >
+                {shownDemo}
+                {!reducedMotion && <span className="ml-0.5 h-6 w-0.5 animate-pulse bg-gold-light/70" />}
+              </span>
+            )}
+          </label>
+          <span>{t(hasBatchim(sentenceName) ? 'verseBatchim' : 'verse')}</span>
         </div>
 
         {/* Bible verse reference */}

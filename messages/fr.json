@@ -3,9 +3,11 @@
     "tagline1": "Vous etes la lumiere du monde,",
     "tagline2": "Eclairons les tenebres par la chaleur de la priere",
     "verse": "est la lumiere du monde",
+    "verseBatchim": "est la lumiere du monde",
     "verseRef": "-Matthieu 5:14",
     "join": "Rejoindre",
-    "title": "ON-GI — Prier Ensemble"
+    "title": "ON-GI — Prier Ensemble",
+    "demoNames": ["Grâce", "Anne", "Sarah"]
   },
   "prayer": {
     "start": "Prier Ensemble Maintenant",

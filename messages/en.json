@@ -3,9 +3,11 @@
     "tagline1": "You are the light of the world,",
     "tagline2": "Let's brighten the darkness with the warmth of prayer",
     "verse": "is the light of the world",
+    "verseBatchim": "is the light of the world",
     "verseRef": "-Matthew 5:14",
     "join": "Join",
-    "title": "ON-GI — Pray Together"
+    "title": "ON-GI — Pray Together",
+    "demoNames": ["Grace", "Hannah", "Sarah"]
   },
   "prayer": {
     "start": "Pray Together Now",

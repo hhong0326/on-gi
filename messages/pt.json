@@ -3,9 +3,11 @@
     "tagline1": "Voce e a luz do mundo,",
     "tagline2": "Vamos iluminar a escuridao com o calor da oracao",
     "verse": "e a luz do mundo",
+    "verseBatchim": "e a luz do mundo",
     "verseRef": "-Mateus 5:14",
     "join": "Participar",
-    "title": "ON-GI — Orar Juntos"
+    "title": "ON-GI — Orar Juntos",
+    "demoNames": ["Graça", "Ana", "Sara"]
   },
   "prayer": {
     "start": "Orar Juntos Agora",

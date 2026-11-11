@@ -3,9 +3,11 @@
     "tagline1": "세상의 빛인 당신,",
     "tagline2": "기도의 온기로 함께 어둠을 밝혀요",
     "verse": "는 세상의 빛이라",
+    "verseBatchim": "은 세상의 빛이라",
     "verseRef": "-마태복음 5:14",
     "join": "함께하기",
-    "title": "ON-GI"
+    "title": "ON-GI",
+    "demoNames": ["은혜", "한나", "사라"]
   },
   "prayer": {
     "start": "지금 함께 기도하기",
