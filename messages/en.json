@@ -87,5 +87,100 @@
     "story7": "We hope this app becomes the light of prayers\nrising from every corner of the world.",
     "verse2": "So that you may approve what is excellent,\nfilled with the fruit of righteousness that comes through Jesus Christ,\nto the glory and praise of God.",
     "verse2Ref": "— Philippians 1:9-11"
+  },
+  "church": {
+    "title": "My Church",
+    "settingsNone": "You haven't joined a church yet",
+    "settingsFind": "Find a church",
+    "findTitle": "Find a church",
+    "searchLabel": "Search by church name",
+    "nearby": "Nearest first",
+    "setMine": "Join",
+    "mine": "My church",
+    "empty": "No churches found",
+    "noneHint": "Can't find your church?",
+    "createLink": "Build a new one on the map",
+    "createTitle": "Build a church",
+    "mapHint": "Move the map to place the pin on your church",
+    "nameLabel": "Church name",
+    "similar": "A church with the same name is nearby: {name} ({distance})",
+    "similarHint": "If it's the same church, join it instead of building a new one",
+    "joinSimilar": "Join this church",
+    "createCta": "Build a booth here",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "change": "Change church",
+    "levelLabel": "LV {level} · {name}",
+    "next": "Next: {name}",
+    "remaining": "{time} until the next stage",
+    "maxReached": "You built it to the final stage together",
+    "membersWeek": "Prayed together this week",
+    "members": "{count}",
+    "warmth": "Warmth from neighbor churches",
+    "nudge": "Join your church and this prayer will help build it together",
+    "nudgeCta": "Find a church",
+    "nudgeDismiss": "Dismiss",
+    "added": "{duration} added to {church}",
+    "addedNoBatchim": "{duration} added to {church}",
+    "neighbors": "Warmth also reached {count} neighbor churches",
+    "noChurchNeighbors": "This prayer sent warmth to {count} neighbor churches",
+    "noChurchCta": "Join your church to build it together",
+    "createFailed": "Couldn't build the church. Try again in a moment",
+    "dailyLimit": "You can build up to 3 churches a day. Try again tomorrow",
+    "nameRequired": "Enter a church name",
+    "loadFailed": "Couldn't load. Try again in a moment",
+    "km": "{n} km",
+    "m": "{n} m",
+    "levels": [
+      {
+        "name": "Booth",
+        "about": "A shelter roofed with branches, built at the Feast of Booths to remember the wilderness.",
+        "verse": "You shall dwell in booths for seven days",
+        "ref": "Leviticus 23:42"
+      },
+      {
+        "name": "Tabernacle",
+        "about": "The tent of meeting in the wilderness: a courtyard, an altar, and a sanctuary where God dwelt among His people.",
+        "verse": "Let them make me a sanctuary, that I may dwell in their midst",
+        "ref": "Exodus 25:8"
+      },
+      {
+        "name": "House Church",
+        "about": "The early church met in homes. The 3rd century house church at Dura-Europos is the oldest church building we know.",
+        "verse": "Breaking bread in their homes, they received their food with glad and generous hearts",
+        "ref": "Acts 2:46"
+      },
+      {
+        "name": "Basilica",
+        "about": "After Christianity was legalized in the 4th century, the first large churches borrowed the form of the Roman hall.",
+        "verse": "Christ Jesus himself being the cornerstone",
+        "ref": "Ephesians 2:20"
+      },
+      {
+        "name": "Romanesque",
+        "about": "11th century Europe. Thick stone walls, round arches, and a heavy bell tower at the heart of the village.",
+        "verse": "On this rock I will build my church",
+        "ref": "Matthew 16:18"
+      },
+      {
+        "name": "Gothic Cathedral",
+        "about": "12th to 16th century. Soaring spires, rose windows and stained glass that brought light inside.",
+        "verse": "Strength and beauty are in his sanctuary",
+        "ref": "Psalm 96:6"
+      },
+      {
+        "name": "Sagrada Família",
+        "about": "Begun in Barcelona in 1882 and still being built together more than 140 years later.",
+        "verse": "In him you also are being built together into a dwelling place for God by the Spirit",
+        "ref": "Ephesians 2:22"
+      },
+      {
+        "name": "Church of the Light",
+        "about": "Modern. A wall opened in the shape of a cross so light can pour in.",
+        "verse": "You are the light of the world",
+        "ref": "Matthew 5:14"
+      }
+    ]
   }
 }

@@ -195,7 +195,8 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPraying]);
 
-  const handleTogglePrayer = useCallback(async () => {
+  // 기도를 마치면 그 기도의 id를 돌려준다 (기도 완료 모달에서 교회 기여 조회용)
+  const handleTogglePrayer = useCallback(async (): Promise<string | null> => {
     if (isPraying) {
       // Stop praying — accumulate duration (previous + this session)
       setIsPraying(false);
@@ -212,7 +213,9 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
           )
         );
         activePrayerIdRef.current = null;
+        return prayerId;
       }
+      return null;
     } else {
       // Start praying — upsert today's row
       setIsPraying(true);
@@ -220,7 +223,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       setUserPosition(rawPos);
       const pos = fuzzyPosition(rawPos);
       const userId = userIdRef.current;
-      if (!userId) return;
+      if (!userId) return null;
 
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -285,6 +288,7 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
           prevDurationRef.current = 0;
         }
       }
+      return null;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPraying]);

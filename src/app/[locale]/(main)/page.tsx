@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
+import { useMyChurch } from '@/hooks/useMyChurch';
 import { appConfig } from '@/lib/app-config';
 import { getPrayerAudio } from '@/lib/audio';
 import { LogoPulse } from '@/components/ui/LogoPulse';
@@ -14,6 +15,22 @@ import { HistoryView } from '@/components/ui/HistoryView';
 import { PrayerCompleteModal } from '@/components/ui/PrayerCompleteModal';
 import { SettingsView } from '@/components/ui/SettingsView';
 import { EasterEggModal } from '@/components/ui/EasterEggModal';
+import { ChurchView } from '@/components/church/ChurchView';
+
+// 내 교회가 없는 사람에게 기도 시작 시 안내는 하루 한 번만 (기기 로컬 기록)
+const CHURCH_NUDGE_KEY = 'ongi-church-nudge-date';
+const CHURCH_NUDGE_MS = 6000;
+
+function takeDailyChurchNudge(): boolean {
+  try {
+    const today = new Date().toDateString();
+    if (localStorage.getItem(CHURCH_NUDGE_KEY) === today) return false;
+    localStorage.setItem(CHURCH_NUDGE_KEY, today);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const MapboxView = dynamic(
   () => import('@/components/mapbox/MapboxView').then((m) => m.MapboxView),
@@ -26,12 +43,16 @@ export default function MainPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [completedDuration, setCompletedDuration] = useState<number | null>(null);
+  const [completedPrayerId, setCompletedPrayerId] = useState<string | null>(null);
+  const [showChurch, setShowChurch] = useState(false);
+  const [showChurchNudge, setShowChurchNudge] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [spinAvailable, setSpinAvailable] = useState(true);
   const resumeSpinRef = useRef<(() => void) | null>(null);
 
 
   const handleTabChange = (tab: ViewTab) => {
+    setShowChurch(false);
     if (tab === 'settings') {
       setShowSettings((v) => !v);
       setShowHistory(false);
@@ -50,15 +71,39 @@ export default function MainPage() {
       getPrayerAudio().stop();
       // Capture elapsed before state resets
       const elapsed = state.elapsedSeconds;
-      await state.handleTogglePrayer();
-      if (elapsed > 0) setCompletedDuration(elapsed);
+      setShowChurchNudge(false);
+      const endedPrayerId = await state.handleTogglePrayer();
+      if (elapsed > 0) {
+        setCompletedPrayerId(endedPrayerId);
+        setCompletedDuration(elapsed);
+      }
+      refreshChurch();
       return;
     }
     // 사용자 제스처 콜스택 안에서(await 이전) 재생해야 iOS 자동재생 정책을 통과한다
     // features.audio 플래그(app_config)로 배포 없이 켜고 끌 수 있다
     if (appConfig.features.audio) getPrayerAudio().play();
+    if (churchLoaded && !myChurch && takeDailyChurchNudge()) setShowChurchNudge(true);
     await state.handleTogglePrayer();
   };
+
+  const closeCompleteModal = useCallback(() => {
+    setCompletedDuration(null);
+    setCompletedPrayerId(null);
+  }, []);
+
+  const openChurch = () => {
+    setShowChurchNudge(false);
+    setShowHistory(false);
+    setShowSettings(true);
+    setShowChurch(true);
+  };
+
+  useEffect(() => {
+    if (!showChurchNudge) return;
+    const timer = setTimeout(() => setShowChurchNudge(false), CHURCH_NUDGE_MS);
+    return () => clearTimeout(timer);
+  }, [showChurchNudge]);
 
   // 어떤 경로로든 기도가 끝나면 음악도 반드시 멈춘다 (버튼 핸들러의 stop은 즉시성용, 이건 상태 기반 보장)
   useEffect(() => {
@@ -78,6 +123,7 @@ export default function MainPage() {
   // Render map immediately so the Mapbox chunk/WebGL/tiles load in parallel
   // with Supabase auth + data queries; only overlay UI waits for readiness.
   const uiReady = state.ready && !!state.nickname;
+  const { church: myChurch, loaded: churchLoaded, refresh: refreshChurch } = useMyChurch(uiReady);
 
   // Splash cover: 신규 유저(닉네임 없음)는 커버가 유지된 채 온보딩으로 넘어가
   // 지구본 깜빡임을 보지 않는다. uiReady 후 페이드아웃 → DOM 제거.
@@ -104,8 +150,18 @@ export default function MainPage() {
       {showSettings && (
         <SettingsView
           nickname={state.nickname}
+          church={myChurch}
+          onOpenChurch={() => setShowChurch(true)}
           onNicknameSaved={state.setNickname}
           onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {showChurch && (
+        <ChurchView
+          church={myChurch}
+          onChurchChanged={refreshChurch}
+          onClose={() => setShowChurch(false)}
         />
       )}
 
@@ -120,7 +176,12 @@ export default function MainPage() {
       {completedDuration !== null && (
         <PrayerCompleteModal
           durationSeconds={completedDuration}
-          onClose={() => setCompletedDuration(null)}
+          prayerId={completedPrayerId}
+          onClose={closeCompleteModal}
+          onFindChurch={() => {
+            closeCompleteModal();
+            openChurch();
+          }}
         />
       )}
 
@@ -144,6 +205,9 @@ export default function MainPage() {
             nickname={state.nickname}
             showSpinButton={spinAvailable}
             onSpinClick={() => resumeSpinRef.current?.()}
+            showChurchNudge={showChurchNudge}
+            onChurchNudgeFind={openChurch}
+            onChurchNudgeDismiss={() => setShowChurchNudge(false)}
           />
         </div>
       )}

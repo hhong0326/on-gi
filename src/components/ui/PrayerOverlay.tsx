@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import {useTranslations} from 'next-intl';
-import { ArrowsClockwise, SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react';
+import { ArrowsClockwise, SpeakerHigh, SpeakerSlash, X } from '@phosphor-icons/react';
 import { appConfig } from '@/lib/app-config';
 import { getPrayerAudio } from '@/lib/audio';
 
@@ -15,6 +15,10 @@ interface PrayerOverlayProps {
   nickname?: string | null;
   showSpinButton?: boolean;
   onSpinClick?: () => void;
+  // 내 교회가 없는 사람이 기도를 시작했을 때 보여주는 안내 (기도는 막지 않음)
+  showChurchNudge?: boolean;
+  onChurchNudgeFind?: () => void;
+  onChurchNudgeDismiss?: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -34,8 +38,12 @@ export function PrayerOverlay({
   nickname,
   showSpinButton = false,
   onSpinClick,
+  showChurchNudge = false,
+  onChurchNudgeFind,
+  onChurchNudgeDismiss,
 }: PrayerOverlayProps) {
   const t = useTranslations('prayer');
+  const tch = useTranslations('church');
   const tc = useTranslations('common');
   const [audioMuted, setAudioMuted] = useState(() =>
     typeof window === 'undefined' ? false : getPrayerAudio().isMuted()
@@ -70,6 +78,26 @@ export function PrayerOverlay({
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* 우리 교회 안내 */}
+      {showChurchNudge && (
+        <div className="pointer-events-auto mx-6 mb-3 flex items-center gap-3 rounded-2xl border border-gold/20 bg-night/80 py-3 pl-4 pr-2 backdrop-blur-md motion-safe:animate-[nudge-in_500ms_cubic-bezier(0.22,1,0.36,1)]">
+          <p className="flex-1 text-sm text-ivory/70">{tch('nudge')}</p>
+          <button
+            onClick={onChurchNudgeFind}
+            className="shrink-0 rounded-full bg-gold/15 px-3 py-2 text-xs font-semibold text-gold-light transition-colors duration-300 ease-weighted hover:bg-gold/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+          >
+            {tch('nudgeCta')}
+          </button>
+          <button
+            onClick={onChurchNudgeDismiss}
+            aria-label={tch('nudgeDismiss')}
+            className="shrink-0 rounded-full p-2 text-ivory/45 transition-colors duration-300 ease-weighted hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {/* CTA Button — pb-24: 하단 플로팅 탭바(bottom-4 + 높이 64px) 위로 16px 간격 */}
       <div className="pointer-events-auto relative mb-[env(safe-area-inset-bottom)] flex items-center justify-center px-6 pb-24">

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90" fill="none">
+  <!-- ON-GI 교회 단계 7 — 초안 선화. 디자이너 교체 대상 (viewBox 120x90, 골드 #D4A44C 선 / 빛 #F5D98A) -->
+  <g fill="none" stroke="#D4A44C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 80h108"/><path d="M16 80V58h88v22"/>
+    <path d="M20 58V36q0-12 5-20 5 8 5 20v22"/><path d="M36 58V30q0-14 5-22 5 8 5 22v28"/>
+    <path d="M74 58V30q0-14 5-22 5 8 5 22v28"/><path d="M90 58V36q0-12 5-20 5 8 5 20v22"/>
+    <path d="M54 58V22q0-9 6-14 6 5 6 14v36"/><path d="M60 8V1M57 4h6" stroke-width="1.6"/>
+    <path d="M23 34h4M23 42h4M23 50h4M39 26h4M39 34h4M39 42h4M39 50h4M57 26h6M57 34h6M57 42h6M57 50h6M77 26h4M77 34h4M77 42h4M77 50h4M93 34h4M93 42h4M93 50h4" stroke-width="1" opacity=".4"/>
+    <path d="M28 80V70q5-8 10 0v10M55 80V68q5-9 10 0v12M82 80V70q5-8 10 0v10"/>
+    <circle cx="60" cy="16" r="1.6" fill="#D4A44C" stroke="none" opacity=".6"/>
+  </g>
+</svg>

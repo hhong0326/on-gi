@@ -87,5 +87,100 @@
     "story7": "Nous esperons que cette app devienne la lumiere des prieres\nqui s'elevent de tous les coins du monde.",
     "verse2": "Pour discerner ce qui est le meilleur,\nremplis du fruit de justice qui est par Jesus-Christ,\na la gloire et a la louange de Dieu.",
     "verse2Ref": "— Philippiens 1:9-11"
+  },
+  "church": {
+    "title": "Mon église",
+    "settingsNone": "Vous n'avez pas encore d'église",
+    "settingsFind": "Trouver une église",
+    "findTitle": "Trouver une église",
+    "searchLabel": "Rechercher par nom",
+    "nearby": "Les plus proches d'abord",
+    "setMine": "Rejoindre",
+    "mine": "Mon église",
+    "empty": "Aucune église trouvée",
+    "noneHint": "Vous ne trouvez pas votre église ?",
+    "createLink": "En bâtir une nouvelle sur la carte",
+    "createTitle": "Bâtir une église",
+    "mapHint": "Déplacez la carte pour placer l'épingle sur votre église",
+    "nameLabel": "Nom de l'église",
+    "similar": "Une église du même nom est proche : {name} ({distance})",
+    "similarHint": "Si c'est la même église, rejoignez-la plutôt que d'en créer une autre",
+    "joinSimilar": "Rejoindre cette église",
+    "createCta": "Bâtir une cabane ici",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "back": "Retour",
+    "change": "Changer d'église",
+    "levelLabel": "NIV {level} · {name}",
+    "next": "Ensuite : {name}",
+    "remaining": "Encore {time} avant l'étape suivante",
+    "maxReached": "Vous l'avez bâtie ensemble jusqu'à la dernière étape",
+    "membersWeek": "Ont prié ensemble cette semaine",
+    "members": "{count}",
+    "warmth": "Chaleur des églises voisines",
+    "nudge": "Rejoignez votre église et cette prière aidera à la bâtir ensemble",
+    "nudgeCta": "Trouver une église",
+    "nudgeDismiss": "Fermer",
+    "added": "{duration} ajoutées à {church}",
+    "addedNoBatchim": "{duration} ajoutées à {church}",
+    "neighbors": "La chaleur a aussi atteint {count} églises voisines",
+    "noChurchNeighbors": "Cette prière a envoyé de la chaleur à {count} églises voisines",
+    "noChurchCta": "Rejoignez votre église pour la bâtir ensemble",
+    "createFailed": "Impossible de bâtir l'église. Réessayez dans un instant",
+    "dailyLimit": "Vous pouvez bâtir jusqu'à 3 églises par jour. Réessayez demain",
+    "nameRequired": "Saisissez le nom de l'église",
+    "loadFailed": "Chargement impossible. Réessayez dans un instant",
+    "km": "{n} km",
+    "m": "{n} m",
+    "levels": [
+      {
+        "name": "Cabane",
+        "about": "Un abri couvert de branches, dressé pendant la fête des Tabernacles pour se souvenir du désert.",
+        "verse": "Vous demeurerez pendant sept jours sous des tentes",
+        "ref": "Lévitique 23:42"
+      },
+      {
+        "name": "Tabernacle",
+        "about": "La tente d'assignation au désert : un parvis, un autel et un sanctuaire où Dieu habitait au milieu de son peuple.",
+        "verse": "Ils me feront un sanctuaire, et j'habiterai au milieu d'eux",
+        "ref": "Exode 25:8"
+      },
+      {
+        "name": "Église de maison",
+        "about": "L'Église primitive se réunissait dans les maisons. L'église de Doura Europos, au IIIe siècle, est le plus ancien lieu de culte chrétien connu.",
+        "verse": "Ils rompaient le pain dans les maisons, et prenaient leur nourriture avec joie et simplicité de cœur",
+        "ref": "Actes 2:46"
+      },
+      {
+        "name": "Basilique",
+        "about": "Après la reconnaissance du christianisme au IVe siècle, les premières grandes églises reprirent la forme de la basilique romaine.",
+        "verse": "Jésus-Christ lui-même étant la pierre angulaire",
+        "ref": "Éphésiens 2:20"
+      },
+      {
+        "name": "Roman",
+        "about": "Europe, XIe siècle. Murs de pierre épais, arcs en plein cintre et un clocher massif au cœur du village.",
+        "verse": "Sur cette pierre je bâtirai mon Église",
+        "ref": "Matthieu 16:18"
+      },
+      {
+        "name": "Cathédrale gothique",
+        "about": "Du XIIe au XVIe siècle. Flèches élancées, rosaces et vitraux pour faire entrer la lumière.",
+        "verse": "La gloire et la magnificence sont dans son sanctuaire",
+        "ref": "Psaume 96:6"
+      },
+      {
+        "name": "Sagrada Família",
+        "about": "Commencée à Barcelone en 1882 et toujours en construction plus de 140 ans après.",
+        "verse": "En lui vous êtes aussi édifiés pour être une habitation de Dieu en Esprit",
+        "ref": "Éphésiens 2:22"
+      },
+      {
+        "name": "Église de la Lumière",
+        "about": "Moderne. Un mur ouvert en forme de croix pour laisser entrer la lumière.",
+        "verse": "Vous êtes la lumière du monde",
+        "ref": "Matthieu 5:14"
+      }
+    ]
   }
 }

@@ -78,6 +78,38 @@ where key = 'features';
 음원 파일 교체 시: 새 파일을 `public/audio/prayer-ambient-v3.m4a`처럼 버전을 올려 추가하고
 `src/lib/audio.ts`의 `AUDIO_SRC` 상수를 변경해 배포한다 (파일명 버저닝은 immutable 캐시 때문에 필수).
 
+### `church_levels` — 우리 교회 단계별 기준 시간
+
+교회 성도 전체의 누적 기도 시간(초)이 이 값에 도달하면 다음 단계로 올라간다. 8단계: 초막 → 회막 → 가정교회 → 바실리카 → 로마네스크 → 고딕 대성당 → 사그라다 파밀리아 → 빛의 교회.
+**다른 키와 달리 DB 함수가 매번 읽으므로 바꾸는 즉시 반영된다** (앱 재접속 불필요). 성장은 단계 계산 결과일 뿐이라 값을 늘리면 표시 단계가 내려갈 수 있다.
+
+```sql
+-- 기본값 (초안): LV1 0 / LV2 1h / LV3 5h / LV4 15h / LV5 40h / LV6 100h / LV7 250h / LV8 600h
+update app_config
+set value = '{"thresholds": [0, 3600, 18000, 54000, 144000, 360000, 900000, 2160000]}', updated_at = now()
+where key = 'church_levels';
+
+-- 테스트용: 30초마다 한 단계씩 (확인 후 반드시 위 기본값으로 되돌릴 것)
+update app_config
+set value = '{"thresholds": [0, 30, 60, 90, 120, 150, 180, 200]}', updated_at = now()
+where key = 'church_levels';
+```
+
+단계 일러스트는 `public/churches/lv1.svg` ~ `lv8.svg` (viewBox 120×90). 디자이너가 파일만 교체하면 앱 전체에 반영된다.
+
+### `church_sharing` — 이웃 교회 나눔
+
+기도 시간이 저장될 때, 내 교회와 별개로 그 시간의 `ratio`만큼을 기도 위치 반경 `radiusKm` 안의 가까운 교회 최대 `maxChurches`곳에 "온기"로 나눠 더한다 (단계가 낮은 교회에 더 많이).
+내 교회 몫은 줄지 않는다. **즉시 반영**되며, 이미 저장된 기도에는 그 기도가 다시 저장될 때 새 값이 적용된다.
+
+```sql
+update app_config
+set value = '{"ratio": 0.1, "radiusKm": 10, "maxChurches": 5}', updated_at = now()
+where key = 'church_sharing';
+```
+
+주의: 개인 기도 위치는 0.1도(약 11km) 격자로 흐려져 저장되므로 `radiusKm`를 10보다 작게 하면 이웃 교회가 거의 잡히지 않는다.
+
 ## 현재 값 확인
 
 ```sql

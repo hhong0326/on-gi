@@ -1,39 +1,52 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {useTranslations} from 'next-intl';
 import { HandsPraying } from '@phosphor-icons/react';
+import { fetchPrayerContribution, levelProgress, type PrayerContribution } from '@/lib/church';
+import { formatDuration, hasBatchim } from '@/lib/format';
+import { createClient } from '@/lib/supabase/client';
 
 interface PrayerCompleteModalProps {
   durationSeconds: number;
+  prayerId: string | null;
   onClose: () => void;
+  onFindChurch: () => void;
 }
 
-function formatDuration(seconds: number, units: { seconds: string; minutes: string; hours: string }): string {
-  if (seconds < 60) return `${seconds}${units.seconds}`;
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  if (m < 60) return s > 0 ? `${m}${units.minutes} ${s}${units.seconds}` : `${m}${units.minutes}`;
-  const h = Math.floor(m / 60);
-  const rm = m % 60;
-  return rm > 0 ? `${h}${units.hours} ${rm}${units.minutes}` : `${h}${units.hours}`;
-}
+// 교회 기여 정보가 있으면 읽을 시간이 더 필요해 자동 닫힘을 늘린다
+const AUTO_CLOSE_MS = 3000;
+const AUTO_CLOSE_WITH_CHURCH_MS = 5000;
 
-export function PrayerCompleteModal({ durationSeconds, onClose }: PrayerCompleteModalProps) {
+export function PrayerCompleteModal({ durationSeconds, prayerId, onClose, onFindChurch }: PrayerCompleteModalProps) {
   const t = useTranslations('prayer');
   const th = useTranslations('history');
+  const tch = useTranslations('church');
+  const [contribution, setContribution] = useState<PrayerContribution | null>(null);
 
-  // Auto-close after 3 seconds
   useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
+    if (!prayerId) return;
+    let cancelled = false;
+    fetchPrayerContribution(createClient(), prayerId).then((c) => {
+      if (!cancelled) setContribution(c);
+    });
+    return () => { cancelled = true; };
+  }, [prayerId]);
+
+  const hasChurchInfo = !!contribution && (!!contribution.church || contribution.neighborCount > 0);
+
+  useEffect(() => {
+    const timer = setTimeout(onClose, hasChurchInfo ? AUTO_CLOSE_WITH_CHURCH_MS : AUTO_CLOSE_MS);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, hasChurchInfo]);
 
   const duration = formatDuration(durationSeconds, {
     seconds: th('seconds'),
     minutes: th('minutes'),
     hours: th('hours'),
   });
+  const church = contribution?.church ?? null;
+  const neighbors = contribution?.neighborCount ?? 0;
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-night/90">
@@ -45,6 +58,29 @@ export function PrayerCompleteModal({ durationSeconds, onClose }: PrayerComplete
         <p className="mt-2 text-sm text-ivory/45">
           {t('completeMessage')}
         </p>
+
+        {church && (
+          <div className="mt-6 flex w-full flex-col gap-2">
+            <p className="text-sm font-semibold text-gold-light">{tch(hasBatchim(duration) ? 'added' : 'addedNoBatchim', { church: church.name, duration })}</p>
+            <div className="h-1.5 overflow-hidden rounded-full bg-gold/15">
+              <div className="h-full origin-left rounded-full bg-gold" style={{ transform: `scaleX(${levelProgress(church)})` }} />
+            </div>
+            {neighbors > 0 && <p className="text-xs text-ivory/45">{tch('neighbors', { count: neighbors })}</p>}
+          </div>
+        )}
+
+        {!church && contribution && (
+          <div className="mt-6 flex w-full flex-col items-center gap-3">
+            {neighbors > 0 && <p className="text-sm text-gold-light">{tch('noChurchNeighbors', { count: neighbors })}</p>}
+            <button
+              onClick={onFindChurch}
+              className="rounded-full px-3 py-2 text-xs text-gold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+            >
+              {tch('noChurchCta')}
+            </button>
+          </div>
+        )}
+
         <div className="mt-6">
           <button
             onClick={onClose}

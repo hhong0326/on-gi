@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous-auth'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
+import { hasBatchim } from '@/lib/format'
 
 // 닉네임 빈칸 타이핑 데모 — 입력란임을 안내 문구 없이 시각적으로 알려준다
 const DEMO_START_MS = 600
@@ -29,12 +30,6 @@ function usePrefersReducedMotion() {
     () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
     () => false,
   )
-}
-
-// 한글 마지막 글자에 받침이 있으면 true — "민준은" / "은혜는" 조사 선택용
-function hasBatchim(text: string): boolean {
-  const code = text.trim().slice(-1).charCodeAt(0)
-  return code >= 0xac00 && code <= 0xd7a3 && (code - 0xac00) % 28 !== 0
 }
 
 // 한글 등 전각 문자는 2ch로 계산해 밑줄 폭을 글자에 맞춘다

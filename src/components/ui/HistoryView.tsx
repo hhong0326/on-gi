@@ -3,26 +3,11 @@
 import { useEffect, useState } from 'react';
 import {useTranslations} from 'next-intl';
 import { BookOpenText, FireSimple } from '@phosphor-icons/react';
+import { formatDuration, type DurationUnits } from '@/lib/format';
 import { createClient } from '@/lib/supabase/client';
 import { LogoPulse } from '@/components/ui/LogoPulse';
 import { usePrayerStats, type StatsPeriod } from '@/hooks/usePrayerStats';
 import type { PrayerRow } from '@/types/prayer';
-
-interface TimeUnits {
-  seconds: string;
-  minutes: string;
-  hours: string;
-}
-
-function formatDuration(seconds: number, units: TimeUnits): string {
-  if (seconds < 60) return `${seconds}${units.seconds}`;
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  if (m < 60) return s > 0 ? `${m}${units.minutes} ${s}${units.seconds}` : `${m}${units.minutes}`;
-  const h = Math.floor(m / 60);
-  const rm = m % 60;
-  return rm > 0 ? `${h}${units.hours} ${rm}${units.minutes}` : `${h}${units.hours}`;
-}
 
 function formatDate(dateStr: string, weekdays: string[]): string {
   const d = new Date(dateStr);
@@ -54,7 +39,7 @@ export function HistoryView({ onClose }: HistoryViewProps) {
   const [prayers, setPrayers] = useState<PrayerRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const timeUnits: TimeUnits = {
+  const timeUnits: DurationUnits = {
     seconds: t('seconds'),
     minutes: t('minutes'),
     hours: t('hours'),

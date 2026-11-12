@@ -33,10 +33,18 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  /* 한국어가 "교/회"처럼 단어 중간에서 끊기지 않게 — 긴 문자열은 필요할 때만 끊음 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
   touch-action: none;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
+}
+
+@keyframes nudge-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 h1, h2, h3 {

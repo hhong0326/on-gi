@@ -1,18 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {useTranslations} from 'next-intl';
+import { CaretRight } from '@phosphor-icons/react';
+import { churchArtSrc, type MyChurch } from '@/lib/church';
 import { createClient } from '@/lib/supabase/client';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 interface SettingsViewProps {
   nickname: string | null;
+  church: MyChurch | null;
+  onOpenChurch: () => void;
   onNicknameSaved: (nickname: string) => void;
   onClose: () => void;
 }
 
-export function SettingsView({ nickname, onNicknameSaved, onClose }: SettingsViewProps) {
+export function SettingsView({ nickname, church, onOpenChurch, onNicknameSaved, onClose }: SettingsViewProps) {
   const t = useTranslations('settings');
+  const tch = useTranslations('church');
+  const levelNames = (tch.raw('levels') as { name: string }[]).map((l) => l.name);
   const tc = useTranslations('common');
   const [editingNickname, setEditingNickname] = useState(false);
   const [newNickname, setNewNickname] = useState('');
@@ -50,6 +57,30 @@ export function SettingsView({ nickname, onNicknameSaved, onClose }: SettingsVie
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 pb-24">
+        {/* 우리 교회 */}
+        <button
+          onClick={onOpenChurch}
+          className="mb-4 flex w-full items-center gap-4 rounded-2xl border border-gold/10 bg-gold/5 p-4 text-left transition-colors duration-300 ease-weighted hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+        >
+          <Image src={churchArtSrc(church?.level ?? 1)} alt="" width={64} height={48} unoptimized className={`h-12 w-16 shrink-0 ${church ? '' : 'opacity-40'}`} />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-gold">{tch('title')}</p>
+            {church ? (
+              <>
+                <p className="truncate text-base font-semibold text-ivory">{church.name}</p>
+                <p className="text-xs text-ivory/45">{tch('levelLabel', { level: church.level, name: levelNames[church.level - 1] ?? '' })}</p>
+              </>
+            ) : (
+              <p className="text-sm text-ivory/70">{tch('settingsNone')}</p>
+            )}
+          </div>
+          {church ? (
+            <CaretRight size={16} className="shrink-0 text-ivory/45" />
+          ) : (
+            <span className="shrink-0 rounded-full bg-gold px-3 py-2 text-xs font-semibold text-night">{tch('settingsFind')}</span>
+          )}
+        </button>
+
         {/* Account */}
         <div className="mb-4 rounded-2xl border border-gold/10 bg-gold/5 p-4">
           <p className="mb-3 text-xs font-semibold text-gold">{t('account')}</p>

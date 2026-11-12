@@ -87,5 +87,100 @@
     "story7": "Esperamos que esta app sea la luz de las oraciones\nque se elevan desde cada rincon del mundo.",
     "verse2": "Para que aprobeis lo mejor,\nllenos de frutos de justicia que son por medio de Jesucristo,\npara gloria y alabanza de Dios.",
     "verse2Ref": "— Filipenses 1:9-11"
+  },
+  "church": {
+    "title": "Mi iglesia",
+    "settingsNone": "Todavía no tienes iglesia",
+    "settingsFind": "Buscar iglesia",
+    "findTitle": "Buscar iglesia",
+    "searchLabel": "Buscar por nombre",
+    "nearby": "Más cercanas primero",
+    "setMine": "Unirme",
+    "mine": "Mi iglesia",
+    "empty": "No se encontraron iglesias",
+    "noneHint": "¿No encuentras tu iglesia?",
+    "createLink": "Levantar una nueva en el mapa",
+    "createTitle": "Levantar una iglesia",
+    "mapHint": "Mueve el mapa para colocar el pin en tu iglesia",
+    "nameLabel": "Nombre de la iglesia",
+    "similar": "Hay una iglesia con el mismo nombre cerca: {name} ({distance})",
+    "similarHint": "Si es la misma iglesia, únete a ella en lugar de crear otra",
+    "joinSimilar": "Unirme a esta iglesia",
+    "createCta": "Levantar una enramada aquí",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "change": "Cambiar iglesia",
+    "levelLabel": "NV {level} · {name}",
+    "next": "Siguiente: {name}",
+    "remaining": "Faltan {time} para la siguiente etapa",
+    "maxReached": "La construyeron juntos hasta la última etapa",
+    "membersWeek": "Oraron juntos esta semana",
+    "members": "{count}",
+    "warmth": "Calor de iglesias vecinas",
+    "nudge": "Únete a tu iglesia y esta oración ayudará a construirla juntos",
+    "nudgeCta": "Buscar iglesia",
+    "nudgeDismiss": "Cerrar",
+    "added": "Se sumaron {duration} a {church}",
+    "addedNoBatchim": "Se sumaron {duration} a {church}",
+    "neighbors": "El calor también llegó a {count} iglesias vecinas",
+    "noChurchNeighbors": "Esta oración envió calor a {count} iglesias vecinas",
+    "noChurchCta": "Únete a tu iglesia para construirla juntos",
+    "createFailed": "No se pudo crear la iglesia. Inténtalo de nuevo en un momento",
+    "dailyLimit": "Puedes crear hasta 3 iglesias por día. Inténtalo mañana",
+    "nameRequired": "Escribe el nombre de la iglesia",
+    "loadFailed": "No se pudo cargar. Inténtalo de nuevo en un momento",
+    "km": "{n} km",
+    "m": "{n} m",
+    "levels": [
+      {
+        "name": "Enramada",
+        "about": "Un refugio techado con ramas, levantado en la Fiesta de los Tabernáculos para recordar el desierto.",
+        "verse": "En tabernáculos habitaréis siete días",
+        "ref": "Levítico 23:42"
+      },
+      {
+        "name": "Tabernáculo",
+        "about": "El tabernáculo del desierto: un atrio, un altar y un santuario donde Dios habitó con su pueblo.",
+        "verse": "Y harán un santuario para mí, y habitaré en medio de ellos",
+        "ref": "Éxodo 25:8"
+      },
+      {
+        "name": "Iglesia en casa",
+        "about": "La iglesia primitiva se reunía en casas. La casa iglesia de Dura Europos, del siglo III, es el templo cristiano más antiguo que se conoce.",
+        "verse": "Partiendo el pan en las casas, comían juntos con alegría y sencillez de corazón",
+        "ref": "Hechos 2:46"
+      },
+      {
+        "name": "Basílica",
+        "about": "Tras la legalización del cristianismo en el siglo IV, las primeras grandes iglesias tomaron la forma de la basílica romana.",
+        "verse": "Siendo la principal piedra del ángulo Jesucristo mismo",
+        "ref": "Efesios 2:20"
+      },
+      {
+        "name": "Románico",
+        "about": "Europa, siglo XI. Muros gruesos de piedra, arcos de medio punto y un campanario robusto en el centro del pueblo.",
+        "verse": "Sobre esta roca edificaré mi iglesia",
+        "ref": "Mateo 16:18"
+      },
+      {
+        "name": "Catedral gótica",
+        "about": "Siglos XII al XVI. Agujas altas, rosetones y vitrales que llenaron el templo de luz.",
+        "verse": "Poder y gloria en su santuario",
+        "ref": "Salmos 96:6"
+      },
+      {
+        "name": "Sagrada Familia",
+        "about": "Comenzada en Barcelona en 1882 y todavía en construcción más de 140 años después.",
+        "verse": "En quien vosotros también sois juntamente edificados para morada de Dios en el Espíritu",
+        "ref": "Efesios 2:22"
+      },
+      {
+        "name": "Iglesia de la Luz",
+        "about": "Moderna. Un muro abierto en forma de cruz para que entre la luz.",
+        "verse": "Vosotros sois la luz del mundo",
+        "ref": "Mateo 5:14"
+      }
+    ]
   }
 }
