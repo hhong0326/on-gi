@@ -110,6 +110,17 @@ where key = 'church_sharing';
 
 주의: 개인 기도 위치는 0.1도(약 11km) 격자로 흐려져 저장되므로 `radiusKm`를 10보다 작게 하면 이웃 교회가 거의 잡히지 않는다.
 
+### `prayer_limits` — 기도 시간 상한
+
+한 번 기도(시작 → 마치기)에서 인정하는 최대 시간(초). 기본 3시간(10800). 서버 `end_prayer`가 이번 기도 시간을 `min(클라이언트 측정, 서버 경과, maxSessionSeconds)`로 정한다 ([0014](decisions/0014-prayer-writes-via-rpc.md)).
+서버에서만 읽는 값이라 클라이언트 `AppConfig`에는 없고 **즉시 반영**된다.
+
+```sql
+update app_config
+set value = '{"maxSessionSeconds": 10800}', updated_at = now()
+where key = 'prayer_limits';
+```
+
 ## 현재 값 확인
 
 ```sql

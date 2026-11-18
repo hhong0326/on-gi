@@ -20,6 +20,17 @@ export interface PrayerRow {
   duration_seconds: number | null;
 }
 
+// get_prayer_feed RPC 응답 — 남의 user_id·church_id·기도 시간은 오지 않는다
+export interface PrayerFeedRow {
+  id: string;
+  lat: number;
+  lng: number;
+  prayed_at: string;
+  updated_at: string;
+  is_active: boolean;
+  is_mine: boolean;
+}
+
 const THIRTY_MINUTES_MS = 30 * 60 * 1000;
 
 // 감쇠 곡선 파라미터(days, minIntensity)는 DB app_config로 배포 없이 튜닝 가능
@@ -43,17 +54,20 @@ export function hashJitter(id: string): { dLat: number; dLng: number } {
   };
 }
 
-export function prayerRowToPoint(row: PrayerRow, currentUserId: string | null): PrayerPoint {
+// 기도 중이라도 30분이 지나면 비활성 (미종료 방치 방지) — 서버 is_active와 같은 기준
+export function isWithinActiveWindow(prayedAt: string): boolean {
+  return Date.now() - new Date(prayedAt).getTime() < THIRTY_MINUTES_MS;
+}
+
+export function feedRowToPoint(row: PrayerFeedRow): PrayerPoint {
   const { dLat, dLng } = hashJitter(row.id);
   return {
     id: row.id,
     lat: row.lat + dLat,
     lng: row.lng + dLng,
     intensity: calculateIntensity(row.prayed_at),
-    isUser: row.user_id === currentUserId,
-    // null = 기도 중이지만, 30분 초과하면 자동 비활성 (미종료 방치 방지)
-    isActive: row.duration_seconds === null &&
-      (Date.now() - new Date(row.prayed_at).getTime()) < THIRTY_MINUTES_MS,
+    isUser: row.is_mine,
+    isActive: row.is_active && isWithinActiveWindow(row.prayed_at),
     prayedAt: row.prayed_at,
   };
 }

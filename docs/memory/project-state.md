@@ -1,7 +1,7 @@
 # 프로젝트 현재 상태
 
 > 세션을 시작할 때 먼저 읽는 요약. 결정의 근거는 [docs/decisions/](../decisions/)에 있다.
-> 작업을 마치면 이 파일을 갱신한다 (마지막 갱신: 2026-11-12).
+> 작업을 마치면 이 파일을 갱신한다 (마지막 갱신: 2026-11-15).
 
 ## 한 줄 요약
 
@@ -11,7 +11,7 @@
 
 - **익명 온보딩**: Supabase 익명 인증 + 닉네임. 빈칸 타이핑 데모로 입력 안내 ([0002](../decisions/0002-remove-invite-code-input.md), [0008](../decisions/0008-onboarding-typing-demo.md))
 - **지구본**: Mapbox GL globe, 첫 터치까지 자동 회전, 회전 재개 버튼(줌 2 이하), 웜 톤 ([0001](../decisions/0001-map-engine-mapbox.md), [0007](../decisions/0007-globe-warm-tone.md))
-- **기도**: 시작 시 내 위치로 flyTo(줌 8), 3초 폴링으로 다른 사람 기도 표시, 백그라운드에서도 시간 유지, 잔광(7일 감쇠), 마커 탭 툴팁
+- **기도**: 시작 시 내 위치로 flyTo(줌 8), 3초 폴링(`get_prayer_feed`, 화면 가려지면 쉼)으로 다른 사람 기도 표시, 백그라운드에서도 시간 유지, 잔광(7일 감쇠), 마커 탭 툴팁. 시작·마치기는 `start_prayer`/`end_prayer` RPC, 시간 상한은 서버 ([0014](../decisions/0014-prayer-writes-via-rpc.md))
 - **기도 음원**: 10분 루프, `features.audio` 플래그로 켜고 끔
 - **기도 기록**: 기간별 통계와 목록
 - **설정**: 우리 교회 카드, 닉네임, 초대 링크 복사, 언어
@@ -31,6 +31,8 @@
 | CLI | `npx -y supabase@2.122.0` 고정 ([0012](../decisions/0012-pin-supabase-cli.md)) |
 | 운영 튜닝 | `app_config` 테이블 ([docs/app-config.md](../app-config.md)) |
 
+**진행 중 (0014 2단계 배포)**: ① `prayer_rpc` 마이그레이션 운영 적용 (2026-11-18 완료) → ② 새 클라이언트 배포 → ③ `supabase/pending/20261113090100_prayer_lockdown.sql`을 `supabase/migrations/`로 옮겨 운영 적용. ①②가 끝나기 전에 ③을 push하지 않는다.
+
 **배포 순서 (DB 변경이 있을 때)**: 로컬 확인 → 실행 전 확인받기 → `npx -y supabase@2.122.0 db push` → 원격 적용 확인(`migration list --linked`) → `git push origin main` → Vercel 상태 확인.
 반대로 하면 배포와 DB 적용 사이에 새 화면이 에러를 낸다.
 
@@ -41,11 +43,12 @@
 - `mapbox-gl.css`가 `.mapboxgl-map`에 `position: relative`를 강제한다 → 지도 컨테이너에 `absolute inset-0` 대신 크기를 직접 지정
 - `.gitignore`가 `*.png`를 막는다 → 새 PNG는 `!public/...` 허용 줄 필요
 - DB 닉네임 기본값 `'기도자'`는 데이터 상수 (번역 비교 금지)
-- 기도 기록은 **사용자당 하루 1행**이고 같은 날 다시 기도하면 그 행에 시간이 누적된다 (`usePrayerState.ts`)
+- 기도 기록은 **사용자당 하루 1행**이고 같은 날 다시 기도하면 그 행에 시간이 누적된다. 규칙과 누적(`prior_seconds`)은 서버 `start_prayer`/`end_prayer`가 지킨다
+- `prayers`·`churches`는 클라이언트가 직접 읽거나 쓰지 않는다 (③ 이후 권한 없음). 새 화면이 필요하면 필요한 열만 돌려주는 RPC를 만든다
+- 로컬 Supabase가 없을 때 마이그레이션 검증은 PGlite에 Supabase 역할·`auth.uid()`를 흉내 내서 돌렸다 (2026-11-13)
 - 개인 기도 위치는 0.1도 격자라 반경 계산은 10km 이상에서만 의미가 있다
 - `next start` 프로세스명은 `next-server`라 `pkill -f "next start"`로 안 죽는다 → 포트 기준으로 종료하고, 서빙 중인 청크에 새 코드가 있는지 확인 후 검증
 - 기도 완료 모달의 `onClose`는 `useCallback`으로 고정해야 한다 (아니면 리렌더마다 자동 닫힘 타이머가 재시작)
-- 오늘 기도 행 조회의 `.single()`이 행이 없을 때 콘솔에 406을 남긴다 (동작에는 영향 없음, 백로그)
 
 ## 백로그
 
@@ -60,10 +63,13 @@
 
 **기술 부채**
 - [ ] `src/hooks/usePrayerStats.ts` 린트 에러 (effect 안 동기 setState)
-- [ ] 오늘 기도 조회 `.single()` → `.maybeSingle()` (406 제거)
-- [ ] 기도 시간 서버측 검증 (현재 클라이언트가 저장)
+- [x] 오늘 기도 조회 406 — `start_prayer` RPC로 대체되며 해소
+- [x] 기도 시간 서버측 검증 — `end_prayer` 상한 (0014)
+- [ ] 계정당 하루 기도 상한, 익명 가입 남용 방지(CAPTCHA)
+- [ ] GPS 거부 시 서울 좌표로 저장되는 문제 (기도를 막을지, 위치 없이 기도할지 결정 필요)
+- [ ] 마커 60개 제한 → GeoJSON 레이어 전환, 교회 누적값 캐시 (확장성)
 - [ ] Supabase CLI 3.x 대응 (`config.toml`의 `[inbucket]` → `[local_smtp]`)
-- [ ] 운영 DB에 생긴 테스트 데이터가 있으면 정리
+- [ ] 운영 DB에 생긴 테스트 데이터가 있으면 정리 — 2026-11-18 화면 검증으로 닉네임 `검증` 익명 사용자 2명과 그 기도(서울 37.6/127.0) 생성
 
 **예정**
 - [ ] 네이티브 앱 웹뷰 임베딩 (`src/lib/bridge.ts` 브릿지 교체)

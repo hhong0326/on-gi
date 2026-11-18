@@ -5,39 +5,58 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadAppConfig } from '@/lib/app-config';
 import { createClient } from '@/lib/supabase/client';
 import { getCurrentPosition } from '@/lib/bridge';
-import type { PrayerPoint, PrayerRow } from '@/types/prayer';
-import { hashJitter, prayerRowToPoint } from '@/types/prayer';
+import type { PrayerFeedRow, PrayerPoint } from '@/types/prayer';
+import { feedRowToPoint, hashJitter, isWithinActiveWindow } from '@/types/prayer';
 
 export type ViewTab = 'home' | 'history' | 'settings';
 
 const POLL_INTERVAL_MS = 3000;
-const SEVEN_DAYS_ISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-const PENDING_DURATION_KEY = 'ongi-pending-duration';
+const FEED_EPOCH = new Date(0).toISOString();
+// 저장 실패한 기도 마치기 — 이번 기도 시간(초)만 기록한다. 서버가 경과 시간으로 상한을 건다
+const PENDING_END_KEY = 'ongi-pending-prayer-end';
+// 이전 버전 키 (누적 시간을 저장했음) — 형식이 달라 버린다
+const LEGACY_PENDING_KEY = 'ongi-pending-duration';
 
-interface PendingDuration {
+interface PendingEnd {
   id: string;
-  duration: number;
+  seconds: number;
 }
 
-function readPendingDuration(): PendingDuration | null {
+function readPendingEnd(): PendingEnd | null {
   try {
-    const raw = localStorage.getItem(PENDING_DURATION_KEY);
-    return raw ? (JSON.parse(raw) as PendingDuration) : null;
+    localStorage.removeItem(LEGACY_PENDING_KEY);
+    const raw = localStorage.getItem(PENDING_END_KEY);
+    return raw ? (JSON.parse(raw) as PendingEnd) : null;
   } catch {
     return null;
   }
 }
 
-function writePendingDuration(value: PendingDuration | null) {
+function writePendingEnd(value: PendingEnd | null) {
   try {
-    if (value) localStorage.setItem(PENDING_DURATION_KEY, JSON.stringify(value));
-    else localStorage.removeItem(PENDING_DURATION_KEY);
+    if (value) localStorage.setItem(PENDING_END_KEY, JSON.stringify(value));
+    else localStorage.removeItem(PENDING_END_KEY);
   } catch {
     // storage unavailable
   }
 }
 
+// 바뀐 기도는 지우고 뒤에 다시 넣는다 — 마커는 배열 뒤쪽(최신)부터 그려진다
+function mergeFeed(prev: PrayerPoint[], rows: PrayerFeedRow[]): PrayerPoint[] {
+  const byId = new Map(prev.map((p) => [p.id, p]));
+  for (const row of rows) {
+    byId.delete(row.id);
+    byId.set(row.id, feedRowToPoint(row));
+  }
+  return [...byId.values()];
+}
+
+function latestUpdatedAt(rows: PrayerFeedRow[], fallback: string): string {
+  return rows.reduce((max, r) => (r.updated_at > max ? r.updated_at : max), fallback);
+}
+
 /// Privacy: round GPS to ~10km grid to protect exact location
+/// (서버도 같은 격자로 반올림하지만, 정확한 좌표는 기기 밖으로 보내지 않는다)
 function fuzzyPosition(pos: { lat: number; lng: number }) {
   return {
     lat: Math.round(pos.lat * 10) / 10,
@@ -55,27 +74,28 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activePrayerIdRef = useRef<string | null>(null);
-  const prevDurationRef = useRef(0);
   const prayerStartRef = useRef(0);
   const userIdRef = useRef<string | null>(null);
-  const lastFetchTimeRef = useRef<string>(SEVEN_DAYS_ISO);
+  const lastFetchTimeRef = useRef<string>(FEED_EPOCH);
+  const pollInFlightRef = useRef(false);
 
   const supabase = createClient();
 
-  // 백그라운드 장기 체류 후 만료 토큰으로 UPDATE가 401 거부될 수 있다 —
-  // 실패 시 세션 갱신 후 1회 재시도, 그래도 실패하면 다음 실행 때 반영(pending)
-  async function saveDuration(id: string, duration: number) {
+  // 백그라운드 장기 체류 후 만료 토큰으로 호출이 401 거부될 수 있다 —
+  // 실패 시 세션 갱신 후 1회 재시도, 그래도 실패하면 다음 실행 때 반영(pending).
+  // 누적·상한 계산은 서버(end_prayer)가 하고, 이미 마친 기도면 저장된 값을 돌려준다
+  async function endPrayer(id: string, seconds: number) {
     const attempt = () =>
-      supabase.from('prayers').update({ duration_seconds: duration }).eq('id', id);
+      supabase.rpc('end_prayer', { p_prayer_id: id, p_client_seconds: seconds });
     let { error } = await attempt();
     if (error) {
       await supabase.auth.refreshSession();
       ({ error } = await attempt());
     }
     if (error) {
-      writePendingDuration({ id, duration });
-    } else if (readPendingDuration()?.id === id) {
-      writePendingDuration(null);
+      writePendingEnd({ id, seconds });
+    } else if (readPendingEnd()?.id === id) {
+      writePendingEnd(null);
     }
   }
 
@@ -89,43 +109,35 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       }
       userIdRef.current = user.id;
 
-      // 이전 세션에서 저장 실패한 기도 시간 반영 (미기록 행만 채움)
-      const pending = readPendingDuration();
+      // 이전 세션에서 저장 실패한 기도 마치기 반영 (이미 마친 기도면 서버가 무시)
+      const pending = readPendingEnd();
       if (pending) {
-        const { error } = await supabase
-          .from('prayers')
-          .update({ duration_seconds: pending.duration })
-          .eq('id', pending.id)
-          .is('duration_seconds', null);
-        if (!error) writePendingDuration(null);
+        const { error } = await supabase.rpc('end_prayer', {
+          p_prayer_id: pending.id,
+          p_client_seconds: pending.seconds,
+        });
+        if (!error) writePendingEnd(null);
       }
 
-      // Load app config + nickname + recent prayers (last 7 days) in parallel
-      const [, { data: profile }, { data: prayers }] = await Promise.all([
+      // Load app config + nickname + recent prayers (감쇠 기간) in parallel
+      const [, { data: profile }, { data: feed }] = await Promise.all([
         loadAppConfig(supabase),
         supabase
           .from('users')
           .select('nickname')
           .eq('id', user.id)
           .single(),
-        supabase
-          .from('prayers')
-          .select('*')
-          .gte('prayed_at', SEVEN_DAYS_ISO)
-          .order('prayed_at', { ascending: false })
-          .limit(200),
+        supabase.rpc('get_prayer_feed'),
       ]);
 
       if (profile && profile.nickname !== '기도자') {
         setNickname(profile.nickname);
       }
 
-      if (prayers && prayers.length > 0) {
-        const mapped = (prayers as PrayerRow[]).map((r) =>
-          prayerRowToPoint(r, user.id)
-        );
-        setPoints(mapped);
-        lastFetchTimeRef.current = (prayers[0] as PrayerRow).prayed_at;
+      if (feed && feed.length > 0) {
+        // 피드는 최신순 — 뒤집어서 최신이 배열 뒤에 오게 한다
+        setPoints([...feed].reverse().map(feedRowToPoint));
+        lastFetchTimeRef.current = latestUpdatedAt(feed, FEED_EPOCH);
       }
 
       setReady(true);
@@ -134,28 +146,38 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Poll for new prayers every 3s
+  // Poll every 3s — 시작·마치기·재시작 모두 updated_at으로 잡힌다.
+  // 화면이 가려져 있으면 쉬고(요청 절약), 돌아오면 그동안 바뀐 것을 한 번에 받는다
   useEffect(() => {
     if (!ready || !userIdRef.current) return;
 
     const interval = setInterval(async () => {
-      const { data: newPrayers } = await supabase
-        .from('prayers')
-        .select('*')
-        .gt('prayed_at', lastFetchTimeRef.current)
-        .order('prayed_at', { ascending: true })
-        .limit(50);
-
-      if (newPrayers && newPrayers.length > 0) {
-        const mapped = (newPrayers as PrayerRow[]).map((r) =>
-          prayerRowToPoint(r, userIdRef.current)
-        );
-        setPoints((prev) => {
-          const existingIds = new Set(prev.map((p) => p.id));
-          const fresh = mapped.filter((p) => !existingIds.has(p.id));
-          return [...prev, ...fresh];
+      if (document.visibilityState === 'hidden' || pollInFlightRef.current) return;
+      pollInFlightRef.current = true;
+      try {
+        const { data: changed } = await supabase.rpc('get_prayer_feed', {
+          p_since: lastFetchTimeRef.current,
         });
-        lastFetchTimeRef.current = (newPrayers[newPrayers.length - 1] as PrayerRow).prayed_at;
+        const rows = changed ?? [];
+        if (rows.length > 0) {
+          lastFetchTimeRef.current = latestUpdatedAt(rows, lastFetchTimeRef.current);
+        }
+
+        setPoints((prev) => {
+          const merged = rows.length > 0 ? mergeFeed(prev, rows) : prev;
+          // 마치지 않고 30분이 지난 기도는 잔광으로 (내가 지금 하는 기도는 제외)
+          const stale = merged.some(
+            (p) => p.isActive && p.id !== activePrayerIdRef.current && !isWithinActiveWindow(p.prayedAt)
+          );
+          if (!stale) return merged;
+          return merged.map((p) =>
+            p.isActive && p.id !== activePrayerIdRef.current && !isWithinActiveWindow(p.prayedAt)
+              ? { ...p, isActive: false }
+              : p
+          );
+        });
+      } finally {
+        pollInFlightRef.current = false;
       }
     }, POLL_INTERVAL_MS);
 
@@ -198,12 +220,12 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
   // 기도를 마치면 그 기도의 id를 돌려준다 (기도 완료 모달에서 교회 기여 조회용)
   const handleTogglePrayer = useCallback(async (): Promise<string | null> => {
     if (isPraying) {
-      // Stop praying — accumulate duration (previous + this session)
+      // Stop praying — 이번 기도 시간만 보내고 같은 날 누적은 서버가 더한다
       setIsPraying(false);
       setUserPosition(null);
       if (activePrayerIdRef.current) {
-        const totalDuration = prevDurationRef.current + Math.floor((Date.now() - prayerStartRef.current) / 1000);
-        await saveDuration(activePrayerIdRef.current, totalDuration);
+        const sessionSeconds = Math.floor((Date.now() - prayerStartRef.current) / 1000);
+        await endPrayer(activePrayerIdRef.current, sessionSeconds);
 
         // Update local point to residual
         const prayerId = activePrayerIdRef.current;
@@ -222,72 +244,35 @@ export function usePrayerState(defaultTab: ViewTab = 'home') {
       const rawPos = await getCurrentPosition();
       setUserPosition(rawPos);
       const pos = fuzzyPosition(rawPos);
-      const userId = userIdRef.current;
-      if (!userId) return null;
+      if (!userIdRef.current) return null;
 
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-
-      // Check if today's prayer already exists
-      const { data: existing } = await supabase
-        .from('prayers')
-        .select('id, duration_seconds')
-        .eq('user_id', userId)
-        .gte('prayed_at', todayStart.toISOString())
-        .order('prayed_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (existing) {
-        // Update existing: new location, reset to active
-        const { error: updateError } = await supabase
-          .from('prayers')
-          .update({ lat: pos.lat, lng: pos.lng, prayed_at: new Date().toISOString(), duration_seconds: null })
-          .eq('id', existing.id);
-        if (updateError) console.warn('prayer start update failed:', updateError.message);
-
-        activePrayerIdRef.current = existing.id;
-
-        // Remove old local point, add updated one
-        setPoints((prev) => {
-          const filtered = prev.filter((p) => p.id !== existing.id);
-          const j = hashJitter(existing.id);
-          return [...filtered, {
-            id: existing.id,
-            lat: pos.lat + j.dLat,
-            lng: pos.lng + j.dLng,
-            intensity: 1,
-            isUser: true,
-            isActive: true,
-            prayedAt: new Date().toISOString(),
-          }];
-        });
-
-        // Store previous duration for accumulation on end
-        prevDurationRef.current = existing.duration_seconds ?? 0;
-      } else {
-        // Insert new
-        const { data, error } = await supabase
-          .from('prayers')
-          .insert({ user_id: userId, lat: pos.lat, lng: pos.lng })
-          .select('id, prayed_at')
-          .single();
-
-        if (!error && data) {
-          activePrayerIdRef.current = data.id;
-          const j = hashJitter(data.id);
-          setPoints((prev) => [...prev, {
-            id: data.id,
-            lat: pos.lat + j.dLat,
-            lng: pos.lng + j.dLng,
-            intensity: 1,
-            isUser: true,
-            isActive: true,
-            prayedAt: data.prayed_at ?? new Date().toISOString(),
-          }]);
-          prevDurationRef.current = 0;
-        }
+      // 오늘 기도 행 만들기/다시 시작은 서버가 한다 (사용자 시간대 기준 하루 1행)
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const { data, error } = await supabase.rpc('start_prayer', {
+        p_lat: pos.lat,
+        p_lng: pos.lng,
+        p_timezone: timezone,
+      });
+      if (error || !data) {
+        console.warn('prayer start failed:', error?.message);
+        return null;
       }
+
+      const started = data as { id: string; lat: number; lng: number; prayed_at: string };
+      activePrayerIdRef.current = started.id;
+      const j = hashJitter(started.id);
+      setPoints((prev) => [
+        ...prev.filter((p) => p.id !== started.id),
+        {
+          id: started.id,
+          lat: started.lat + j.dLat,
+          lng: started.lng + j.dLng,
+          intensity: 1,
+          isUser: true,
+          isActive: true,
+          prayedAt: started.prayed_at,
+        },
+      ]);
       return null;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -36,8 +36,8 @@ export function usePrayerStats(period: StatsPeriod = 'week') {
     }
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const { data, error } = await supabase.rpc('get_prayer_stats', {
-      p_user_id: user.id,
+    // 본인 통계만 — 서버가 auth.uid()로 판단한다
+    const { data, error } = await supabase.rpc('get_my_prayer_stats', {
       p_period: period,
       p_timezone: timezone,
     });

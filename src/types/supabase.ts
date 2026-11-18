@@ -125,14 +125,14 @@ isOneToOne: false
                   ]
                 },"prayers": {
                   Row: {
-                    "church_id": string | null,"duration_seconds": number | null,"id": string,"lat": number,"lng": number,"prayed_at": string | null,"user_id": string
+                    "church_id": string | null,"duration_seconds": number | null,"id": string,"lat": number,"lng": number,"prayed_at": string | null,"prior_seconds": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "church_id"?: string | null,"duration_seconds"?: number | null,"id"?: string,"lat": number,"lng": number,"prayed_at"?: string | null,"user_id": string
+                    "church_id"?: string | null,"duration_seconds"?: number | null,"id"?: string,"lat": number,"lng": number,"prayed_at"?: string | null,"prior_seconds"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "church_id"?: string | null,"duration_seconds"?: number | null,"id"?: string,"lat"?: number,"lng"?: number,"prayed_at"?: string | null,"user_id"?: string
+                    "church_id"?: string | null,"duration_seconds"?: number | null,"id"?: string,"lat"?: number,"lng"?: number,"prayed_at"?: string | null,"prior_seconds"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -187,6 +187,9 @@ isOneToOne: false
 "distance_km":
 { Args: { "lat1": number,"lat2": number,"lng1": number,"lng2": number }; Returns: number
                            },
+"end_prayer":
+{ Args: { "p_client_seconds": number,"p_prayer_id": string }; Returns: number
+                           },
 "find_similar_churches":
 { Args: { "p_lat": number,"p_lng": number,"p_name": string,"p_radius_km"?: number }; Returns: {
               "distance_km": number,"id": string,"name": string
@@ -198,15 +201,21 @@ isOneToOne: false
 "get_prayer_contribution":
 { Args: { "p_prayer_id": string }; Returns: Json
                            },
-"get_prayer_stats":
-{ Args: { "p_period"?: string,"p_user_id": string }; Returns: Json
-                           } |
-{ Args: { "p_period"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: Json
+"get_my_prayer_stats":
+{ Args: { "p_period"?: string,"p_timezone"?: string }; Returns: Json
+                           },
+"get_prayer_feed":
+{ Args: { "p_limit"?: number,"p_since"?: string }; Returns: {
+              "id": string,"is_active": boolean,"is_mine": boolean,"lat": number,"lng": number,"prayed_at": string,"updated_at": string
+            }[]
                            },
 "search_churches":
 { Args: { "p_lat"?: number,"p_limit"?: number,"p_lng"?: number,"p_query"?: string }; Returns: {
               "distance_km": number,"id": string,"lat": number,"level": number,"lng": number,"name": string
             }[]
+                           },
+"start_prayer":
+{ Args: { "p_lat": number,"p_lng": number,"p_timezone"?: string }; Returns: Json
                            },
 "set_my_church":
 { Args: { "p_church_id": string }; Returns: undefined
