@@ -78,7 +78,8 @@ export function getPrayerAudio(): PrayerAudio {
         el.currentTime = 0;
       };
       const fade = (now: number) => {
-        const progress = Math.min((now - t0) / FADE_MS, 1);
+        // rAF 시각은 프레임 시작 시각이라 t0보다 앞설 수 있다 — 음수면 볼륨이 1을 넘어 예외가 난다
+        const progress = Math.min(Math.max((now - t0) / FADE_MS, 0), 1);
         el.volume = startVolume * (1 - progress);
         if (progress < 1) {
           fadeFrame = requestAnimationFrame(fade);
