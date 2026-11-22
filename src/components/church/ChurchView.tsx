@@ -9,6 +9,7 @@ import { ArrowLeft, CaretRight, MagnifyingGlass } from '@phosphor-icons/react';
 import { getCurrentPosition } from '@/lib/bridge';
 import {
   churchArtSrc,
+  CHURCH_DESCRIPTION_MAX,
   createChurch,
   distanceParts,
   findSimilarChurches,
@@ -302,6 +303,7 @@ function CreateSection({
 }) {
   const t = useTranslations('church');
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [similar, setSimilar] = useState<{ id: string; name: string; distanceKm: number } | null>(null);
   const [warnedFor, setWarnedFor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -329,7 +331,7 @@ function CreateSection({
           return;
         }
       }
-      const result = await createChurch(supabase, trimmed, pin);
+      const result = await createChurch(supabase, trimmed, pin, description);
       if ('error' in result) {
         setError(result.error === 'daily_limit' ? t('dailyLimit') : t('createFailed'));
         return;
@@ -356,6 +358,22 @@ function CreateSection({
           maxLength={40}
           onChange={(e) => { setName(e.target.value); setError(null); }}
           className="border-b-2 border-gold/60 bg-transparent py-2 text-base text-gold-light caret-gold-light outline-none transition-colors duration-300 ease-weighted focus:border-gold"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="flex justify-between text-xs text-ivory/45">
+          <span>{t('descriptionLabel')}</span>
+          <span className="tabular-nums">{description.length}/{CHURCH_DESCRIPTION_MAX}</span>
+        </span>
+        <input
+          id="church-description"
+          type="text"
+          value={description}
+          maxLength={CHURCH_DESCRIPTION_MAX}
+          placeholder={t('descriptionPlaceholder')}
+          onChange={(e) => setDescription(e.target.value)}
+          className="border-b-2 border-gold/60 bg-transparent py-2 text-base text-gold-light caret-gold-light outline-none transition-colors duration-300 ease-weighted placeholder:text-ivory/30 focus:border-gold"
         />
       </label>
 

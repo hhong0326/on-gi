@@ -5,9 +5,12 @@ import {useTranslations} from 'next-intl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import '@/components/mapbox/church-popup.css';
 import '@/components/shared/prayer-light.css';
+import { bindChurchPopup, syncChurchLayer } from '@/components/mapbox/church-layer';
 import { createPrayerLightElement } from '@/components/shared/prayer-light';
 import { applyToneOnTone } from '@/lib/map-tone';
+import type { ChurchMarker } from '@/lib/church';
 import type { PrayerPoint } from '@/types/prayer';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
@@ -58,6 +61,7 @@ const FOG_PRESETS: Record<FogPreset, mapboxgl.FogSpecification> = {
 
 interface MapboxViewProps {
   points: PrayerPoint[];
+  churches?: ChurchMarker[];
   mapStyle?: MapboxStyle;
   fogPreset?: FogPreset;
   hideLabels?: boolean;
@@ -67,6 +71,8 @@ interface MapboxViewProps {
   onSpinAvailableChange?: (available: boolean) => void;
   resumeSpinRef?: React.RefObject<(() => void) | null>;
 }
+
+const NO_CHURCHES: ChurchMarker[] = [];
 
 // Jerusalem easter egg marker
 const JERUSALEM: [number, number] = [35.2137, 31.7683];
@@ -94,10 +100,16 @@ function createBulbMarkerElement(onClick?: () => void): HTMLElement {
   return el;
 }
 
-export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick, onSpinAvailableChange, resumeSpinRef }: MapboxViewProps) {
+export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', fogPreset = 'ember', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick, onSpinAvailableChange, resumeSpinRef }: MapboxViewProps) {
   const t = useTranslations('common');
   const ttime = useTranslations('time');
   const tprayer = useTranslations('prayer');
+  const tchurch = useTranslations('church');
+  const mineLabelRef = useRef('');
+  mineLabelRef.current = tchurch('popupMine');
+  const churchesRef = useRef(churches);
+  const styleReadyRef = useRef(false);
+  churchesRef.current = churches;
   const tooltipLabelsRef = useRef({justNow: '', minutesAgo: '', hoursAgo: '', daysAgo: '', prayedAt: ''});
   tooltipLabelsRef.current = {
     justNow: ttime('justNow'),
@@ -138,12 +150,15 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hid
       if (mapStyle === 'dark') applyToneOnTone(map);
       if (hideLabels) {
         map.getStyle().layers?.forEach((layer) => {
-          if (layer.type === 'symbol') {
+          if (layer.type === 'symbol' && !layer.id.startsWith('ongi-')) {
             map.setLayoutProperty(layer.id, 'visibility', 'none');
           }
         });
       }
+      styleReadyRef.current = true;
+      syncChurchLayer(map, churchesRef.current);
     });
+    const unbindChurchPopup = bindChurchPopup(map, () => mineLabelRef.current);
 
     // Auto-spin: only on initial load, stops permanently on first touch
     function spin() {
@@ -191,6 +206,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hid
       if (resumeSpinRef) resumeSpinRef.current = null;
       easterMarkerRef.current?.remove();
       easterMarkerRef.current = null;
+      unbindChurchPopup();
       map.remove();
       mapRef.current = null;
     };
@@ -203,6 +219,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hid
     if (!map || currentStyleRef.current === mapStyle) return;
 
     currentStyleRef.current = mapStyle;
+    styleReadyRef.current = false;
     map.setStyle(STYLE_URLS[mapStyle]);
 
     map.once('style.load', () => {
@@ -210,11 +227,13 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hid
       if (mapStyle === 'dark') applyToneOnTone(map);
       if (hideLabels) {
         map.getStyle().layers?.forEach((layer) => {
-          if (layer.type === 'symbol') {
+          if (layer.type === 'symbol' && !layer.id.startsWith('ongi-')) {
             map.setLayoutProperty(layer.id, 'visibility', 'none');
           }
         });
       }
+      styleReadyRef.current = true;
+      syncChurchLayer(map, churchesRef.current);
       // Re-add markers after style change
       markersRef.current.forEach(({ marker }) => marker.addTo(map));
       easterMarkerRef.current?.addTo(map);
@@ -255,7 +274,7 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hid
     if (!map) return;
     try {
       map.getStyle().layers?.forEach((layer) => {
-        if (layer.type === 'symbol') {
+        if (layer.type === 'symbol' && !layer.id.startsWith('ongi-')) {
           map.setLayoutProperty(layer.id, 'visibility', hideLabels ? 'none' : 'visible');
         }
       });
@@ -263,6 +282,12 @@ export function MapboxView({ points, mapStyle = 'dark', fogPreset = 'ember', hid
       // style not loaded yet
     }
   }, [hideLabels]);
+
+  // 교회 아이콘 데이터 갱신 (스타일 로드 전이면 style.load에서 그린다)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && styleReadyRef.current) syncChurchLayer(map, churches);
+  }, [churches]);
 
   // Update markers (diff-based, re-create on isActive change)
   useEffect(() => {

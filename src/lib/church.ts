@@ -32,6 +32,18 @@ export interface MyChurch {
   membersThisWeek: number;
 }
 
+// 지구본 교회 아이콘 — 다른 교회는 단계 없이 모두 같은 모양 (0010)
+export interface ChurchMarker {
+  id: string;
+  name: string;
+  description: string | null;
+  lat: number;
+  lng: number;
+  isMine: boolean;
+}
+
+export const CHURCH_DESCRIPTION_MAX = 20;
+
 export interface PrayerContribution {
   neighborCount: number;
   church: MyChurch | null;
@@ -90,6 +102,19 @@ export async function fetchMyChurch(supabase: SupabaseClient): Promise<MyChurch 
   return toMyChurch(data as unknown as MyChurchRow | null);
 }
 
+export async function fetchChurchMap(supabase: SupabaseClient): Promise<ChurchMarker[]> {
+  const { data, error } = await supabase.rpc('get_church_map');
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    lat: row.lat,
+    lng: row.lng,
+    isMine: row.is_mine,
+  }));
+}
+
 export async function searchChurches(
   supabase: SupabaseClient,
   query: string,
@@ -131,11 +156,13 @@ export async function createChurch(
   supabase: SupabaseClient,
   name: string,
   position: { lat: number; lng: number },
+  description: string,
 ): Promise<{ id: string } | { error: CreateChurchError }> {
   const { data, error } = await supabase.rpc('create_church', {
     p_name: name,
     p_lat: position.lat,
     p_lng: position.lng,
+    p_description: description.trim() || undefined,
   });
   if (error) {
     return { error: error.message.includes('daily church limit') ? 'daily_limit' : 'failed' };

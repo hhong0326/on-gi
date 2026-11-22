@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
+import { useChurchMap } from '@/hooks/useChurchMap';
 import { useMyChurch } from '@/hooks/useMyChurch';
 import { appConfig } from '@/lib/app-config';
 import { getPrayerAudio } from '@/lib/audio';
@@ -124,6 +125,10 @@ export default function MainPage() {
   // with Supabase auth + data queries; only overlay UI waits for readiness.
   const uiReady = state.ready && !!state.nickname;
   const { church: myChurch, loaded: churchLoaded, refresh: refreshChurch } = useMyChurch(uiReady);
+  const { churches: churchMarkers, refresh: refreshChurchMap } = useChurchMap(uiReady);
+  const handleChurchChanged = async () => {
+    await Promise.all([refreshChurch(), refreshChurchMap()]);
+  };
 
   // Splash cover: 신규 유저(닉네임 없음)는 커버가 유지된 채 온보딩으로 넘어가
   // 지구본 깜빡임을 보지 않는다. uiReady 후 페이드아웃 → DOM 제거.
@@ -139,6 +144,7 @@ export default function MainPage() {
       <div className="absolute inset-0 z-0">
         <MapboxView
           points={state.points}
+          churches={churchMarkers}
           isPraying={state.isPraying}
           userPosition={state.userPosition}
           onEasterEggClick={() => setShowEasterEgg(true)}
@@ -160,7 +166,7 @@ export default function MainPage() {
       {showChurch && (
         <ChurchView
           church={myChurch}
-          onChurchChanged={refreshChurch}
+          onChurchChanged={handleChurchChanged}
           onClose={() => setShowChurch(false)}
         />
       )}

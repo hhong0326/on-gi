@@ -65,14 +65,14 @@ isOneToOne: false
                   ]
                 },"churches": {
                   Row: {
-                    "created_at": string | null,"created_by": string | null,"id": string,"invite_code": string,"lat": number | null,"lng": number | null,"name": string
+                    "created_at": string | null,"created_by": string | null,"description": string | null,"id": string,"invite_code": string,"lat": number | null,"lng": number | null,"name": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string | null,"created_by"?: string | null,"id"?: string,"invite_code"?: string,"lat"?: number | null,"lng"?: number | null,"name": string
+                    "created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"id"?: string,"invite_code"?: string,"lat"?: number | null,"lng"?: number | null,"name": string
                   }
                   Update: {
-                    "created_at"?: string | null,"created_by"?: string | null,"id"?: string,"invite_code"?: string,"lat"?: number | null,"lng"?: number | null,"name"?: string
+                    "created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"id"?: string,"invite_code"?: string,"lat"?: number | null,"lng"?: number | null,"name"?: string
                   }
                   Relationships: [
                     {
@@ -182,7 +182,7 @@ isOneToOne: false
 { Args: { "p_church_id": string }; Returns: number
                            },
 "create_church":
-{ Args: { "p_lat": number,"p_lng": number,"p_name": string }; Returns: string
+{ Args: { "p_description"?: string,"p_lat": number,"p_lng": number,"p_name": string }; Returns: string
                            },
 "distance_km":
 { Args: { "lat1": number,"lat2": number,"lng1": number,"lng2": number }; Returns: number
@@ -193,6 +193,11 @@ isOneToOne: false
 "find_similar_churches":
 { Args: { "p_lat": number,"p_lng": number,"p_name": string,"p_radius_km"?: number }; Returns: {
               "distance_km": number,"id": string,"name": string
+            }[]
+                           },
+"get_church_map":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "description": string | null,"id": string,"is_mine": boolean,"lat": number,"lng": number,"name": string
             }[]
                            },
 "get_my_church":
