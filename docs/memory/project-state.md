@@ -32,9 +32,7 @@
 | CLI | `npx -y supabase@2.122.0` 고정 ([0012](../decisions/0012-pin-supabase-cli.md)) |
 | 운영 튜닝 | `app_config` 테이블 ([docs/app-config.md](../app-config.md)) |
 
-**진행 중 (0014 2단계 배포)**: ① `prayer_rpc` 마이그레이션 운영 적용 (2026-11-18 완료) → ② 새 클라이언트 배포 → ③ `supabase/pending/20261113090100_prayer_lockdown.sql`을 `supabase/migrations/`로 옮겨 운영 적용. ①②가 끝나기 전에 ③을 push하지 않는다. ②는 2026-11-19 배포 완료, ③은 운영 로그에서 옛 폴링(`prayed_at=gt`)이 하루 동안 0건이면 적용.
-
-**진행 중 (0015)**: `church_map` 마이그레이션을 운영에 먼저 적용한 뒤 클라이언트를 배포한다 (새 클라이언트의 교회 세우기가 `p_description`을 보낸다).
+**보안 잠금 완료 (0014)**: 2026-11-22 `prayer_lockdown` 운영 적용 (`supabase/migrations/20261122000000_prayer_lockdown.sql`). 운영 로그에서 옛 폴링이 이틀간 0건인 것을 확인한 뒤 적용. `prayers`는 본인 행 읽기만, `churches`는 직접 접근 불가, `users`는 닉네임만 직접 수정. 이후 기도·교회 데이터는 RPC로만 다룬다.
 
 **배포 순서 (DB 변경이 있을 때)**: 로컬 확인 → 실행 전 확인받기 → `npx -y supabase@2.122.0 db push` → 원격 적용 확인(`migration list --linked`) → `git push origin main` → Vercel 상태 확인.
 반대로 하면 배포와 DB 적용 사이에 새 화면이 에러를 낸다.
@@ -75,7 +73,7 @@
 - [ ] GPS 거부 시 서울 좌표로 저장되는 문제 (기도를 막을지, 위치 없이 기도할지 결정 필요)
 - [ ] 마커 60개 제한 → GeoJSON 레이어 전환, 교회 누적값 캐시 (확장성)
 - [ ] Supabase CLI 3.x 대응 (`config.toml`의 `[inbucket]` → `[local_smtp]`)
-- [ ] 운영 DB에 생긴 테스트 데이터가 있으면 정리 — 2026-11-18 화면 검증으로 닉네임 `검증` 익명 사용자 2명과 그 기도(서울 37.6/127.0) 생성
+- [ ] 운영 DB에 생긴 테스트 데이터가 있으면 정리 — 2026-11-18~22 화면·API 검증으로 닉네임 `검증` 익명 사용자 여러 명과 그 기도(서울 37.6/127.0) 생성
 
 **예정**
 - [ ] 네이티브 앱 웹뷰 임베딩 (`src/lib/bridge.ts` 브릿지 교체)
