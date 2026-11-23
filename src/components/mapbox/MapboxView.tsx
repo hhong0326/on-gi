@@ -8,6 +8,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import '@/components/mapbox/church-popup.css';
 import '@/components/shared/prayer-light.css';
 import { bindChurchPopup, syncChurchLayer } from '@/components/mapbox/church-layer';
+import { createChurchRoute, type ChurchRoute } from '@/components/mapbox/church-route';
 import { createPrayerLightElement } from '@/components/shared/prayer-light';
 import { applyToneOnTone } from '@/lib/map-tone';
 import type { ChurchMarker } from '@/lib/church';
@@ -109,6 +110,7 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
   mineLabelRef.current = tchurch('popupMine');
   const churchesRef = useRef(churches);
   const styleReadyRef = useRef(false);
+  const routeRef = useRef<ChurchRoute | null>(null);
   churchesRef.current = churches;
   const tooltipLabelsRef = useRef({justNow: '', minutesAgo: '', hoursAgo: '', daysAgo: '', prayedAt: ''});
   tooltipLabelsRef.current = {
@@ -157,7 +159,9 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       }
       styleReadyRef.current = true;
       syncChurchLayer(map, churchesRef.current);
+      routeRef.current?.restore();
     });
+    routeRef.current = createChurchRoute(map);
     const unbindChurchPopup = bindChurchPopup(map, () => mineLabelRef.current);
 
     // Auto-spin: only on initial load, stops permanently on first touch
@@ -207,6 +211,8 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       easterMarkerRef.current?.remove();
       easterMarkerRef.current = null;
       unbindChurchPopup();
+      routeRef.current?.hide();
+      routeRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -234,6 +240,7 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       }
       styleReadyRef.current = true;
       syncChurchLayer(map, churchesRef.current);
+      routeRef.current?.restore();
       // Re-add markers after style change
       markersRef.current.forEach(({ marker }) => marker.addTo(map));
       easterMarkerRef.current?.addTo(map);
@@ -251,22 +258,59 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
     }
   }, [fogPreset]);
 
-  // Handle prayer state: fly to user location
+  // 내 교회와 지금 켜진 내 기도 불빛 — 원시값으로 뽑아 effect가 목록 갱신마다 다시 돌지 않게 한다
+  const myChurch = churches.find((c) => c.isMine);
+  const myChurchLat = myChurch?.lat;
+  const myChurchLng = myChurch?.lng;
+  const myLight = isPraying ? points.find((p) => p.isUser && p.isActive) : undefined;
+  const myLightLat = myLight?.lat;
+  const myLightLng = myLight?.lng;
+
+  // Handle prayer state: 내 위치로 이동. 내 교회가 있으면 내 위치와 교회가 함께 보이게 맞춘다
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
     if (isPraying && userPosition) {
       spinningRef.current = false;
-      map.flyTo({
-        center: [userPosition.lng, userPosition.lat],
-        zoom: 8,
-        duration: 2000,
-      });
+      if (myChurchLat !== undefined && myChurchLng !== undefined) {
+        // 날짜변경선 너머 교회도 가까운 쪽으로 감싸도록 경도를 편다
+        let churchLng = myChurchLng;
+        while (churchLng - userPosition.lng > 180) churchLng -= 360;
+        while (churchLng - userPosition.lng < -180) churchLng += 360;
+        map.fitBounds(
+          [
+            [Math.min(userPosition.lng, churchLng), Math.min(userPosition.lat, myChurchLat)],
+            [Math.max(userPosition.lng, churchLng), Math.max(userPosition.lat, myChurchLat)],
+          ],
+          { padding: { top: 160, bottom: 240, left: 56, right: 56 }, maxZoom: 8, duration: 2000 },
+        );
+      } else {
+        map.flyTo({
+          center: [userPosition.lng, userPosition.lat],
+          zoom: 8,
+          duration: 2000,
+        });
+      }
     } else if (!isPraying) {
       map.flyTo({ zoom: 1.5, duration: 2000 });
     }
-  }, [isPraying, userPosition]);
+  }, [isPraying, userPosition, myChurchLat, myChurchLng]);
+
+  // 기도 중 내 불빛 → 내 교회로 가는 빛 (0016)
+  useEffect(() => {
+    const route = routeRef.current;
+    if (!route || !styleReadyRef.current) return;
+    if (
+      isPraying
+      && myLightLat !== undefined && myLightLng !== undefined
+      && myChurchLat !== undefined && myChurchLng !== undefined
+    ) {
+      route.show({ lat: myLightLat, lng: myLightLng }, { lat: myChurchLat, lng: myChurchLng });
+    } else {
+      route.hide();
+    }
+  }, [isPraying, myLightLat, myLightLng, myChurchLat, myChurchLng]);
 
   // Update label visibility
   useEffect(() => {

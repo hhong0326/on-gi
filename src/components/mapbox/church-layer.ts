@@ -87,9 +87,9 @@ export function syncChurchLayer(map: mapboxgl.Map, churches: ChurchMarker[]) {
         'icon-image': ['case', ['get', 'mine'], ICON_MINE, ICON],
         'icon-size': [
           'interpolate', ['linear'], ['zoom'],
-          1, ['case', ['get', 'mine'], 0.85, 0.55],
-          6, ['case', ['get', 'mine'], 1.25, 0.9],
-          12, ['case', ['get', 'mine'], 1.5, 1.1],
+          1, ['case', ['get', 'mine'], 0.7, 0.45],
+          6, ['case', ['get', 'mine'], 1, 0.7],
+          12, ['case', ['get', 'mine'], 1.2, 0.9],
         ],
         'icon-allow-overlap': true,
         'icon-ignore-placement': true,
