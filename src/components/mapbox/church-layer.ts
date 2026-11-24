@@ -16,8 +16,10 @@ const GOLD = '#D4A44C';
 const GOLD_LIGHT = '#F5D98A';
 const NIGHT = 'rgba(19, 18, 9, 0.75)';
 
-// 24×24 선화: 십자가 · 지붕 · 몸체 · 문
-const GLYPH = 'M12 2.5v4M10.25 4.25h3.5M5.5 12l6.5-5 6.5 5M7.5 10.5V20h9v-9.5M10.75 20v-3.25h2.5V20';
+// 24×24 선화: 십자가 · 지붕 · 몸체 (시안 G — 불 켜진 창)
+const GLYPH = 'M12 2.5v4M10.25 4.25h3.5M5.5 12l6.5-5 6.5 5M7.5 10.5V20h9v-9.5';
+// 아치 창: 금빛으로 채워 교회에 빛이 머문 모습 (기도 빛이 닿는 곳)
+const WINDOW = 'M10.6 19v-3.4a1.4 1.4 0 0 1 2.8 0V19z';
 
 function drawIcon(mine: boolean): ImageData | null {
   const size = ICON_PX * PIXEL_RATIO;
@@ -42,9 +44,14 @@ function drawIcon(mine: boolean): ImageData | null {
   ctx.lineJoin = 'round';
   ctx.lineWidth = mine ? 1.75 : 1.5;
   ctx.strokeStyle = mine ? GOLD_LIGHT : GOLD;
-  ctx.shadowColor = mine ? GOLD_LIGHT : 'transparent';
-  ctx.shadowBlur = mine ? 4 : 0;
+  ctx.shadowColor = mine ? GOLD_LIGHT : 'rgba(212, 164, 76, 0.55)';
+  ctx.shadowBlur = mine ? 4 : 2;
   ctx.stroke(path);
+
+  ctx.fillStyle = GOLD_LIGHT;
+  ctx.shadowColor = GOLD_LIGHT;
+  ctx.shadowBlur = mine ? 4 : 2;
+  ctx.fill(new Path2D(WINDOW));
 
   return ctx.getImageData(0, 0, size, size);
 }
