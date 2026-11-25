@@ -115,6 +115,16 @@ export async function fetchChurchMap(supabase: SupabaseClient): Promise<ChurchMa
   }));
 }
 
+// 이번 기도가 온기를 나눌 이웃 교회 위치 (0017) — 서버가 온기 트리거와 같은 규칙으로 고른다
+export async function fetchPrayerNeighbors(
+  supabase: SupabaseClient,
+  prayerId: string,
+): Promise<{ id: string; lat: number; lng: number }[]> {
+  const { data, error } = await supabase.rpc('get_prayer_neighbors', { p_prayer_id: prayerId });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function searchChurches(
   supabase: SupabaseClient,
   query: string,

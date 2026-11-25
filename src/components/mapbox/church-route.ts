@@ -1,19 +1,36 @@
 import type mapboxgl from 'mapbox-gl';
 
-// 기도 중 내 자리 → 내 교회로 가는 빛 (교회에 빛 보내기 2단계).
+// 기도 중 내 불빛 → 교회로 가는 빛 (교회에 빛 보내기 2·3단계).
 // 대권(지구 위 최단) 곡선을 희미한 길 + 그 위를 흘러가는 빛 한 줄기로 그린다.
-// 출발점은 기기의 현재 위치라 화면에만 쓰고 서버로 보내지 않는다 (0004).
+// 'church'는 내 교회로 가는 또렷한 빛 한 줄(0016), 'neighbors'는 온기를 나누는 이웃 교회로 가는 희미한 빛(0017).
+// 출발점은 화면 위 내 불빛(0.1도 격자 + 지터)이라 실제 GPS가 드러나지 않는다 (0004).
 
-const SOURCE_ID = 'ongi-church-route';
-const BASE_LAYER_ID = 'ongi-church-route-base';
-const GLOW_LAYER_ID = 'ongi-church-route-glow';
 const SEGMENTS = 96;
-const PULSE_MS = 2800; // 빛 한 줄기가 교회까지 가는 시간
-const PULSE_TAIL = 0.18; // 빛 꼬리 길이 (경로 비율)
-
-const GOLD = 'rgba(212, 164, 76, 0.35)';
 const GOLD_LIGHT = 'rgba(245, 217, 138, 1)';
 const CLEAR = 'rgba(245, 217, 138, 0)';
+
+export type RouteKind = 'church' | 'neighbors';
+
+const STYLE = {
+  church: {
+    prefix: 'ongi-church-route',
+    base: 'rgba(212, 164, 76, 0.35)',
+    baseWidth: [1, 2],
+    glowWidth: [2.5, 4],
+    glowOpacity: 0.9,
+    pulseMs: 2800, // 빛 한 줄기가 교회까지 가는 시간
+    tail: 0.18, // 빛 꼬리 길이 (경로 비율)
+  },
+  neighbors: {
+    prefix: 'ongi-neighbor-route',
+    base: 'rgba(212, 164, 76, 0.28)',
+    baseWidth: [1, 1.5],
+    glowWidth: [2, 3],
+    glowOpacity: 0.6,
+    pulseMs: 3600,
+    tail: 0.25,
+  },
+} as const;
 
 type LngLat = { lat: number; lng: number };
 
@@ -50,9 +67,9 @@ export function greatCircle(from: LngLat, to: LngLat, segments = SEGMENTS): [num
 }
 
 // 진행률 p(0~1)에 머리가 있는 빛 줄기 그라디언트. 정지 값은 항상 오름차순이어야 한다
-function pulseGradient(p: number): mapboxgl.ExpressionSpecification {
+function pulseGradient(p: number, tailLength: number): mapboxgl.ExpressionSpecification {
   const head = Math.min(Math.max(p, 0.001), 0.999);
-  const tail = Math.max(head - PULSE_TAIL, 0);
+  const tail = Math.max(head - tailLength, 0);
   const stops: (number | string)[] = [];
   if (tail > 0) stops.push(0, CLEAR);
   stops.push(tail, CLEAR, head, GOLD_LIGHT, Math.min(head + 0.0005, 1), CLEAR);
@@ -61,16 +78,20 @@ function pulseGradient(p: number): mapboxgl.ExpressionSpecification {
 }
 
 export interface ChurchRoute {
-  /** 경로를 보여준다 (이미 있으면 좌표만 바꾼다). 스타일 재로드 뒤에도 다시 부른다 */
-  show: (from: LngLat, to: LngLat) => void;
+  /** 출발점에서 각 목적지로 가는 경로를 보여준다 (이미 있으면 좌표만 바꾼다) */
+  show: (from: LngLat, to: LngLat[]) => void;
   hide: () => void;
   /** 스타일이 바뀌면 레이어가 사라지므로 style.load 뒤에 현재 경로를 다시 그린다 */
   restore: () => void;
 }
 
-export function createChurchRoute(map: mapboxgl.Map): ChurchRoute {
+export function createChurchRoute(map: mapboxgl.Map, kind: RouteKind = 'church'): ChurchRoute {
+  const style = STYLE[kind];
+  const SOURCE_ID = style.prefix;
+  const BASE_LAYER_ID = `${style.prefix}-base`;
+  const GLOW_LAYER_ID = `${style.prefix}-glow`;
   let frame: number | null = null;
-  let current: { from: LngLat; to: LngLat } | null = null;
+  let current: { from: LngLat; to: LngLat[] } | null = null;
   const reducedMotion = typeof window !== 'undefined'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -87,19 +108,24 @@ export function createChurchRoute(map: mapboxgl.Map): ChurchRoute {
   const animate = (t0: number) => {
     const tick = (now: number) => {
       if (!map.getLayer(GLOW_LAYER_ID)) { frame = null; return; }
-      const p = ((now - t0) % PULSE_MS) / PULSE_MS;
-      map.setPaintProperty(GLOW_LAYER_ID, 'line-gradient', pulseGradient(p));
+      const p = ((now - t0) % style.pulseMs) / style.pulseMs;
+      map.setPaintProperty(GLOW_LAYER_ID, 'line-gradient', pulseGradient(p, style.tail));
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
   };
 
-  const show = (from: LngLat, to: LngLat) => {
+  const show = (from: LngLat, to: LngLat[]) => {
+    if (to.length === 0) { hide(); return; }
     current = { from, to };
-    const data: GeoJSON.Feature<GeoJSON.LineString> = {
-      type: 'Feature',
-      properties: {},
-      geometry: { type: 'LineString', coordinates: greatCircle(from, to) },
+    // line-progress는 피처마다 0→1이라 한 그라디언트로 모든 경로에 빛이 함께 흐른다
+    const data: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+      type: 'FeatureCollection',
+      features: to.map((t) => ({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: greatCircle(from, t) },
+      })),
     };
     const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     if (source) {
@@ -107,16 +133,19 @@ export function createChurchRoute(map: mapboxgl.Map): ChurchRoute {
       return;
     }
     map.addSource(SOURCE_ID, { type: 'geojson', data, lineMetrics: true });
-    // 교회 아이콘 아래에 깐다
-    const before = map.getLayer('ongi-church-icons') ? 'ongi-church-icons' : undefined;
+    // 교회 아이콘 아래에 깐다. 이웃 빛은 내 교회 빛보다도 아래
+    const below = kind === 'neighbors'
+      ? ['ongi-church-route-base', 'ongi-church-icons']
+      : ['ongi-church-icons'];
+    const before = below.find((id) => map.getLayer(id));
     map.addLayer({
       id: BASE_LAYER_ID,
       type: 'line',
       source: SOURCE_ID,
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
-        'line-color': GOLD,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 1, 1, 8, 2],
+        'line-color': style.base,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 1, style.baseWidth[0], 8, style.baseWidth[1]],
         'line-blur': 1,
         'line-opacity': 0,
         'line-opacity-transition': { duration: 500 },
@@ -128,11 +157,11 @@ export function createChurchRoute(map: mapboxgl.Map): ChurchRoute {
       source: SOURCE_ID,
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
-        'line-width': ['interpolate', ['linear'], ['zoom'], 1, 2.5, 8, 4],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 1, style.glowWidth[0], 8, style.glowWidth[1]],
         'line-blur': 2,
         'line-gradient': reducedMotion
           ? (['interpolate', ['linear'], ['line-progress'], 0, CLEAR, 1, GOLD_LIGHT] as mapboxgl.ExpressionSpecification)
-          : pulseGradient(0),
+          : pulseGradient(0, style.tail),
         'line-opacity': 0,
         'line-opacity-transition': { duration: 500 },
       },
@@ -141,7 +170,7 @@ export function createChurchRoute(map: mapboxgl.Map): ChurchRoute {
     requestAnimationFrame(() => {
       if (!map.getLayer(BASE_LAYER_ID)) return;
       map.setPaintProperty(BASE_LAYER_ID, 'line-opacity', 1);
-      map.setPaintProperty(GLOW_LAYER_ID, 'line-opacity', 0.9);
+      map.setPaintProperty(GLOW_LAYER_ID, 'line-opacity', style.glowOpacity);
     });
     stopAnim();
     if (!reducedMotion) animate(performance.now());

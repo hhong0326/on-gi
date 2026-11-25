@@ -206,6 +206,11 @@ isOneToOne: false
 "get_prayer_contribution":
 { Args: { "p_prayer_id": string }; Returns: Json
                            },
+"get_prayer_neighbors":
+{ Args: { "p_prayer_id": string }; Returns: {
+              "id": string,"lat": number,"lng": number
+            }[]
+                           },
 "get_my_prayer_stats":
 { Args: { "p_period"?: string,"p_timezone"?: string }; Returns: Json
                            },

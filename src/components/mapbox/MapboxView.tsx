@@ -63,6 +63,8 @@ const FOG_PRESETS: Record<FogPreset, mapboxgl.FogSpecification> = {
 interface MapboxViewProps {
   points: PrayerPoint[];
   churches?: ChurchMarker[];
+  /** 기도 중 온기를 나누는 이웃 교회 위치 (0017) */
+  neighborChurches?: { lat: number; lng: number }[];
   mapStyle?: MapboxStyle;
   fogPreset?: FogPreset;
   hideLabels?: boolean;
@@ -74,6 +76,7 @@ interface MapboxViewProps {
 }
 
 const NO_CHURCHES: ChurchMarker[] = [];
+const NO_NEIGHBORS: { lat: number; lng: number }[] = [];
 
 // Jerusalem easter egg marker
 const JERUSALEM: [number, number] = [35.2137, 31.7683];
@@ -101,7 +104,7 @@ function createBulbMarkerElement(onClick?: () => void): HTMLElement {
   return el;
 }
 
-export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', fogPreset = 'ember', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick, onSpinAvailableChange, resumeSpinRef }: MapboxViewProps) {
+export function MapboxView({ points, churches = NO_CHURCHES, neighborChurches = NO_NEIGHBORS, mapStyle = 'dark', fogPreset = 'ember', hideLabels = false, isPraying = false, userPosition = null, onEasterEggClick, onSpinAvailableChange, resumeSpinRef }: MapboxViewProps) {
   const t = useTranslations('common');
   const ttime = useTranslations('time');
   const tprayer = useTranslations('prayer');
@@ -111,6 +114,7 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
   const churchesRef = useRef(churches);
   const styleReadyRef = useRef(false);
   const routeRef = useRef<ChurchRoute | null>(null);
+  const neighborRouteRef = useRef<ChurchRoute | null>(null);
   churchesRef.current = churches;
   const tooltipLabelsRef = useRef({justNow: '', minutesAgo: '', hoursAgo: '', daysAgo: '', prayedAt: ''});
   tooltipLabelsRef.current = {
@@ -160,8 +164,10 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       styleReadyRef.current = true;
       syncChurchLayer(map, churchesRef.current);
       routeRef.current?.restore();
+      neighborRouteRef.current?.restore();
     });
     routeRef.current = createChurchRoute(map);
+    neighborRouteRef.current = createChurchRoute(map, 'neighbors');
     const unbindChurchPopup = bindChurchPopup(map, () => mineLabelRef.current);
 
     // Auto-spin: only on initial load, stops permanently on first touch
@@ -213,6 +219,8 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       unbindChurchPopup();
       routeRef.current?.hide();
       routeRef.current = null;
+      neighborRouteRef.current?.hide();
+      neighborRouteRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -241,6 +249,7 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       styleReadyRef.current = true;
       syncChurchLayer(map, churchesRef.current);
       routeRef.current?.restore();
+      neighborRouteRef.current?.restore();
       // Re-add markers after style change
       markersRef.current.forEach(({ marker }) => marker.addTo(map));
       easterMarkerRef.current?.addTo(map);
@@ -306,11 +315,27 @@ export function MapboxView({ points, churches = NO_CHURCHES, mapStyle = 'dark', 
       && myLightLat !== undefined && myLightLng !== undefined
       && myChurchLat !== undefined && myChurchLng !== undefined
     ) {
-      route.show({ lat: myLightLat, lng: myLightLng }, { lat: myChurchLat, lng: myChurchLng });
+      route.show({ lat: myLightLat, lng: myLightLng }, [{ lat: myChurchLat, lng: myChurchLng }]);
     } else {
       route.hide();
     }
   }, [isPraying, myLightLat, myLightLng, myChurchLat, myChurchLng]);
+
+  // 기도 중 내 불빛 → 이웃 교회들로 가는 희미한 빛 (0017). 좌표 문자열로 바꿔 같은 목록이면 다시 그리지 않는다
+  const neighborKey = neighborChurches.map((n) => `${n.lat},${n.lng}`).join(';');
+  useEffect(() => {
+    const route = neighborRouteRef.current;
+    if (!route || !styleReadyRef.current) return;
+    if (isPraying && myLightLat !== undefined && myLightLng !== undefined && neighborKey) {
+      const to = neighborKey.split(';').map((s) => {
+        const [lat, lng] = s.split(',').map(Number);
+        return { lat, lng };
+      });
+      route.show({ lat: myLightLat, lng: myLightLng }, to);
+    } else {
+      route.hide();
+    }
+  }, [isPraying, myLightLat, myLightLng, neighborKey]);
 
   // Update label visibility
   useEffect(() => {

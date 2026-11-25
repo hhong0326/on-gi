@@ -6,6 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 
 import { usePrayerState, type ViewTab } from '@/hooks/usePrayerState';
 import { useChurchMap } from '@/hooks/useChurchMap';
+import { usePrayerNeighbors } from '@/hooks/usePrayerNeighbors';
 import { useMyChurch } from '@/hooks/useMyChurch';
 import { appConfig } from '@/lib/app-config';
 import { getPrayerAudio } from '@/lib/audio';
@@ -126,6 +127,8 @@ export default function MainPage() {
   const uiReady = state.ready && !!state.nickname;
   const { church: myChurch, loaded: churchLoaded, refresh: refreshChurch } = useMyChurch(uiReady);
   const { churches: churchMarkers, refresh: refreshChurchMap } = useChurchMap(uiReady);
+  const activePrayerId = state.isPraying ? state.points.find((p) => p.isUser && p.isActive)?.id ?? null : null;
+  const neighborChurches = usePrayerNeighbors(activePrayerId);
   const handleChurchChanged = async () => {
     await Promise.all([refreshChurch(), refreshChurchMap()]);
   };
@@ -145,6 +148,7 @@ export default function MainPage() {
         <MapboxView
           points={state.points}
           churches={churchMarkers}
+          neighborChurches={neighborChurches}
           isPraying={state.isPraying}
           userPosition={state.userPosition}
           onEasterEggClick={() => setShowEasterEgg(true)}
